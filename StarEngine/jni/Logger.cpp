@@ -176,7 +176,7 @@ namespace star
 #endif
 	}
 
-	void Logger::_CheckGlError(const schar* file, int line) 
+	void Logger::_CheckGlError(const schar* file, int32 line) 
 	{
 #if LOGGER_MIN_LEVEL > 0
 		GLenum err (glGetError());
@@ -215,7 +215,7 @@ namespace star
 #endif
 	}
 
-	void Logger::SetLogSaveDelayTime(float seconds)
+	void Logger::SetLogSaveDelayTime(float32 seconds)
 	{
 #ifndef NO_LOG_FILE
 		SceneManager::GetInstance()->GetStopwatch()->SetTargetTimeTimer(

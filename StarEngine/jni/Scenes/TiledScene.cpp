@@ -10,7 +10,7 @@ namespace star
 {
 	TiledScene::TiledScene(
 		const tstring & name,
-		float scale )
+		float32 scale )
 		: BaseScene(name)
 		, m_pActiveCamera(nullptr)
 		, m_Width(0)
@@ -60,7 +60,7 @@ namespace star
 	{
 		gid -= set.FirstGid;
 
-		int tx(set.Width / set.TileWidth),
+		int32 tx(set.Width / set.TileWidth),
 			ty(set.Height / set.TileHeight);
 
 		auto texture = new SpriteComponent(
@@ -216,13 +216,13 @@ namespace star
 				++lpIT;
 			} while(lpIT != lpEnd);
 
-			float sX(m_Scale * m_TileWidth);
-			float sY(m_Scale * m_TileHeight);
+			float32 sX(m_Scale * m_TileWidth);
+			float32 sY(m_Scale * m_TileHeight);
 
 			uint32 i = 0;
 			while(TIT != tilesEnd)
 			{
-				uint32 tID = string_cast<int>(TIT->second->GetAttributes().at(_T("gid")));
+				uint32 tID = string_cast<int32>(TIT->second->GetAttributes().at(_T("gid")));
 				if(tID != 0)
 				{
 					TileSet tileSet;
@@ -231,8 +231,8 @@ namespace star
 
 					Object * obj = new Object();
 					auto transform = obj->GetTransform();
-					float x((i % m_Width) * sX);
-					float y((m_Height - (i / m_Width) - 1) * sY);
+					float32 x((i % m_Width) * sX);
+					float32 y((m_Height - (i / m_Width) - 1) * sY);
 				#ifdef STAR2D
 					// [TODO] Use height from layer name instead of this hack
 					transform->Translate(
@@ -355,8 +355,8 @@ namespace star
 				#ifdef STAR2D
 					// [TODO] Use height from layer name instead of this hack
 					transform->Translate(
-						float(tObj.x),
-						float(tObj.y),
+						float32(tObj.x),
+						float32(tObj.y),
 						height);
 					transform->Scale(m_Scale, m_Scale);
 	#else

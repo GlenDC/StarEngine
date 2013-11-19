@@ -4,7 +4,7 @@
 
 namespace star
 {
-	const int MAX_SAMPLES = 10;
+	const int32 MAX_SAMPLES = 10;
 
 	class SoundEffect final : public BaseSound
 	{
@@ -12,7 +12,7 @@ namespace star
 		SoundEffect(const tstring& path, uint8 channel = 0);
 		~SoundEffect();
 
-		virtual void Play(int loopTime = 0);
+		virtual void Play(int32 loopTime = 0);
 		virtual void Stop();
 		virtual void Pause();
 		virtual void Resume();
@@ -21,19 +21,19 @@ namespace star
 		virtual void UnsetChannel();
 
 	#ifdef ANDROID
-		void SetVolume(float volume);
+		void SetVolume(float32 volume);
 	#endif
-		float GetVolume() const;
+		float32 GetVolume() const;
 
 		void SetMuted(bool muted);
 		bool IsMuted() const;
 
 	private:
 #ifdef DESKTOP
-		void SetSoundVolume(int volume);
+		void SetSoundVolume(int32 volume);
 
-		static int PLAY_CHANNELS;
-		int mPlayChannel;
+		static int32 PLAY_CHANNELS;
+		int32 mPlayChannel;
 		Mix_Chunk * mpSound;
 #else
 		void RegisterCallback(SLPlayItf & player);
@@ -46,7 +46,7 @@ namespace star
 
 		std::vector<SLObjectItf> mPlayerObjs;
 		std::vector<SLPlayItf> mPlayers;
-		std::vector<int> mLoopTimes;
+		std::vector<int32> mLoopTimes;
 #endif	
 
 		SoundEffect(const SoundEffect& yRef);

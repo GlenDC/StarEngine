@@ -22,16 +22,16 @@ namespace star
 		virtual void UnsetChannel();
 
 #ifdef ANDROID
-		void SetVolume(float volume);
+		void SetVolume(float32 volume);
 #endif
-		float GetVolume() const;
+		float32 GetVolume() const;
 
 		void SetMuted(bool muted);
 		bool IsMuted() const;
 
 	protected:
 #ifdef DESKTOP
-		void SetSoundVolume(int volume);
+		void SetSoundVolume(int32 volume);
 		static void MusicStoppedCallback();
 #else
 		void CreateSoundDetails();
