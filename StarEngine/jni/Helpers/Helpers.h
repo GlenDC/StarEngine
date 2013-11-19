@@ -138,31 +138,71 @@ namespace star
 		(const schar_16 * value);
 	
 	template <>
-	tstring string_cast<tstring, glm::vec2>
-		(const glm::vec2 & value);
+	tstring string_cast<tstring, fvec2>
+		(const fvec2 & value);
 
 	template <>
 	tstring string_cast<tstring, pos>
 		(const pos & value);
 
 	template <>
-	tstring string_cast<tstring, glm::vec3>
-		(const glm::vec3 & value);
+	tstring string_cast<tstring, fvec3>
+		(const fvec3 & value);
 
 	template <>
-	tstring string_cast<tstring, glm::vec4>
-		(const glm::vec4 & value);
+	tstring string_cast<tstring, fvec4>
+		(const fvec4 & value);
 
 	template <>
-	tstring string_cast<tstring, glm::quat>
-		(const glm::quat & value);
+	tstring string_cast<tstring, fquat>
+		(const fquat & value);
+	
+	template <>
+	tstring string_cast<tstring, dvec2>
+		(const dvec2 & value);
+
+	template <>
+	tstring string_cast<tstring, dvec3>
+		(const dvec3 & value);
+
+	template <>
+	tstring string_cast<tstring, dvec4>
+		(const dvec4 & value);
+
+	template <>
+	tstring string_cast<tstring, dquat>
+		(const dquat & value);
+	
+	template <>
+	tstring string_cast<tstring, ivec2>
+		(const ivec2 & value);
+
+	template <>
+	tstring string_cast<tstring, ivec3>
+		(const ivec3 & value);
+
+	template <>
+	tstring string_cast<tstring, ivec4>
+		(const ivec4 & value);
+	
+	template <>
+	tstring string_cast<tstring, uvec2>
+		(const uvec2 & value);
+
+	template <>
+	tstring string_cast<tstring, uvec3>
+		(const uvec3 & value);
+
+	template <>
+	tstring string_cast<tstring, uvec4>
+		(const uvec4 & value);
 
 	template <>
 	bool string_cast<bool, tstring>
 		(const tstring & value);
 
 	template <>
-	int string_cast<int, tstring>
+	int32 string_cast<int32, tstring>
 		(const tstring & value);
 
 	template <>
@@ -174,15 +214,15 @@ namespace star
 		(const tstring & value);
 
 	template <>
-	float string_cast<float, tstring>
+	float32 string_cast<float32, tstring>
 		(const tstring & value);
 
 	template <>
-	double string_cast<double, tstring>
+	float64 string_cast<float64, tstring>
 		(const tstring & value);
 
 	template <>
-	glm::vec2 string_cast<glm::vec2, tstring>
+	fvec2 string_cast<fvec2, tstring>
 		(const tstring & value);
 
 	template <>
@@ -190,15 +230,55 @@ namespace star
 		(const tstring & value);
 
 	template <>
-	glm::vec3 string_cast<glm::vec3, tstring>
+	fvec3 string_cast<fvec3, tstring>
 		(const tstring & value);
 
 	template <>
-	glm::vec4 string_cast<glm::vec4, tstring>
+	fvec4 string_cast<fvec4, tstring>
 		(const tstring & value);
 
 	template <>
-	glm::quat string_cast<glm::quat, tstring>
+	fquat string_cast<fquat, tstring>
+		(const tstring & value);
+
+	template <>
+	dvec2 string_cast<dvec2, tstring>
+		(const tstring & value);
+
+	template <>
+	dvec3 string_cast<dvec3, tstring>
+		(const tstring & value);
+
+	template <>
+	dvec4 string_cast<dvec4, tstring>
+		(const tstring & value);
+
+	template <>
+	dquat string_cast<dquat, tstring>
+		(const tstring & value);
+
+	template <>
+	ivec2 string_cast<ivec2, tstring>
+		(const tstring & value);
+
+	template <>
+	ivec3 string_cast<ivec3, tstring>
+		(const tstring & value);
+
+	template <>
+	ivec4 string_cast<ivec4, tstring>
+		(const tstring & value);
+
+	template <>
+	uvec2 string_cast<uvec2, tstring>
+		(const tstring & value);
+
+	template <>
+	uvec3 string_cast<uvec3, tstring>
+		(const tstring & value);
+
+	template <>
+	uvec4 string_cast<uvec4, tstring>
 		(const tstring & value);
 
 	void ReadTextFile(const tstring & file, tstring & text,

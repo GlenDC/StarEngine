@@ -15,13 +15,14 @@
 #include "../Scenes/BaseScene.h"
 #include "../Objects/BaseCamera.h"
 #include "../Helpers/Helpers.h"
+#include "../Helpers/Math.h"
 
 namespace star
 {
 #ifdef DESKTOP
-	const float InputManager::BYTE_TO_DOUBLE_VALUE = 255.0f;
+	const float32 InputManager::BYTE_TO_DOUBLE_VALUE = 255.0f;
 #else
-	const float InputManager::UNDEFINED_POINTER_POSITION = -123456.0f;
+	const float32 InputManager::UNDEFINED_POINTER_POSITION = -123456.0f;
 #endif
 
 	InputManager * InputManager::m_InputManagerPtr = nullptr;
@@ -38,8 +39,8 @@ namespace star
 	{
 	}
 
-	InputAction::InputAction(int actionID, InputTriggerState triggerState,
-				int keyboardCode, int mouseButtonCode, WORD gamepadButtonCode,
+	InputAction::InputAction(int32 actionID, InputTriggerState triggerState,
+				int32 keyboardCode, int32 mouseButtonCode, WORD gamepadButtonCode,
 				GamepadIndex playerIndex):
 		ActionID(actionID),
 		TriggerState(triggerState),
@@ -124,7 +125,7 @@ namespace star
 		return true;
 	}
 
-	bool InputManager::IsActionTriggered(int actionID) const
+	bool InputManager::IsActionTriggered(int32 actionID) const
 	{
 		return m_InputActions.at(actionID).IsTriggered;
 	}
@@ -169,7 +170,7 @@ namespace star
 		{
 			//GetKeyboardState is thread dependant! use AttachThreadInput to link them!
 			getKeyboardResult = GetKeyboardState(m_pKeyboardState1);
-			for(int i = 0 ; i < NUMBER_OF_KEYBOARDKEYS ; ++i)
+			for(int32 i = 0 ; i < NUMBER_OF_KEYBOARDKEYS ; ++i)
 			{
 				m_pOldKeyboardState[i] = m_pKeyboardState0[i];
 				m_pCurrKeyboardState[i] = m_pKeyboardState1[i];
@@ -178,7 +179,7 @@ namespace star
 		else
 		{
 			getKeyboardResult = GetKeyboardState(m_pKeyboardState0);
-			for(int i = 0 ; i < NUMBER_OF_KEYBOARDKEYS ; ++i)
+			for(int32 i = 0 ; i < NUMBER_OF_KEYBOARDKEYS ; ++i)
 			{
 				m_pOldKeyboardState[i] = m_pKeyboardState1[i];
 				m_pCurrKeyboardState[i] = m_pKeyboardState0[i];
@@ -468,10 +469,10 @@ namespace star
 			
 			m_CurrMousePosition = vec2(
 				mousePos.x , 
-				float(GraphicsManager::GetInstance()->GetWindowHeight() - mousePos.y));
+				float32(GraphicsManager::GetInstance()->GetWindowHeight() - mousePos.y));
 			m_CurrMousePosition -= vec2(
-				float(GraphicsManager::GetInstance()->GetHorizontalViewportOffset()),
-				float(GraphicsManager::GetInstance()->GetVerticalViewportOffset()));
+				float32(GraphicsManager::GetInstance()->GetHorizontalViewportOffset()),
+				float32(GraphicsManager::GetInstance()->GetVerticalViewportOffset()));
 			m_CurrMousePosition /= GraphicsManager::GetInstance()->GetViewportResolution();
 			m_CurrMousePosition *= GraphicsManager::GetInstance()->GetScreenResolution();
 			
@@ -542,7 +543,7 @@ namespace star
 			}
 		}
 
-		//Shorts have a range of 32768, so to convert that range to a double, 
+		//Shorts have a range of 32768, so to convert that range to a float64, 
 		//devide it by that range
 		if(pos.x < 0)
 		{
@@ -565,11 +566,11 @@ namespace star
 		return pos;
 	}
 	
-	float InputManager::GetTriggerPressure(bool leftTrigger, GamepadIndex playerIndex) const
+	float32 InputManager::GetTriggerPressure(bool leftTrigger, GamepadIndex playerIndex) const
 	{
 		if(leftTrigger)
 		{
-			//bLeftTrigger returns a byte, div by 255 to cast to double
+			//bLeftTrigger returns a byte, div by 255 to cast to float64
 			return m_CurrGamepadState[playerIndex].Gamepad.bLeftTrigger 
 					/ BYTE_TO_DOUBLE_VALUE;
 		}
@@ -580,14 +581,14 @@ namespace star
 		}
 	}
 
-	void InputManager::SetVibration(float leftVibration, float rightVibration, 
+	void InputManager::SetVibration(float32 leftVibration, float32 rightVibration, 
 		GamepadIndex playerIndex)
 	{
 		XINPUT_VIBRATION vibration;
-		glm::clamp<float>(leftVibration, 0.0f, 1.0f);
-		glm::clamp<float>(rightVibration, 0.0f, 1.0f);
+		Clamp(leftVibration, 0.0f, 1.0f);
+		Clamp(rightVibration, 0.0f, 1.0f);
 		ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
-		//convert from float to word -> float * lenght of word
+		//convert from float32 to word -> float32 * lenght of word
 		vibration.wLeftMotorSpeed = static_cast<WORD>(leftVibration * MAX_VALUE_OF_WORD);
 		vibration.wRightMotorSpeed = static_cast<WORD>(rightVibration * MAX_VALUE_OF_WORD);
 		XInputSetState(playerIndex, &vibration);
@@ -649,10 +650,10 @@ namespace star
 			m_CurrMousePosition = m_PointerVec.at(fingerIndex-1).Position;
 			m_CurrMousePosition = vec2(
 				m_CurrMousePosition.x , 
-				(float)GraphicsManager::GetInstance()->GetWindowHeight() - m_CurrMousePosition.y);
+				(float32)GraphicsManager::GetInstance()->GetWindowHeight() - m_CurrMousePosition.y);
 			m_CurrMousePosition -= vec2(
-				float(GraphicsManager::GetInstance()->GetHorizontalViewportOffset()),
-				float(GraphicsManager::GetInstance()->GetVerticalViewportOffset()));
+				float32(GraphicsManager::GetInstance()->GetHorizontalViewportOffset()),
+				float32(GraphicsManager::GetInstance()->GetVerticalViewportOffset()));
 			m_CurrMousePosition /= GraphicsManager::GetInstance()->GetViewportResolution();
 			m_CurrMousePosition *= GraphicsManager::GetInstance()->GetScreenResolution();
 			
@@ -680,10 +681,10 @@ namespace star
 				m_OldMousePosition = m_OldPointerVec.at(fingerIndex-1).Position;
 				m_OldMousePosition = vec2(
 				m_OldMousePosition.x , 
-					(float)GraphicsManager::GetInstance()->GetWindowHeight() - m_OldMousePosition.y);
+					(float32)GraphicsManager::GetInstance()->GetWindowHeight() - m_OldMousePosition.y);
 				m_OldMousePosition -= vec2(
-					float(GraphicsManager::GetInstance()->GetHorizontalViewportOffset()),
-					float(GraphicsManager::GetInstance()->GetVerticalViewportOffset()));
+					float32(GraphicsManager::GetInstance()->GetHorizontalViewportOffset()),
+					float32(GraphicsManager::GetInstance()->GetVerticalViewportOffset()));
 				m_OldMousePosition /= GraphicsManager::GetInstance()->GetViewportResolution();
 				m_OldMousePosition *= GraphicsManager::GetInstance()->GetScreenResolution();
 			
@@ -712,13 +713,13 @@ namespace star
 		{
 		case AMOTION_EVENT_ACTION_POINTER_UP:
 		{
-			int pointerIndex((action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) 
+			int32 pointerIndex((action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) 
 								>> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT);
-			int pointerID(AMotionEvent_getPointerId(pEvent,pointerIndex));
+			int32 pointerID(AMotionEvent_getPointerId(pEvent,pointerIndex));
 			if(pointerID == m_ActivePointerID)
 			{
 				//This was our active pointer going up. Choose a new active pointer and adjust
-				int newPointerIndex = pointerIndex == 0? 1 : 0;
+				int32 newPointerIndex = pointerIndex == 0? 1 : 0;
 				m_ActivePointerID = AMotionEvent_getPointerId(pEvent, newPointerIndex);
 			}
 			--m_NumberOfPointers;
@@ -761,7 +762,7 @@ namespace star
 		m_OldPointerVec = m_PointerVec;
 		m_PointerVec.clear();
 		//Store every pointer in a vector, with their position and everything else we need
-		for(int i = 0; i < AMotionEvent_getPointerCount(pEvent); ++i)
+		for(int32 i = 0; i < AMotionEvent_getPointerCount(pEvent); ++i)
 		{
 			FingerPointerANDR temp = FingerPointerANDR();
 			temp.ID = AMotionEvent_getPointerId(pEvent,i);

@@ -27,7 +27,7 @@ namespace star
 		return m_ScaleSystemPtr;	
 	}
 
-	void ScaleSystem::SetWorkingResolution(int xPixels, int yPixels)
+	void ScaleSystem::SetWorkingResolution(int32 xPixels, int32 yPixels)
 	{
 		vec2 workingRes(xPixels, yPixels);
 		SetWorkingResolution(workingRes);
@@ -50,7 +50,7 @@ namespace star
 		CalculateScale();
 	}
 
-	float ScaleSystem::GetScale() const
+	float32 ScaleSystem::GetScale() const
 	{
 		return m_Scale;
 	}

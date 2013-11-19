@@ -25,7 +25,7 @@ namespace star
 
 	bool Font::Init(const tstring& path, int32 size, FT_Library& library)
 	{
-		mSize = static_cast<float>(size);
+		mSize = static_cast<float32>(size);
 		mTextures = new GLuint[FONT_TEXTURES];
 		mMaxLetterHeight = 0;
 
@@ -112,9 +112,9 @@ namespace star
 
 		GLubyte* expanded_data = new GLubyte[2 * width * height];
 
-		for(int j = 0; j < height; ++j) 
+		for(int32 j = 0; j < height; ++j) 
 		{
-			for(int i = 0; i < width; ++i) 
+			for(int32 i = 0; i < width; ++i) 
 			{
 				expanded_data[2 * (i + j * width)] = 255;
 				expanded_data[2 * (i + j * width) + 1] = 
@@ -134,10 +134,10 @@ namespace star
 		Logger::GetInstance()->CheckGlError();
 		delete[] expanded_data;
 
-		float x = static_cast<float>(bitmap.width) / static_cast<float>(width);
-		float y = static_cast<float>(bitmap.rows) / static_cast<float>(height);
-		int dimx = (face->glyph->metrics.horiAdvance / 64);
-		int dimy = ((face->glyph->metrics.horiBearingY) - (face->glyph->metrics.height)) / 64;
+		float32 x = static_cast<float32>(bitmap.width) / static_cast<float32>(width);
+		float32 y = static_cast<float32>(bitmap.rows) / static_cast<float32>(height);
+		int32 dimx = (face->glyph->metrics.horiAdvance / 64);
+		int32 dimy = ((face->glyph->metrics.horiBearingY) - (face->glyph->metrics.height)) / 64;
 		ivec2 tempdim(dimx, dimy);
 		if(mMaxLetterHeight<face->glyph->bitmap_top)mMaxLetterHeight = face->glyph->bitmap_top;
 		mLetterSizeList.push_back(tempdim);	
@@ -206,7 +206,7 @@ namespace star
 		int32 length = 0;
 		sstring conv_text = star::string_cast<sstring>(string);
 		const schar *line = conv_text.c_str();
-		for(int i = 0; line[i] != 0; ++i) 
+		for(int32 i = 0; line[i] != 0; ++i) 
 		{
 			length += mLetterSizeList[line[i]].x;
 		}

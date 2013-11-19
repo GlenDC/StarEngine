@@ -98,6 +98,7 @@
     <ClInclude Include="jni\Context.h" />
     <ClInclude Include="jni\defines.h" />
     <ClInclude Include="jni\definesAndroid.h" />
+    <ClInclude Include="jni\definesMath.h" />
     <ClInclude Include="jni\definesTypes.h" />
     <ClInclude Include="jni\definesWindows.h" />
     <ClInclude Include="jni\EventLoop.h" />
@@ -116,7 +117,7 @@
     <ClInclude Include="jni\Helpers\Helpers.h" />
     <ClInclude Include="jni\Helpers\HelpersAndroid.h" />
     <ClInclude Include="jni\Helpers\HelpersCrossplatform.h" />
-    <ClInclude Include="jni\Helpers\HelpersMath.h" />
+    <ClInclude Include="jni\Helpers\Math.h" />
     <ClInclude Include="jni\Helpers\Rect.h" />
     <ClInclude Include="jni\Helpers\SerializedData.h" />
     <ClInclude Include="jni\Helpers\SpriteAnimation.h" />
@@ -191,7 +192,7 @@
     <ClCompile Include="jni\Helpers\Helpers.cpp" />
     <ClCompile Include="jni\Helpers\HelpersAndroid.cpp" />
     <ClCompile Include="jni\Helpers\HelpersCrossplatform.cpp" />
-    <ClCompile Include="jni\Helpers\HelpersMath.cpp" />
+    <ClCompile Include="jni\Helpers\Math.cpp" />
     <ClCompile Include="jni\Helpers\Rect.cpp" />
     <ClCompile Include="jni\Helpers\SerializedData.cpp" />
     <ClCompile Include="jni\Helpers\SpriteAnimation.cpp" />

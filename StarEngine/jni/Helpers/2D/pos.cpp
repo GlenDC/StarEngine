@@ -18,23 +18,23 @@ namespace star
 
 	}
 
-	pos::pos(int X, int Y, lay layer)
-		: x((float)X)
-		, y((float)Y)
+	pos::pos(int32 X, int32 Y, lay layer)
+		: x((float32)X)
+		, y((float32)Y)
 		, l(layer)
 	{
 
 	}
 
 	pos::pos(long X, long Y, lay layer)
-		: x((float)X)
-		, y((float)Y)
+		: x((float32)X)
+		, y((float32)Y)
 		, l(layer)
 	{
 
 	}
 
-	pos::pos(float X, float Y, lay layer)
+	pos::pos(float32 X, float32 Y, lay layer)
 		: x(X)
 		, y(Y)
 		, l(layer)
@@ -42,9 +42,9 @@ namespace star
 
 	}
 
-	pos::pos(double X, double Y, lay layer)
-		: x((float)X)
-		, y((float)Y)
+	pos::pos(float64 X, float64 Y, lay layer)
+		: x((float32)X)
+		, y((float32)Y)
 		, l(layer)
 	{
 
@@ -176,7 +176,7 @@ namespace star
 		return copy;
 	}
 
-	pos pos::operator*(unsigned int n)
+	pos pos::operator*(uint32 n)
 	{
 		pos copy(*this);
 		copy *= n;
@@ -192,7 +192,7 @@ namespace star
 		return copy;
 	}
 
-	pos pos::operator*(int n)
+	pos pos::operator*(int32 n)
 	{
 		pos copy(*this);
 		copy *= n;
@@ -208,7 +208,7 @@ namespace star
 		return copy;
 	}
 
-	pos pos::operator*(float n)
+	pos pos::operator*(float32 n)
 	{
 		pos copy(*this);
 		copy *= n;
@@ -216,7 +216,7 @@ namespace star
 		return copy;
 	}
 
-	pos pos::operator*(double n)
+	pos pos::operator*(float64 n)
 	{
 		pos copy(*this);
 		copy *= n;
@@ -224,7 +224,7 @@ namespace star
 		return copy;
 	}
 	
-	pos pos::operator/(unsigned int n)
+	pos pos::operator/(uint32 n)
 	{
 		pos copy(*this);
 		copy /= n;
@@ -240,7 +240,7 @@ namespace star
 		return copy;
 	}
 
-	pos pos::operator/(int n)
+	pos pos::operator/(int32 n)
 	{
 		pos copy(*this);
 		copy /= n;
@@ -256,7 +256,7 @@ namespace star
 		return copy;
 	}
 
-	pos pos::operator/(float n)
+	pos pos::operator/(float32 n)
 	{
 		pos copy(*this);
 		copy /= n;
@@ -264,7 +264,7 @@ namespace star
 		return copy;
 	}
 
-	pos pos::operator/(double n)
+	pos pos::operator/(float64 n)
 	{
 		pos copy(*this);
 		copy /= n;
@@ -272,39 +272,39 @@ namespace star
 		return copy;
 	}
 	
-	pos & pos::operator*=(unsigned int n)
+	pos & pos::operator*=(uint32 n)
 	{
-		x *= (float)n;
-		y *= (float)n;
+		x *= (float32)n;
+		y *= (float32)n;
 
 		return *this;
 	}
 
 	pos & pos::operator*=(unsigned long n)
 	{
-		x *= (float)n;
-		y *= (float)n;
+		x *= (float32)n;
+		y *= (float32)n;
 
 		return *this;
 	}
 
-	pos & pos::operator*=(int n)
+	pos & pos::operator*=(int32 n)
 	{
-		x *= (float)n;
-		y *= (float)n;
+		x *= (float32)n;
+		y *= (float32)n;
 
 		return *this;
 	}
 
 	pos & pos::operator*=(long n)
 	{
-		x *= (float)n;
-		y *= (float)n;
+		x *= (float32)n;
+		y *= (float32)n;
 
 		return *this;
 	}
 
-	pos & pos::operator*=(float n)
+	pos & pos::operator*=(float32 n)
 	{
 		x *= n;
 		y *= n;
@@ -312,47 +312,47 @@ namespace star
 		return *this;
 	}
 
-	pos & pos::operator*=(double n)
+	pos & pos::operator*=(float64 n)
 	{
-		x *= (float)n;
-		y *= (float)n;
+		x *= (float32)n;
+		y *= (float32)n;
 
 		return *this;
 	}
 	
-	pos & pos::operator/=(unsigned int n)
+	pos & pos::operator/=(uint32 n)
 	{
-		x /= (float)n;
-		y /= (float)n;
+		x /= (float32)n;
+		y /= (float32)n;
 
 		return *this;
 	}
 
 	pos & pos::operator/=(unsigned long n)
 	{
-		x /= (float)n;
-		y /= (float)n;
+		x /= (float32)n;
+		y /= (float32)n;
 
 		return *this;
 	}
 
-	pos & pos::operator/=(int n)
+	pos & pos::operator/=(int32 n)
 	{
-		x /= (float)n;
-		y /= (float)n;
+		x /= (float32)n;
+		y /= (float32)n;
 
 		return *this;
 	}
 
 	pos & pos::operator/=(long n)
 	{
-		x /= (float)n;
-		y /= (float)n;
+		x /= (float32)n;
+		y /= (float32)n;
 
 		return *this;
 	}
 
-	pos & pos::operator/=(float n)
+	pos & pos::operator/=(float32 n)
 	{
 		x /= n;
 		y /= n;
@@ -360,20 +360,20 @@ namespace star
 		return *this;
 	}
 
-	pos & pos::operator/=(double n)
+	pos & pos::operator/=(float64 n)
 	{
-		x /= (float)n;
-		y /= (float)n;
+		x /= (float32)n;
+		y /= (float32)n;
 
 		return *this;
 	}
 	
-	pos operator*(unsigned int n, const pos & yRef)
+	pos operator*(uint32 n, const pos & yRef)
 	{
 		pos copy(yRef);
 
-		copy.x *= (float)n;
-		copy.y *= (float)n;
+		copy.x *= (float32)n;
+		copy.y *= (float32)n;
 
 		return copy;
 	}
@@ -382,18 +382,18 @@ namespace star
 	{
 		pos copy(yRef);
 
-		copy.x *= (float)n;
-		copy.y *= (float)n;
+		copy.x *= (float32)n;
+		copy.y *= (float32)n;
 
 		return copy;
 	}
 
-	pos operator*(int n, const pos & yRef)
+	pos operator*(int32 n, const pos & yRef)
 	{
 		pos copy(yRef);
 
-		copy.x *= (float)n;
-		copy.y *= (float)n;
+		copy.x *= (float32)n;
+		copy.y *= (float32)n;
 
 		return copy;
 	}
@@ -402,13 +402,13 @@ namespace star
 	{
 		pos copy(yRef);
 
-		copy.x *= (float)n;
-		copy.y *= (float)n;
+		copy.x *= (float32)n;
+		copy.y *= (float32)n;
 
 		return copy;
 	}
 
-	pos operator*(float n, const pos & yRef)
+	pos operator*(float32 n, const pos & yRef)
 	{
 		pos copy(yRef);
 
@@ -418,12 +418,12 @@ namespace star
 		return copy;
 	}
 
-	pos operator*(double n, const pos & yRef)
+	pos operator*(float64 n, const pos & yRef)
 	{
 		pos copy(yRef);
 
-		copy.x *= (float)n;
-		copy.y *= (float)n;
+		copy.x *= (float32)n;
+		copy.y *= (float32)n;
 
 		return copy;
 	}
@@ -438,12 +438,12 @@ namespace star
 		return copy;
 	}
 	
-	pos operator/(unsigned int n, const pos & yRef)
+	pos operator/(uint32 n, const pos & yRef)
 	{
 		pos copy(yRef);
 
-		copy.x /= (float)n;
-		copy.y /= (float)n;
+		copy.x /= (float32)n;
+		copy.y /= (float32)n;
 
 		return copy;
 	}
@@ -452,18 +452,18 @@ namespace star
 	{
 		pos copy(yRef);
 
-		copy.x /= (float)n;
-		copy.y /= (float)n;
+		copy.x /= (float32)n;
+		copy.y /= (float32)n;
 
 		return copy;
 	}
 
-	pos operator/(int n, const pos & yRef)
+	pos operator/(int32 n, const pos & yRef)
 	{
 		pos copy(yRef);
 
-		copy.x /= (float)n;
-		copy.y /= (float)n;
+		copy.x /= (float32)n;
+		copy.y /= (float32)n;
 
 		return copy;
 	}
@@ -472,13 +472,13 @@ namespace star
 	{
 		pos copy(yRef);
 
-		copy.x /= (float)n;
-		copy.y /= (float)n;
+		copy.x /= (float32)n;
+		copy.y /= (float32)n;
 
 		return copy;
 	}
 
-	pos operator/(float n, const pos & yRef)
+	pos operator/(float32 n, const pos & yRef)
 	{
 		pos copy(yRef);
 
@@ -488,12 +488,12 @@ namespace star
 		return copy;
 	}
 
-	pos operator/(double n, const pos & yRef)
+	pos operator/(float64 n, const pos & yRef)
 	{
 		pos copy(yRef);
 
-		copy.x /= (float)n;
-		copy.y /= (float)n;
+		copy.x /= (float32)n;
+		copy.y /= (float32)n;
 
 		return copy;
 	}
@@ -526,12 +526,12 @@ namespace star
 
 	vec3 pos::pos3D() const
 	{
-		vec3 vec(x,y,(float)l);
+		vec3 vec(x,y,(float32)l);
 		vec.z *= LAYER_HEIGHT;
 		return vec;
 	}
 
-	float pos::length() const
+	float32 pos::length() const
 	{
 		return sqrt(pow(x,2) + pow(y,2));
 	}

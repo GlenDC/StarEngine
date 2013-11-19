@@ -6,7 +6,7 @@
 #include "../Graphics/SpriteComponent.h"
 #include "../../Helpers/Debug/DebugDraw.h"
 #include "../../Helpers/Helpers.h"
-#include "../../Helpers/HelpersMath.h"
+#include "../../Helpers/Math.h"
 #include "../../Scenes/SceneManager.h"
 #include "../../Scenes/BaseScene.h"
 #include "../../Physics/Collision/CollisionManager.h"
@@ -30,7 +30,7 @@ namespace star
 
 	}
 
-	RectangleColliderComponent::RectangleColliderComponent(float width, float height)
+	RectangleColliderComponent::RectangleColliderComponent(float32 width, float32 height)
 		: BaseColliderComponent()
 		, m_CollisionRect(vec2(),vec2(width, 0),vec2(0, height), vec2(width, height))
 		, m_bDefaultInitialized(false)
@@ -54,7 +54,7 @@ namespace star
 	{
 
 	}
-	RectangleColliderComponent::RectangleColliderComponent(float width, float height, 
+	RectangleColliderComponent::RectangleColliderComponent(float32 width, float32 height, 
 		const tstring* layers, uint8 n)
 		: BaseColliderComponent(layers, n)
 		, m_CollisionRect(vec2(),vec2(width, 0),vec2(0, height), vec2(width, height))
@@ -288,30 +288,30 @@ namespace star
 	bool RectangleColliderComponent::CalculateAxisSpecificCollision(const Rect& rect, 
 		const vec2& point1, const vec2& point2, const vec2& axis) const
 	{
-		float AvecPosOnAxis1 = glm::dot(rect.GetLeftTop(),axis);
-		float AvecPosOnAxis2 = glm::dot(rect.GetLeftBottom(),axis);
-		float AvecPosOnAxis3 = glm::dot(rect.GetRightBottom(),axis);
-		float AvecPosOnAxis4 = glm::dot(rect.GetRightTop(),axis);
+		float32 AvecPosOnAxis1 = Dot(rect.GetLeftTop(),axis);
+		float32 AvecPosOnAxis2 = Dot(rect.GetLeftBottom(),axis);
+		float32 AvecPosOnAxis3 = Dot(rect.GetRightBottom(),axis);
+		float32 AvecPosOnAxis4 = Dot(rect.GetRightTop(),axis);
 
-		float BvecPosOnAxis1 = glm::dot(point1,axis);
-		float BvecPosOnAxis2 = glm::dot(point2,axis);
+		float32 BvecPosOnAxis1 = Dot(point1,axis);
+		float32 BvecPosOnAxis2 = Dot(point2,axis);
 
 		//Find Min and Max
-		float vec1[4];
+		float32 vec1[4];
 		vec1[0] = AvecPosOnAxis1;
 		vec1[1] = AvecPosOnAxis2;
 		vec1[2] = AvecPosOnAxis3;
 		vec1[3] = AvecPosOnAxis4;
 
-		float vec2[2];
+		float32 vec2[2];
 		vec2[0] = BvecPosOnAxis1;
 		vec2[1] = BvecPosOnAxis2;
 
-		float AMinimum = CalculateMinimum(vec1, 4);
-		float AMaximum = CalculateMaximum(vec1, 4);
+		float32 AMinimum = CalculateMinimum(vec1, 4);
+		float32 AMaximum = CalculateMaximum(vec1, 4);
 
-		float BMinimum = CalculateMinimum(vec2, 2);
-		float BMaximum = CalculateMaximum(vec2, 2);
+		float32 BMinimum = CalculateMinimum(vec2, 2);
+		float32 BMaximum = CalculateMaximum(vec2, 2);
 
 		return (BMinimum <= AMaximum && BMaximum >= AMinimum);
 	}
@@ -319,21 +319,21 @@ namespace star
 	bool RectangleColliderComponent::CalculateAxisSpecificCollision(const Rect& rect,
 		const vec2& point, const vec2& axis) const
 	{
-		float AvecPosOnAxis1 = glm::dot(rect.GetLeftTop(), axis);
-		float AvecPosOnAxis2 = glm::dot(rect.GetLeftBottom(), axis);
-		float AvecPosOnAxis3 = glm::dot(rect.GetRightBottom(), axis);
-		float AvecPosOnAxis4 = glm::dot(rect.GetRightTop(), axis);
+		float32 AvecPosOnAxis1 = Dot(rect.GetLeftTop(), axis);
+		float32 AvecPosOnAxis2 = Dot(rect.GetLeftBottom(), axis);
+		float32 AvecPosOnAxis3 = Dot(rect.GetRightBottom(), axis);
+		float32 AvecPosOnAxis4 = Dot(rect.GetRightTop(), axis);
 
-		float BvecPosOnAxis1 =  glm::dot(point, axis);
+		float32 BvecPosOnAxis1 =  Dot(point, axis);
 
-		float vec1[4];
+		float32 vec1[4];
 		vec1[0] = AvecPosOnAxis1;
 		vec1[1] = AvecPosOnAxis2;
 		vec1[2] = AvecPosOnAxis3;
 		vec1[3] = AvecPosOnAxis4;
 
-		float AMinimum = CalculateMinimum(vec1, 4);
-		float AMaximum = CalculateMaximum(vec1, 4);
+		float32 AMinimum = CalculateMinimum(vec1, 4);
+		float32 AMaximum = CalculateMaximum(vec1, 4);
 
 		return (BvecPosOnAxis1 <= AMaximum && BvecPosOnAxis1 >= AMinimum);
 	}
@@ -341,41 +341,41 @@ namespace star
 	bool RectangleColliderComponent::CalculateAxisSpecificCollision(const Rect& rect1, 
 		const Rect& rect2, const vec2& axis) const
 	{
-		float AvecPosOnAxis1 = glm::dot(rect1.GetLeftTop(),axis);
-		float AvecPosOnAxis2 = glm::dot(rect1.GetLeftBottom(),axis);
-		float AvecPosOnAxis3 = glm::dot(rect1.GetRightBottom(),axis);
-		float AvecPosOnAxis4 = glm::dot(rect1.GetRightTop(),axis);
+		float32 AvecPosOnAxis1 = Dot(rect1.GetLeftTop(),axis);
+		float32 AvecPosOnAxis2 = Dot(rect1.GetLeftBottom(),axis);
+		float32 AvecPosOnAxis3 = Dot(rect1.GetRightBottom(),axis);
+		float32 AvecPosOnAxis4 = Dot(rect1.GetRightTop(),axis);
 
-		float BvecPosOnAxis1 = glm::dot(rect2.GetLeftTop(),axis);
-		float BvecPosOnAxis2 = glm::dot(rect2.GetLeftBottom(),axis);
-		float BvecPosOnAxis3 = glm::dot(rect2.GetRightBottom(),axis);
-		float BvecPosOnAxis4 = glm::dot(rect2.GetRightTop(),axis);
+		float32 BvecPosOnAxis1 = Dot(rect2.GetLeftTop(),axis);
+		float32 BvecPosOnAxis2 = Dot(rect2.GetLeftBottom(),axis);
+		float32 BvecPosOnAxis3 = Dot(rect2.GetRightBottom(),axis);
+		float32 BvecPosOnAxis4 = Dot(rect2.GetRightTop(),axis);
 
-		float vec1[4];
+		float32 vec1[4];
 		vec1[0] = AvecPosOnAxis1;
 		vec1[1] = AvecPosOnAxis2;
 		vec1[2] = AvecPosOnAxis3;
 		vec1[3] = AvecPosOnAxis4;
 
-		float vec2[4]; 
+		float32 vec2[4]; 
 		vec2[0] = BvecPosOnAxis1;
 		vec2[1] = BvecPosOnAxis2;
 		vec2[2] = BvecPosOnAxis3;
 		vec2[3] = BvecPosOnAxis4;
 
-		float AMinimum = CalculateMinimum(vec1, 4);
-		float BMinimum = CalculateMinimum(vec2, 4);
-		float AMaximum = CalculateMaximum(vec1, 4);
-		float BMaximum = CalculateMaximum(vec2, 4);
+		float32 AMinimum = CalculateMinimum(vec1, 4);
+		float32 BMinimum = CalculateMinimum(vec2, 4);
+		float32 AMaximum = CalculateMaximum(vec1, 4);
+		float32 BMaximum = CalculateMaximum(vec2, 4);
 
 		return BMinimum <= AMaximum && BMaximum >= AMinimum;
 	}
 
-	float RectangleColliderComponent::CalculateMinimum(const float* vec, uint8 size) const
+	float32 RectangleColliderComponent::CalculateMinimum(const float32* vec, uint8 size) const
 	{
 		ASSERT(size != 0, _T("You can't calculate the minimum of 0 elements!"));
-		float minimum = vec[0];
-		for(int i = 1; i < size; ++i)
+		float32 minimum = vec[0];
+		for(int32 i = 1; i < size; ++i)
 		{
 			if(vec[i] < minimum)
 			{
@@ -385,11 +385,11 @@ namespace star
 		return minimum;
 	}
 
-	float RectangleColliderComponent::CalculateMaximum(const float* vec, uint8 size) const
+	float32 RectangleColliderComponent::CalculateMaximum(const float32* vec, uint8 size) const
 	{
 		ASSERT(size != 0, _T("You can't calculate the maximum of 0 elements!"));
-		float maximum = vec[0];
-		for(int i = 1; i < size; ++i)
+		float32 maximum = vec[0];
+		for(int32 i = 1; i < size; ++i)
 		{
 			if(vec[i] > maximum)
 			{
@@ -399,12 +399,12 @@ namespace star
 		return maximum;
 	}
 
-	float RectangleColliderComponent::GetCollisionRectWidth() const
+	float32 RectangleColliderComponent::GetCollisionRectWidth() const
 	{
 		return GetCollisionRect().GetWidth();
 	}
 
-	float RectangleColliderComponent::GetCollisionRectHeight() const
+	float32 RectangleColliderComponent::GetCollisionRectHeight() const
 	{
 		return GetCollisionRect().GetHeight();
 	}
@@ -415,7 +415,7 @@ namespace star
 		outputVec.y = GetCollisionRectHeight();
 	}
 
-	void RectangleColliderComponent::SetCollisionRectSize(float width, float height)
+	void RectangleColliderComponent::SetCollisionRectSize(float32 width, float32 height)
 	{
 		m_CollisionRect.SetPoints(vec2(0, 0), vec2(width, 0), vec2(0, height), vec2(width, height));
 	}
@@ -438,29 +438,29 @@ namespace star
 		pos.x = m_CollisionRect.GetCenterPoint().x;
 		pos.y = m_CollisionRect.GetCenterPoint().y;
 		pos.w = 1;
-		pos = glm::mul(pos, TransposeMatrix(GetTransform()->GetWorldMatrix()));
-		pos = glm::mul(pos, 
-			TransposeMatrix(GraphicsManager::GetInstance()->GetViewInverseMatrix()));
+		pos = Mul(pos, Transpose(GetTransform()->GetWorldMatrix()));
+		pos = Mul(pos, 
+			Transpose(GraphicsManager::GetInstance()->GetViewInverseMatrix()));
 		return vec2(pos.x, pos.y);
 	}
 
 	vec2 RectangleColliderComponent::GetOrientatedUnitVecX() const
 	{
 		vec4 unitVec(1, 0, 0, 1);
-		unitVec = glm::mul(unitVec, TransposeMatrix(GetTransform()->GetWorldMatrix()));
-		unitVec = glm::mul(unitVec, 
-			TransposeMatrix(GraphicsManager::GetInstance()->GetViewInverseMatrix()));
-		unitVec = glm::normalize(unitVec);
+		unitVec = Mul(unitVec, Transpose(GetTransform()->GetWorldMatrix()));
+		unitVec = Mul(unitVec, 
+			Transpose(GraphicsManager::GetInstance()->GetViewInverseMatrix()));
+		unitVec = Normalize(unitVec);
 		return vec2(unitVec.x, unitVec.y);
 	}
 
 	vec2 RectangleColliderComponent::GetOrientatedUnitVecY() const
 	{
 		vec4 unitVec(0, 1, 0, 1);
-		unitVec = glm::mul(unitVec, TransposeMatrix(GetTransform()->GetWorldMatrix()));
-		unitVec = glm::mul(unitVec, 
-			TransposeMatrix(GraphicsManager::GetInstance()->GetViewInverseMatrix()));
-		unitVec = glm::normalize(unitVec);
+		unitVec = Mul(unitVec, Transpose(GetTransform()->GetWorldMatrix()));
+		unitVec = Mul(unitVec, 
+			Transpose(GraphicsManager::GetInstance()->GetViewInverseMatrix()));
+		unitVec = Normalize(unitVec);
 		return vec2(unitVec.x, unitVec.y);
 	}
 
