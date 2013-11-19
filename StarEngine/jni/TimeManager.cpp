@@ -58,32 +58,32 @@ namespace star
 		mTotalMS += mDeltaMs;
 	}
 
-	double TimeManager::GetSeconds() const
+	float64 TimeManager::GetSeconds() const
 	{
 		return mDeltaS;
 	}
 
-	double TimeManager::GetMilliSeconds() const
+	float64 TimeManager::GetMilliSeconds() const
 	{
 		return mDeltaMs;
 	}
 
-	double TimeManager::GetMicroSeconds() const
+	float64 TimeManager::GetMicroSeconds() const
 	{
 		return mDeltauS;
 	}
 
-	double TimeManager::GetMilliSecondsSinceStart() const
+	float64 TimeManager::GetMilliSecondsSinceStart() const
 	{
 		return mTotalMS;
 	}
 
 	tstring TimeManager::GetTimeStamp()
 	{
-		int totalSeconds = int(mTotalMS / 1000);
-		int seconds = totalSeconds % 60;
-		int minutes = totalSeconds / 60;
-		int hours = totalSeconds / 3600;
+		int32 totalSeconds = int32(mTotalMS / 1000);
+		int32 seconds = totalSeconds % 60;
+		int32 minutes = totalSeconds / 60;
+		int32 hours = totalSeconds / 3600;
 
 		tstringstream strstr;
 		if(hours < 10)
@@ -105,7 +105,7 @@ namespace star
 		return strstr.str();
 	}
 
-	double TimeManager::GetSecondsSinceStart() const
+	float64 TimeManager::GetSecondsSinceStart() const
 	{
 		return mTotalMS / MILLIMULTIPLIER;
 	}

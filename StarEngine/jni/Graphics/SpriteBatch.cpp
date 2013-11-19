@@ -7,7 +7,7 @@
 #include "../Objects/FreeCamera.h"
 #include "../Scenes/BaseScene.h"
 #include <algorithm>
-#include "../Helpers/HelpersMath.h"
+#include "../Helpers/Math.h"
 #include "ScaleSystem.h"
 
 namespace star
@@ -145,9 +145,9 @@ namespace star
 		CreateSpriteQuad(spriteQueue);
 		
 		//DRAW
-		int batchStart = 0;
-		int batchSize = 0;
-		for(unsigned int i = 0; i < spriteQueue.size(); ++i)
+		int32 batchStart = 0;
+		int32 batchSize = 0;
+		for(uint32 i = 0; i < spriteQueue.size(); ++i)
 		{
 			GLuint currTexture = star::TextureManager::GetInstance()
 				->GetTextureID(spriteQueue[i].spriteName);
@@ -173,10 +173,10 @@ namespace star
 		
 			batchSize += 4;
 
-			float scaleValue = ScaleSystem::GetInstance()->GetScale();
-			mat4x4 scaleMat = glm::scale<float>(scaleValue, scaleValue, 1.0f);
+			float32 scaleValue = ScaleSystem::GetInstance()->GetScale();
+			mat4 scaleMat = Scale(scaleValue, scaleValue, 1.0f);
 		
-			for(int j = 0; j < ((batchSize/4)); ++j)
+			for(int32 j = 0; j < ((batchSize/4)); ++j)
 			{
 				//Set attributes and buffers
 				glVertexAttribPointer(ATTRIB_VERTEX, 3, GL_FLOAT,0,0, 
@@ -187,8 +187,8 @@ namespace star
 				if(spriteQueue[m_CurrentSprite + j].bIsHUD)
 				{
 					glUniformMatrix4fv(glGetUniformLocation(m_Shader.GetID(),"MVP"),
-						1, GL_FALSE, glm::value_ptr(
-							TransposeMatrix(spriteQueue[m_CurrentSprite + j].transform) * 
+						1, GL_FALSE, ToPointerValue(
+							Transpose(spriteQueue[m_CurrentSprite + j].transform) * 
 							scaleMat *
 							GraphicsManager::GetInstance()->GetProjectionMatrix()
 							)
@@ -197,8 +197,8 @@ namespace star
 				else
 				{
 					glUniformMatrix4fv(glGetUniformLocation(m_Shader.GetID(),"MVP"),
-						1, GL_FALSE, glm::value_ptr(
-							TransposeMatrix(spriteQueue[m_CurrentSprite + j].transform) *
+						1, GL_FALSE, ToPointerValue(
+							Transpose(spriteQueue[m_CurrentSprite + j].transform) *
 							scaleMat *
 							GraphicsManager::GetInstance()->GetViewProjectionMatrix()));
 				}
@@ -232,7 +232,7 @@ namespace star
 		}
 		
 		auto curfont = FontManager::GetInstance()->GetFont(fontname);
-		float h = curfont.GetSize()/0.63f;
+		float32 h = curfont.GetSize()/0.63f;
 		const vec2& position = transform->GetWorldPosition().pos2D();
 		const vec2& origposition = position;
 
@@ -253,15 +253,15 @@ namespace star
 		GLint s_colorId = glGetUniformLocation(m_Shader.GetID(), "colorMultiplier");
 		glUniform4f(s_colorId,color.r,color.g,color.b,color.a);
 	
-		float scaleValue = ScaleSystem::GetInstance()->GetScale();
-		mat4x4 scaleMat = glm::scale<float>(scaleValue, scaleValue, 1.0f);
+		float32 scaleValue = ScaleSystem::GetInstance()->GetScale();
+		mat4 scaleMat = Scale(scaleValue, scaleValue, 1.0f);
 
-		int offsetX(0);
-		int offsetY(0);
+		int32 offsetX(0);
+		int32 offsetY(0);
 		for(auto it = text.begin(); it != text.end() ; ++it)
 		{
 			const schar *start_line=it->c_str();
-			for(int i = 0 ; start_line[i] != 0 ; ++i) 
+			for(int32 i = 0 ; start_line[i] != 0 ; ++i) 
 			{
 
 				glBindTexture(GL_TEXTURE_2D,textures[ start_line[i] ]);
@@ -272,25 +272,25 @@ namespace star
 				glVertexAttribPointer(ATTRIB_UV, 2, GL_FLOAT, 0, 0, 
 					tempuvs[start_line[i]].uv);
 
-				mat4x4 offsetTrans;
+				mat4 offsetTrans;
 				
 				if(start_line[i] != 0)
 				{
-					int offset = curfont.GetMaxLetterHeight() - tempsizes[start_line[i]].y;
-					offsetTrans = glm::translate(
-						glm::vec3(offsetX, offsetY - curfont.GetMaxLetterHeight() - offset, 0));
+					int32 offset = curfont.GetMaxLetterHeight() - tempsizes[start_line[i]].y;
+					offsetTrans = Translate(
+						vec3(offsetX, offsetY - curfont.GetMaxLetterHeight() - offset, 0));
 					offsetX += tempsizes[start_line[i]].x;
 				}
 				else
 				{
-					offsetTrans = glm::translate(glm::vec3(0, 0, 0));
+					offsetTrans = Translate(0.0f, 0.0f, 0.0f);
 				}
-				const mat4x4& world = transform->GetWorldMatrix() * offsetTrans;
+				const mat4& world = transform->GetWorldMatrix() * offsetTrans;
 
 				glUniformMatrix4fv(glGetUniformLocation(m_Shader.GetID(),"MVP"),
 					1,GL_FALSE,
-					glm::value_ptr(
-						TransposeMatrix(world) *
+					ToPointerValue(
+						Transpose(world) *
 						scaleMat *
 						GraphicsManager::GetInstance()->GetViewProjectionMatrix()
 						)

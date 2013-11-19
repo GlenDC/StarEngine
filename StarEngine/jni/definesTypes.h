@@ -12,6 +12,10 @@ typedef uint32_t 	uint32;
 typedef uint16_t 	uint16;
 typedef uint8_t 	uint8;
 
+typedef float		float32;
+typedef double		float64;
+typedef long double float128;
+
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -120,3 +124,10 @@ typedef uint8_t 	uint8;
 		#define TSHFILEINFO SSHFILEINFO
 	#endif
 #endif
+
+template <typename T, typename U = uint8>
+struct PointerArray
+{
+	  U amount;
+	  T * elements;
+};

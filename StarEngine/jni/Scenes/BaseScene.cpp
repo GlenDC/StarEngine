@@ -82,8 +82,12 @@ namespace star
 				object->BaseUpdate(context);
 			//}
 		}
-
 		Update(context);
+		//[COMMENT] Updating the collisionManager before the objects or here?
+		//			If i do it before the objects, there is the problem that
+		//			the objects won't be translated correctly...
+		//			So i think here is best, unless somebody proves me wrong
+		m_CollisionManagerPtr->Update(context);
 	}
 
 	void BaseScene::BaseDraw()
@@ -184,10 +188,10 @@ namespace star
 	{
 		pos objectPos = object->GetTransform()->GetWorldPosition();
 		pos camPos = m_pDefaultCamera->GetTransform()->GetWorldPosition();
-		float xPos = (camPos.pos2D().x) * ((star::ScaleSystem::GetInstance()->GetWorkingResolution().x) / 2.0f);
-		float yPos = (camPos.pos2D().y) * ((star::ScaleSystem::GetInstance()->GetWorkingResolution().y) / 2.0f); 
-		int screenWidth = GraphicsManager::GetInstance()->GetScreenWidth();
-		int screenHeight = GraphicsManager::GetInstance()->GetScreenHeight();
+		float32 xPos = (camPos.pos2D().x) * ((star::ScaleSystem::GetInstance()->GetWorkingResolution().x) / 2.0f);
+		float32 yPos = (camPos.pos2D().y) * ((star::ScaleSystem::GetInstance()->GetWorkingResolution().y) / 2.0f); 
+		int32 screenWidth = GraphicsManager::GetInstance()->GetScreenWidth();
+		int32 screenHeight = GraphicsManager::GetInstance()->GetScreenHeight();
 		SpriteComponent* sprite = object->GetComponent<SpriteComponent>();
 		SpritesheetComponent* spritesheet = object->GetComponent<SpritesheetComponent>();
 		if(sprite == nullptr && spritesheet == nullptr)
@@ -195,18 +199,18 @@ namespace star
 			return false;
 		}
 
-		int spriteWidth;
-		int spriteHeight;
+		int32 spriteWidth;
+		int32 spriteHeight;
 
 		if(sprite != nullptr)
 		{
-			spriteWidth = int(float(sprite->GetWidth()) * object->GetTransform()->GetWorldScale().x);
-			spriteHeight = int(float(sprite->GetHeight()) * object->GetTransform()->GetWorldScale().y);
+			spriteWidth = int32(float32(sprite->GetWidth()) * object->GetTransform()->GetWorldScale().x);
+			spriteHeight = int32(float32(sprite->GetHeight()) * object->GetTransform()->GetWorldScale().y);
 		}
 		if(spritesheet != nullptr)
 		{
-			spriteWidth = int(float(spritesheet->GetWidth()) * object->GetTransform()->GetWorldScale().x);
-			spriteHeight = int(float(spritesheet->GetHeight()) * object->GetTransform()->GetWorldScale().y);
+			spriteWidth = int32(float32(spritesheet->GetWidth()) * object->GetTransform()->GetWorldScale().x);
+			spriteHeight = int32(float32(spritesheet->GetHeight()) * object->GetTransform()->GetWorldScale().y);
 		}
 
 		//[TODO] allow used to set the offset you want around the culling area.
@@ -220,13 +224,13 @@ namespace star
 		return true;
 	}
 
-	void BaseScene::SetCullingOffset(int offset)
+	void BaseScene::SetCullingOffset(int32 offset)
 	{
 		m_CullingOffsetX = offset;
 		m_CullingOffsetY = offset;
 	}
 
-	void BaseScene::SetCullingOffset(int offsetX, int offsetY)
+	void BaseScene::SetCullingOffset(int32 offsetX, int32 offsetY)
 	{
 		m_CullingOffsetX = offsetX;
 		m_CullingOffsetY = offsetY;

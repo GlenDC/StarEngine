@@ -1,7 +1,7 @@
 #include "AudioManager.h"
 #include "../Logger.h"
 #include "../Helpers/Helpers.h"
-#include "../Helpers/HelpersMath.h"
+#include "../Helpers/Math.h"
 
 #ifdef ANDROID
 #include "../Assets/Resource.h"
@@ -45,14 +45,14 @@ namespace star
 
 	AudioManager::~AudioManager()
 	{
-		for(auto music : mMusicList)
+		for(auto & music : mMusicList)
 		{
 			delete music.second;
 		}
 
 		mMusicList.clear();
 
-		for(auto effect : mEffectsList)
+		for(auto & effect : mEffectsList)
 		{
 			delete effect.second;
 		}
@@ -77,8 +77,8 @@ namespace star
 		int32 audio_buffers(4096);
 
 		SDL_Init(SDL_INIT_AUDIO);
-		int flags = MIX_INIT_OGG | MIX_INIT_MP3;
-		int innited = Mix_Init(flags);
+		int32 flags = MIX_INIT_OGG | MIX_INIT_MP3;
+		int32 innited = Mix_Init(flags);
 		if((innited & flags) != flags)
 		{
 			star::Logger::GetInstance()->Log(star::LogLevel::Info, 
@@ -238,7 +238,7 @@ namespace star
 	void AudioManager::LoadMusic(
 		const tstring& path,
 		const tstring& name,
-		float volume,
+		float32 volume,
 		uint8 channel
 		)
 	{
@@ -285,7 +285,7 @@ namespace star
 	void AudioManager::LoadSoundEffect(
 		const tstring& path,
 		const tstring& name,
-		float volume,
+		float32 volume,
 		uint8 channel
 		)
 	{
@@ -329,7 +329,7 @@ namespace star
 		const tstring& path,
 		const tstring& name,
 		uint8 channel,
-		int loopTimes
+		int32 loopTimes
 		)
 	{
 		ASSERT(mSoundService != nullptr, _T("Sound Service is invalid."));
@@ -343,7 +343,7 @@ namespace star
 
 	void AudioManager::PlayMusic(
 		const tstring& name,
-		int loopTimes
+		int32 loopTimes
 		)
 	{
 		ASSERT(mSoundService != nullptr, _T("Sound Service is invalid."));
@@ -370,7 +370,7 @@ namespace star
 		const tstring& path,
 		const tstring& name,
 		uint8 channel,
-		int loopTimes
+		int32 loopTimes
 		)
 	{
 		ASSERT(mSoundService != nullptr,
@@ -385,7 +385,7 @@ namespace star
 
 	void AudioManager::PlaySoundEffect(
 		const tstring& name,
-		int loopTimes
+		int32 loopTimes
 		)
 	{
 		ASSERT(mSoundService != nullptr,
@@ -409,9 +409,9 @@ namespace star
 	void AudioManager::PlayMusic(
 		const tstring& path,
 		const tstring& name,
-		float volume,
+		float32 volume,
 		uint8 channel,
-		int loopTimes
+		int32 loopTimes
 		)
 	{
 		ASSERT(mSoundService != nullptr, _T("Sound Service is invalid."));
@@ -425,8 +425,8 @@ namespace star
 
 	void AudioManager::PlayMusic(
 		const tstring& name,
-		float volume,
-		int loopTimes
+		float32 volume,
+		int32 loopTimes
 		)
 	{
 		ASSERT(mSoundService != nullptr, _T("Sound Service is invalid."));
@@ -453,9 +453,9 @@ namespace star
 	void AudioManager::PlaySoundEffect(
 		const tstring& path,
 		const tstring& name,
-		float volume,
+		float32 volume,
 		uint8 channel,
-		int loopTimes
+		int32 loopTimes
 		)
 	{
 		ASSERT(mSoundService != nullptr,
@@ -470,8 +470,8 @@ namespace star
 
 	void AudioManager::PlaySoundEffect(
 		const tstring& name,
-		float volume,
-		int loopTimes
+		float32 volume,
+		int32 loopTimes
 		)
 	{
 		ASSERT(mSoundService != nullptr,
@@ -507,7 +507,7 @@ namespace star
 		{
 			star::Logger::GetInstance()->
 				Log(LogLevel::Warning,
-				_T("SSoundService::AddToBackgroundQueue: Couldn't find background song '") + name +
+				_T("SoundService::AddToBackgroundQueue: Couldn't find background song '") + name +
 				_T("'."));
 		}
 	}
@@ -769,7 +769,7 @@ namespace star
 		return false;
 	}
 
-	void AudioManager::SetMusicVolume(const tstring& name, float volume)
+	void AudioManager::SetMusicVolume(const tstring& name, float32 volume)
 	{
 		auto it = mMusicList.find(name);
 		if(it != mMusicList.end())
@@ -784,7 +784,7 @@ namespace star
 		}
 	}
 
-	float AudioManager::GetMusicVolume(const tstring& name) const
+	float32 AudioManager::GetMusicVolume(const tstring& name) const
 	{
 		auto it = mMusicList.find(name);
 		if(it != mMusicList.end())
@@ -800,7 +800,7 @@ namespace star
 		return 0;
 	}
 
-	void AudioManager::SetEffectVolume(const tstring& name, float volume)
+	void AudioManager::SetEffectVolume(const tstring& name, float32 volume)
 	{
 		auto it = mEffectsList.find(name);
 		if(it != mEffectsList.end())
@@ -815,7 +815,7 @@ namespace star
 		}
 	}
 
-	float AudioManager::GetEffectVolume(const tstring& name) const
+	float32 AudioManager::GetEffectVolume(const tstring& name) const
 	{
 		auto it = mEffectsList.find(name);
 		if(it != mEffectsList.end())
@@ -831,7 +831,7 @@ namespace star
 		return 0;
 	}
 
-	void AudioManager::IncreaseMusicVolume(const tstring& name, float volume)
+	void AudioManager::IncreaseMusicVolume(const tstring& name, float32 volume)
 	{
 		auto it = mMusicList.find(name);
 		if(it != mMusicList.end())
@@ -846,7 +846,7 @@ namespace star
 		}
 	}
 
-	void AudioManager::DecreaseMusicVolume(const tstring& name, float volume)
+	void AudioManager::DecreaseMusicVolume(const tstring& name, float32 volume)
 	{
 		auto it = mMusicList.find(name);
 		if(it != mMusicList.end())
@@ -861,7 +861,7 @@ namespace star
 		}
 	}
 
-	void AudioManager::IncreaseEffectVolume(const tstring& name, float volume)
+	void AudioManager::IncreaseEffectVolume(const tstring& name, float32 volume)
 	{
 		auto it = mEffectsList.find(name);
 		if(it != mEffectsList.end())
@@ -875,7 +875,7 @@ namespace star
 				name + _T("'."));
 		}
 	}
-	void AudioManager::DecreaseEffectVolume(const tstring& name, float volume)
+	void AudioManager::DecreaseEffectVolume(const tstring& name, float32 volume)
 	{
 		auto it = mEffectsList.find(name);
 		if(it != mEffectsList.end())
@@ -991,16 +991,15 @@ namespace star
 		auto & chnl = mChannels[channel];
 		auto it = chnl.mSounds.begin();
 		auto end = chnl.mSounds.end();
-		while(it != end)
+		for(auto sound : chnl.mSounds)
 		{
-			if(*it == pSound)
+			if(sound == pSound)
 			{
 				Logger::GetInstance()->Log(LogLevel::Warning,
 					_T("AudioManager::AddSoundToChannel: Trying to add a sound twice in channel '")
 					+ string_cast<tstring>(channel) + _T("'."));
 				return;
 			}
-			++it;
 		}
 		pSound->SetChannelVolume(chnl.mVolume);
 		chnl.mSounds.push_back(pSound);
@@ -1026,9 +1025,10 @@ namespace star
 			);
 		if(result)
 		{
-			auto it = chnl.mSounds.begin();
-			auto end = chnl.mSounds.end();
-			while(it != end)
+			for(auto it = chnl.mSounds.begin() ;
+				it != chnl.mSounds.end() ;
+				++it
+				)
 			{
 				if(*it == pSound)
 				{
@@ -1036,7 +1036,6 @@ namespace star
 					chnl.mSounds.erase(it);
 					return;
 				}
-				++it;
 			}
 			Logger::GetInstance()->Log(LogLevel::Warning,
 				_T("AudioManager::RemoveSoundFromChannel: Sound not found in channel '")
@@ -1044,7 +1043,7 @@ namespace star
 		}
 	}
 
-	void AudioManager::SetChannelVolume(uint8 channel, float volume)
+	void AudioManager::SetChannelVolume(uint8 channel, float32 volume)
 	{
 		bool result;
 		SoundChannel & chnl = GetChannel(
@@ -1058,7 +1057,7 @@ namespace star
 		}
 	}
 
-	float AudioManager::GetChannelVolume(uint8 channel)
+	float32 AudioManager::GetChannelVolume(uint8 channel)
 	{
 		bool result;
 		SoundChannel & chnl = GetChannel(
@@ -1073,7 +1072,7 @@ namespace star
 		return 0;
 	}
 
-	void AudioManager::IncreaseChannelVolume(uint8 channel, float volume)
+	void AudioManager::IncreaseChannelVolume(uint8 channel, float32 volume)
 	{
 		bool result;
 		SoundChannel & chnl = GetChannel(
@@ -1087,7 +1086,7 @@ namespace star
 		}
 	}
 
-	void AudioManager::DecreaseChannelVolume(uint8 channel, float volume)
+	void AudioManager::DecreaseChannelVolume(uint8 channel, float32 volume)
 	{
 		bool result;
 		SoundChannel & chnl = GetChannel(
@@ -1216,12 +1215,9 @@ namespace star
 			);
 		if(result)
 		{
-			auto it = chnl.mSounds.begin();
-			auto end = chnl.mSounds.end();
-			while(it != end)
+			for(auto sound : chnl.mSounds)
 			{
-				(*it)->Pause();
-				++it;
+				sound->Pause();
 			}
 			chnl.mState = ChannelState::paused;
 		}
@@ -1252,12 +1248,9 @@ namespace star
 			);
 		if(result)
 		{
-			auto it = chnl.mSounds.begin();
-			auto end = chnl.mSounds.end();
-			while(it != end)
+			for(auto sound : chnl.mSounds)
 			{
-				(*it)->Resume();
-				++it;
+				sound->Resume();
 			}
 			chnl.mState = ChannelState::playing;
 		}
@@ -1288,12 +1281,9 @@ namespace star
 			);
 		if(result)
 		{
-			auto it = chnl.mSounds.begin();
-			auto end = chnl.mSounds.end();
-			while(it != end)
+			for(auto sound : chnl.mSounds)
 			{
-				(*it)->Stop();
-				++it;
+				sound->Stop();
 			}
 			chnl.mState = ChannelState::stopped;
 		}
@@ -1314,7 +1304,7 @@ namespace star
 		return false;
 	}
 	
-	void AudioManager::PlayChannel(uint8 channel, int loopTimes)
+	void AudioManager::PlayChannel(uint8 channel, int32 loopTimes)
 	{
 		bool result;
 		SoundChannel & chnl = GetChannel(
@@ -1324,33 +1314,11 @@ namespace star
 			);
 		if(result)
 		{
-			auto it = chnl.mSounds.begin();
-			auto end = chnl.mSounds.end();
-			while(it != end)
+			for(auto sound : chnl.mSounds)
 			{
-				(*it)->Play(loopTimes);
-				++it;
+				sound->Play(loopTimes);
 			}
 			chnl.mState = ChannelState::playing;
-		}
-	}
-
-	void AudioManager::StopSound(const tstring& name)
-	{
-		ASSERT(mSoundService != nullptr, _T("Sound Service is invalid."));
-
-		auto it = mMusicList.find(name);
-		if(it != mMusicList.end())
-		{
-			mMusicList[name]->Stop();
-			return;
-		}
-
-		auto it2 = mEffectsList.find(name);
-		if(it2 != mEffectsList.end())
-		{
-			mEffectsList[name]->Stop();
-			return;
 		}
 	}
 
@@ -1421,36 +1389,36 @@ namespace star
 		
 	}
 
-	void AudioManager::SetVolume(float volume)
+	void AudioManager::SetVolume(float32 volume)
 	{
 		mVolume = Clamp(volume, 0.0f, 1.0f);
 
-		for(auto song : mMusicList)
+		for(auto & song : mMusicList)
 		{
 			song.second->SetMasterVolume(volume);
 		}
 
-		for(auto effect : mEffectsList)
+		for(auto & effect : mEffectsList)
 		{
 			effect.second->SetMasterVolume(volume);
 		}
 	}
 
-	float AudioManager::GetVolume() const
+	float32 AudioManager::GetVolume() const
 	{
 		return mVolume;
 	}
 
-	void AudioManager::IncreaseVolume(float volume)
+	void AudioManager::IncreaseVolume(float32 volume)
 	{
-		float vol = GetVolume();
+		float32 vol = GetVolume();
 		vol += volume;
 		SetVolume(vol);
 	}
 
-	void AudioManager::DecreaseVolume(float volume)
+	void AudioManager::DecreaseVolume(float32 volume)
 	{
-		float vol = GetVolume();
+		float32 vol = GetVolume();
 		vol -= volume;
 		SetVolume(vol);
 	}
@@ -1507,7 +1475,7 @@ namespace star
 		mSounds.clear();
 	}
 
-	void AudioManager::SoundChannel::SetVolume(float volume)
+	void AudioManager::SoundChannel::SetVolume(float32 volume)
 	{
 		mVolume = Clamp(volume, 0.0f, 1.0f);
 		for( auto it : mSounds)
@@ -1516,17 +1484,17 @@ namespace star
 		}
 	}
 
-	float AudioManager::SoundChannel::GetVolume() const
+	float32 AudioManager::SoundChannel::GetVolume() const
 	{
 		return mVolume;
 	}
 
-	void AudioManager::SoundChannel::IncreaseVolume(float volume)
+	void AudioManager::SoundChannel::IncreaseVolume(float32 volume)
 	{
 		SetVolume(mVolume + volume);
 	}
 
-	void AudioManager::SoundChannel::DecreaseVolume(float volume)
+	void AudioManager::SoundChannel::DecreaseVolume(float32 volume)
 	{
 		SetVolume(mVolume - volume);
 	}

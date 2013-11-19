@@ -39,14 +39,14 @@ namespace star
 	struct InputAction
 	{
 		InputAction();
-		InputAction(int actionID, InputTriggerState triggerState = InputTriggerState::Pressed,
-					int keyboardCode = -1, int mouseButtonCode = -1, WORD gamepadButtonCode = 0,
+		InputAction(int32 actionID, InputTriggerState triggerState = InputTriggerState::Pressed,
+					int32 keyboardCode = -1, int32 mouseButtonCode = -1, WORD gamepadButtonCode = 0,
 					GamepadIndex playerIndex = GamepadIndex::PlayerOne);
 
-		int ActionID;
+		int32 ActionID;
 		InputTriggerState TriggerState;
-		int KeyboardCode; //VK_... (Range 0x07 <> 0xFE)
-		int MouseButtonCode; //VK_... (Range 0x00 <> 0x06)
+		int32 KeyboardCode; //VK_... (Range 0x07 <> 0xFE)
+		int32 MouseButtonCode; //VK_... (Range 0x00 <> 0x06)
 		WORD GamepadButtonCode; //XINPUT_GAMEPAD_...
 		GamepadIndex PlayerIndex;
 		bool IsTriggered;
@@ -59,10 +59,10 @@ namespace star
 
 		vec2 Position;
 		vec2 RawPosition;
-		float Pressure;
-		float ToolMajor;
-		float ToolMinor;
-		int ID;
+		float32 Pressure;
+		float32 ToolMajor;
+		float32 ToolMinor;
+		int32 ID;
 	};
 #endif
 
@@ -87,17 +87,17 @@ namespace star
 		
 		//[TODO] add InputActions for android
 		bool AddInputAction(const InputAction& action);
-		bool IsActionTriggered(int actionID) const;
+		bool IsActionTriggered(int32 actionID) const;
 		//[TODO] -- END TODO
 		void IsCursorVisible(bool visible);
 
 		vec2 GetThumbstickPosition(bool leftThumbstick = true, 
 			GamepadIndex playerIndex = GamepadIndex::PlayerOne) const;
 
-		float GetTriggerPressure(bool leftTrigger = true, 
+		float32 GetTriggerPressure(bool leftTrigger = true, 
 			GamepadIndex playerIndex = GamepadIndex::PlayerOne) const;
 
-		void SetVibration(float leftVibration, float rightVibration, 
+		void SetVibration(float32 leftVibration, float32 rightVibration, 
 			GamepadIndex playerIndex = GamepadIndex::PlayerOne);
 
 		bool IsGamepadConnected(GamepadIndex index) const { return m_ConnectedGamepads[(DWORD)index]; }
@@ -138,18 +138,18 @@ namespace star
 		static InputManager*  m_InputManagerPtr;
 
 #ifdef DESKTOP
-		static const int NUMBER_OF_KEYBOARDKEYS = 256;
-		static const int MIN_KEYBOARD_VALUE = 0x07;
-		static const int MAX_KEYBOARD_VALUE = 0xFE;
-		static const int MIN_MOUSE_BUTTON_VALUE = 0x00;
-		static const int MAX_MOUSE_BUTTON_VALUE = 0x06;
+		static const int32 NUMBER_OF_KEYBOARDKEYS = 256;
+		static const int32 MIN_KEYBOARD_VALUE = 0x07;
+		static const int32 MAX_KEYBOARD_VALUE = 0xFE;
+		static const int32 MIN_MOUSE_BUTTON_VALUE = 0x00;
+		static const int32 MAX_MOUSE_BUTTON_VALUE = 0x06;
 		static const WORD  MIN_GAMEPAD_VALUE = 0x0000;
 		static const WORD  MAX_GAMEPAD_VALUE = 0x8000;
-		static const int MAX_VALUE_OF_SHORT = 32768;
-		static const int MAX_VALUE_OF_WORD = 65535;
-		static const float BYTE_TO_DOUBLE_VALUE;
+		static const int32 MAX_VALUE_OF_SHORT = 32768;
+		static const int32 MAX_VALUE_OF_WORD = 65535;
+		static const float32 BYTE_TO_DOUBLE_VALUE;
 
-		std::map<int,InputAction> m_InputActions;
+		std::map<int32,InputAction> m_InputActions;
 		BYTE	m_pCurrKeyboardState[NUMBER_OF_KEYBOARDKEYS],
 				m_pOldKeyboardState[NUMBER_OF_KEYBOARDKEYS],
 				m_pKeyboardState0[NUMBER_OF_KEYBOARDKEYS],
@@ -168,8 +168,8 @@ namespace star
 		bool IsKeyboardKeyDown_unsafe(uint8 key, bool previousFrame = false) const;
 		bool IsMouseButtonDown_unsafe(uint8 button, bool previousFrame = false) const;
 #else
-		static const int INVALID_POINTER_ID = -1;
-		static const float UNDEFINED_POINTER_POSITION;
+		static const int32 INVALID_POINTER_ID = -1;
+		static const float32 UNDEFINED_POINTER_POSITION;
 		bool m_bMainIsDown;
 		bool m_bPointerIsDown;
 		bool m_bMainIsUp;

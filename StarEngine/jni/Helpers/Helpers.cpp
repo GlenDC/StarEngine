@@ -313,8 +313,8 @@ namespace star
 	}
 
 	template <>
-	tstring string_cast<tstring, glm::vec2>
-		(const glm::vec2 & value)
+	tstring string_cast<tstring, fvec2>
+		(const fvec2 & value)
 	{
 		tstringstream strstr;
 		strstr << value.x << _T(";");
@@ -334,8 +334,8 @@ namespace star
 	}
 
 	template <>
-	tstring string_cast<tstring, glm::vec3>
-		(const glm::vec3 & value)
+	tstring string_cast<tstring, fvec3>
+		(const fvec3 & value)
 	{
 		tstringstream strstr;
 		strstr << value.x << _T(";");
@@ -345,8 +345,8 @@ namespace star
 	}
 
 	template <>
-	tstring string_cast<tstring, glm::vec4>
-		(const glm::vec4 & value)
+	tstring string_cast<tstring, fvec4>
+		(const fvec4 & value)
 	{
 		tstringstream strstr;
 		strstr << value.x << _T(";");
@@ -357,8 +357,120 @@ namespace star
 	}
 
 	template <>
-	tstring string_cast<tstring, glm::quat>
-		(const glm::quat & value)
+	tstring string_cast<tstring, fquat>
+		(const fquat & value)
+	{
+		tstringstream strstr;
+		strstr << value.x << _T(";");
+		strstr << value.y << _T(";");
+		strstr << value.z << _T(";");
+		strstr << value.w;
+		return strstr.str();
+	}
+	
+	template <>
+	tstring string_cast<tstring, dvec2>
+		(const dvec2 & value)
+	{
+		tstringstream strstr;
+		strstr << value.x << _T(";");
+		strstr << value.y;
+		return strstr.str();
+	}
+
+	template <>
+	tstring string_cast<tstring, dvec3>
+		(const dvec3 & value)
+	{
+		
+		tstringstream strstr;
+		strstr << value.x << _T(";");
+		strstr << value.y << _T(";");
+		strstr << value.z;
+		return strstr.str();
+	}
+
+	template <>
+	tstring string_cast<tstring, dvec4>
+		(const dvec4 & value)
+	{
+		tstringstream strstr;
+		strstr << value.x << _T(";");
+		strstr << value.y << _T(";");
+		strstr << value.z << _T(";");
+		strstr << value.w;
+		return strstr.str();
+	}
+
+	template <>
+	tstring string_cast<tstring, dquat>
+		(const dquat & value)
+	{
+		tstringstream strstr;
+		strstr << value.x << _T(";");
+		strstr << value.y << _T(";");
+		strstr << value.z << _T(";");
+		strstr << value.w;
+		return strstr.str();
+	}
+	
+	template <>
+	tstring string_cast<tstring, ivec2>
+		(const ivec2 & value)
+	{	
+		tstringstream strstr;
+		strstr << value.x << _T(";");
+		strstr << value.y;
+		return strstr.str();
+	}
+
+	template <>
+	tstring string_cast<tstring, ivec3>
+		(const ivec3 & value)
+	{
+		tstringstream strstr;
+		strstr << value.x << _T(";");
+		strstr << value.y << _T(";");
+		strstr << value.z;
+		return strstr.str();
+	}
+
+	template <>
+	tstring string_cast<tstring, ivec4>
+		(const ivec4 & value)
+	{
+		tstringstream strstr;
+		strstr << value.x << _T(";");
+		strstr << value.y << _T(";");
+		strstr << value.z << _T(";");
+		strstr << value.w;
+		return strstr.str();
+	}
+	
+	template <>
+	tstring string_cast<tstring, uvec2>
+		(const uvec2 & value)
+	{
+		tstringstream strstr;
+		strstr << value.x << _T(";");
+		strstr << value.y;
+		return strstr.str();
+	}
+
+	template <>
+	tstring string_cast<tstring, uvec3>
+		(const uvec3 & value)
+	{
+		tstringstream strstr;
+		strstr << value.x << _T(";");
+		strstr << value.y << _T(";");
+		strstr << value.z;
+		return strstr.str();
+	}
+
+	template <>
+	tstring string_cast<tstring, uvec4>
+		(const uvec4 & value)
 	{
 		tstringstream strstr;
 		strstr << value.x << _T(";");
@@ -378,7 +490,7 @@ namespace star
 	}
 
 	template <>
-	int string_cast<int, tstring>
+	int32 string_cast<int32, tstring>
 		(const tstring & value)
 	{
 		return ttoi(value.c_str());
@@ -388,7 +500,7 @@ namespace star
 	uint32 string_cast<uint32, tstring>
 		(const tstring & value)
 	{
-		return uint32(string_cast<int>(value));
+		return uint32(string_cast<int32>(value));
 	}
 
 	template <>
@@ -399,27 +511,27 @@ namespace star
 	}
 
 	template <>
-	float string_cast<float, tstring>
+	float32 string_cast<float32, tstring>
 		(const tstring & value)
 	{
-		return static_cast<float>(ttof(value.c_str()));
+		return static_cast<float32>(ttof(value.c_str()));
 	}
 
 	template <>
-	double string_cast<double, tstring>
+	float64 string_cast<float64, tstring>
 		(const tstring & value)
 	{
 		return ttof(value.c_str());
 	}
 
 	template <>
-	glm::vec2 string_cast<glm::vec2, tstring>
+	fvec2 string_cast<fvec2, tstring>
 		(const tstring & value)
 	{
-		glm::vec2 vec;
-		int index = value.find(';',0);
-		vec.x = string_cast<float>(value.substr(0, index));
-		vec.y = string_cast<float>(value.substr(++index,value.size()-index));
+		fvec2 vec;
+		int32 index = value.find(';',0);
+		vec.x = string_cast<float32>(value.substr(0, index));
+		vec.y = string_cast<float32>(value.substr(++index,value.size()-index));
 		return vec;
 	}
 
@@ -428,55 +540,187 @@ namespace star
 		(const tstring & value)
 	{
 		pos pos;
-		int index = value.find(';', 0);
-		pos.x = string_cast<float>(value.substr(0, index));
-		int index2 = value.find(';', ++index);
-		pos.y = string_cast<float>(value.substr(index, index2 - index));
+		int32 index = value.find(';', 0);
+		pos.x = string_cast<float32>(value.substr(0, index));
+		int32 index2 = value.find(';', ++index);
+		pos.y = string_cast<float32>(value.substr(index, index2 - index));
 		pos.l = lay(string_cast<int32>(value.substr(++index2, value.size() - index2)));
 		return pos;
 	}
 
 	template <>
-	glm::vec3 string_cast<glm::vec3, tstring>
+	fvec3 string_cast<fvec3, tstring>
 		(const tstring & value)
 	{
-		glm::vec3 vec;
-		int index = value.find(';', 0);
-		vec.x = string_cast<float>(value.substr(0, index));
-		int index2 = value.find(';', ++index);
-		vec.y = string_cast<float>(value.substr(index, index2 - index));
-		vec.z = string_cast<float>(value.substr(++index2, value.size() - index2));
+		fvec3 vec;
+		int32 index = value.find(';', 0);
+		vec.x = string_cast<float32>(value.substr(0, index));
+		int32 index2 = value.find(';', ++index);
+		vec.y = string_cast<float32>(value.substr(index, index2 - index));
+		vec.z = string_cast<float32>(value.substr(++index2, value.size() - index2));
 		return vec;
 	}
 
 	template <>
-	glm::vec4 string_cast<glm::vec4, tstring>
+	fvec4 string_cast<fvec4, tstring>
 		(const tstring & value)
 	{
-		glm::vec4 vec;
-		int index = value.find(';', 0);
-		vec.x = string_cast<float>(value.substr(0, index));
-		int index2 = value.find(';', ++index);
-		vec.y = string_cast<float>(value.substr(index, index2 - index));
+		fvec4 vec;
+		int32 index = value.find(';', 0);
+		vec.x = string_cast<float32>(value.substr(0, index));
+		int32 index2 = value.find(';', ++index);
+		vec.y = string_cast<float32>(value.substr(index, index2 - index));
 		index = value.find(';', ++index2);
-		vec.z = string_cast<float>(value.substr(index2, index - index2));
-		vec.w = string_cast<float>(value.substr(++index, value.size() - index));
+		vec.z = string_cast<float32>(value.substr(index2, index - index2));
+		vec.w = string_cast<float32>(value.substr(++index, value.size() - index));
 		return vec;
 	}
 
 	template <>
-	glm::quat string_cast<glm::quat, tstring>
+	fquat string_cast<fquat, tstring>
 		(const tstring & value)
 	{
-		glm::quat quat;
-		int index = value.find(';', 0);
-		quat.x = string_cast<float>(value.substr(0, index));
-		int index2 = value.find(';', ++index);
-		quat.y = string_cast<float>(value.substr(index, index2 - index));
+		fquat quat;
+		int32 index = value.find(';', 0);
+		quat.x = string_cast<float32>(value.substr(0, index));
+		int32 index2 = value.find(';', ++index);
+		quat.y = string_cast<float32>(value.substr(index, index2 - index));
 		index = value.find(';', ++index2);
-		quat.z = string_cast<float>(value.substr(index2, index - index2));
-		quat.w = string_cast<float>(value.substr(++index, value.size() - index));
+		quat.z = string_cast<float32>(value.substr(index2, index - index2));
+		quat.w = string_cast<float32>(value.substr(++index, value.size() - index));
 		return quat;
+	}
+
+	template <>
+	dvec2 string_cast<dvec2, tstring>
+		(const tstring & value)
+	{
+		dvec2 vec;
+		int32 index = value.find(';',0);
+		vec.x = string_cast<float64>(value.substr(0, index));
+		vec.y = string_cast<float64>(value.substr(++index,value.size()-index));
+		return vec;
+	}
+
+	template <>
+	dvec3 string_cast<dvec3, tstring>
+		(const tstring & value)
+	{
+		dvec3 vec;
+		int32 index = value.find(';', 0);
+		vec.x = string_cast<float64>(value.substr(0, index));
+		int32 index2 = value.find(';', ++index);
+		vec.y = string_cast<float64>(value.substr(index, index2 - index));
+		vec.z = string_cast<float64>(value.substr(++index2, value.size() - index2));
+		return vec;
+	}
+
+	template <>
+	dvec4 string_cast<dvec4, tstring>
+		(const tstring & value)
+	{
+		dvec4 vec;
+		int32 index = value.find(';', 0);
+		vec.x = string_cast<float64>(value.substr(0, index));
+		int32 index2 = value.find(';', ++index);
+		vec.y = string_cast<float64>(value.substr(index, index2 - index));
+		index = value.find(';', ++index2);
+		vec.z = string_cast<float64>(value.substr(index2, index - index2));
+		vec.w = string_cast<float64>(value.substr(++index, value.size() - index));
+		return vec;
+	}
+
+	template <>
+	dquat string_cast<dquat, tstring>
+		(const tstring & value)
+	{
+		dquat quat;
+		int32 index = value.find(';', 0);
+		quat.x = string_cast<float64>(value.substr(0, index));
+		int32 index2 = value.find(';', ++index);
+		quat.y = string_cast<float64>(value.substr(index, index2 - index));
+		index = value.find(';', ++index2);
+		quat.z = string_cast<float64>(value.substr(index2, index - index2));
+		quat.w = string_cast<float64>(value.substr(++index, value.size() - index));
+		return quat;
+	}
+
+	template <>
+	ivec2 string_cast<ivec2, tstring>
+		(const tstring & value)
+	{
+		ivec2 vec;
+		int32 index = value.find(';',0);
+		vec.x = string_cast<int32>(value.substr(0, index));
+		vec.y = string_cast<int32>(value.substr(++index,value.size()-index));
+		return vec;
+	}
+
+	template <>
+	ivec3 string_cast<ivec3, tstring>
+		(const tstring & value)
+	{
+		ivec3 vec;
+		int32 index = value.find(';', 0);
+		vec.x = string_cast<int32>(value.substr(0, index));
+		int32 index2 = value.find(';', ++index);
+		vec.y = string_cast<int32>(value.substr(index, index2 - index));
+		vec.z = string_cast<int32>(value.substr(++index2, value.size() - index2));
+		return vec;
+	}
+
+	template <>
+	ivec4 string_cast<ivec4, tstring>
+		(const tstring & value)
+	{
+		ivec4 vec;
+		int32 index = value.find(';', 0);
+		vec.x = string_cast<int32>(value.substr(0, index));
+		int32 index2 = value.find(';', ++index);
+		vec.y = string_cast<int32>(value.substr(index, index2 - index));
+		index = value.find(';', ++index2);
+		vec.z = string_cast<int32>(value.substr(index2, index - index2));
+		vec.w = string_cast<int32>(value.substr(++index, value.size() - index));
+		return vec;
+	}
+
+	template <>
+	uvec2 string_cast<uvec2, tstring>
+		(const tstring & value)
+	{
+		uvec2 vec;
+		int32 index = value.find(';',0);
+		vec.x = string_cast<uint32>(value.substr(0, index));
+		vec.y = string_cast<uint32>(value.substr(++index,value.size()-index));
+		return vec;
+	}
+
+	template <>
+	uvec3 string_cast<uvec3, tstring>
+		(const tstring & value)
+	{
+		uvec3 vec;
+		int32 index = value.find(';', 0);
+		vec.x = string_cast<uint32>(value.substr(0, index));
+		int32 index2 = value.find(';', ++index);
+		vec.y = string_cast<uint32>(value.substr(index, index2 - index));
+		vec.z = string_cast<uint32>(value.substr(++index2, value.size() - index2));
+		return vec;
+	}
+
+	template <>
+	uvec4 string_cast<uvec4, tstring>
+		(const tstring & value)
+	{
+		uvec4 vec;
+		int32 index = value.find(';', 0);
+		vec.x = string_cast<uint32>(value.substr(0, index));
+		int32 index2 = value.find(';', ++index);
+		vec.y = string_cast<uint32>(value.substr(index, index2 - index));
+		index = value.find(';', ++index2);
+		vec.z = string_cast<uint32>(value.substr(index2, index - index2));
+		vec.w = string_cast<uint32>(value.substr(++index, value.size() - index));
+		return vec;
 	}
 
 	void ReadTextFile(const tstring & file, tstring & text,
