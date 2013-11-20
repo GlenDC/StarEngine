@@ -2,6 +2,8 @@
 #include "../StarComponents.h"
 #include "../Components/TransformComponent.h"
 #include "../Graphics/GraphicsManager.h"
+#include "../Scenes/BaseScene.h"
+#include "../Physics/Collision/CollisionManager.h"
 #include <algorithm>
 #include <typeinfo>
 
@@ -129,14 +131,6 @@ namespace star
 					component->BaseDraw();
 				} 
 			}
-
-			for(auto child : m_pChildren)
-			{
-				if(child)
-				{
-					child->BaseDraw();
-				}
-			}
 		}
 	}
 
@@ -180,6 +174,11 @@ namespace star
 	void Object::RemoveComponent(const BaseComponent* pComponent)
 	{
 		m_pComponents.erase(std::find(m_pComponents.begin(), m_pComponents.end(), pComponent));
+		/*auto baseColComp = dynamic_cast<const BaseColliderComponent*>(pComponent);
+		if(baseColComp)
+		{
+			GetScene()->GetCollisionManager()->RemoveComponent(baseColComp);
+		}*/
 		delete pComponent;
 
 		Logger::GetInstance()->Log(LogLevel::Info, _T("Component Removed"));
@@ -215,6 +214,10 @@ namespace star
 	void Object::SetVisible(bool visible)
 	{
 		m_IsVisible = visible;
+		for(auto child : m_pChildren)
+		{
+			child->SetVisible(visible);
+		}
 	}
 
 	bool Object::IsVisible() const
@@ -225,6 +228,10 @@ namespace star
 	void Object::Freeze(bool freeze)
 	{
 		m_IsFrozen = freeze;
+		for(auto child : m_pChildren)
+		{
+			child->Freeze(freeze);
+		}
 	}
 
 	bool Object::IsFrozen() const
@@ -236,6 +243,11 @@ namespace star
 	{
 		m_IsVisible = !disabled;
 		m_IsFrozen = disabled;
+
+		for(auto child : m_pChildren)
+		{
+			child->SetDisabled(disabled);
+		}
 	}
 
 	bool Object::IsDisabled() const
