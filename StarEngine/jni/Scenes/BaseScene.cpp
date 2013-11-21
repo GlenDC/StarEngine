@@ -16,10 +16,11 @@ namespace star
 		: m_GestureManagerPtr(nullptr)
 		, m_CollisionManagerPtr(nullptr)
 		, m_Objects()
+		, m_Garbage()
 		, m_pDefaultCamera(nullptr)
 		, m_CullingOffsetX(0)
 		, m_CullingOffsetY(0)
-		, m_Initialized(false) 
+		, m_Initialized(false)
 		, m_Name(name)
 	{
 		m_pStopwatch = std::make_shared<Stopwatch>();
@@ -44,7 +45,11 @@ namespace star
 		{
 			CreateObjects();
 
-			m_pDefaultCamera = new BaseCamera();
+			if(m_pDefaultCamera == nullptr)
+			{
+				m_pDefaultCamera = new BaseCamera();
+				AddObject(m_pDefaultCamera);
+			}
 
 			m_Initialized = true;
 			for(auto object : m_Objects)
@@ -57,6 +62,7 @@ namespace star
 
 	void BaseScene::BaseAfterInitializedObjects()
 	{
+		SetActiveCamera(m_pDefaultCamera);
 		AfterInitializedObjects();
 	}
 
@@ -73,14 +79,20 @@ namespace star
 
 	void BaseScene::BaseUpdate(const Context& context)
 	{	
-		m_pStopwatch->Update(context);
+		CollectGarbage();
 
+		m_pStopwatch->Update(context);
+		
 		for(auto object : m_Objects)
 		{
 			object->BaseUpdate(context);
 		}
-
 		Update(context);
+		//[COMMENT] Updating the collisionManager before the objects or here?
+		//			If i do it before the objects, there is the problem that
+		//			the objects won't be translated correctly...
+		//			So i think here is best, unless somebody proves me wrong
+		m_CollisionManagerPtr->Update(context);
 	}
 
 	void BaseScene::BaseDraw()
@@ -135,7 +147,7 @@ namespace star
 		auto it = std::find(m_Objects.begin(), m_Objects.end(), object);
 		if(it != m_Objects.end())
 		{
-			m_Objects.erase(it);
+			m_Garbage.push_back(object);
 			object->UnsetScene();
 		}
 	}
@@ -226,5 +238,18 @@ namespace star
 	{
 		m_CullingOffsetX = offsetX;
 		m_CullingOffsetY = offsetY;
+	}
+
+	void BaseScene::CollectGarbage()
+	{
+		for(auto elem : m_Garbage)
+		{
+			auto it = std::find(m_Objects.begin(), m_Objects.end(), elem);
+			ASSERT(it != m_Objects.end(), _T("BaseScene::CollectGarbage: Trying to delete unknown object"));
+			m_Objects.erase(it);
+			delete elem;
+		}
+		m_Garbage.clear();
+		
 	}
 }

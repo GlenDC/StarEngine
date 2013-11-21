@@ -12,9 +12,9 @@ namespace star
 	class BaseComponent
 	{
 	public:
-		BaseComponent(void);
+		BaseComponent();
 		BaseComponent(Object* parent);
-		virtual ~BaseComponent(void);
+		virtual ~BaseComponent();
 
 		void Initialize();
 		void BaseUpdate(const Context& context);
@@ -33,12 +33,16 @@ namespace star
 		void SetEnabled(bool bEnabled);
 		bool IsEnabled() const;
 
+		void SetVisible(bool bVisible);
+		bool IsVisible() const;
+
 	protected:
 		virtual void InitializeComponent() = 0;
 
 		Object* m_pParentObject;
-		bool m_bInitialized,
-			 m_bIsEnabled;
+		bool	m_bInitialized,
+				m_bIsEnabled,
+				m_bIsVisible;
 
 	private:
 		BaseComponent(const BaseComponent& t);
