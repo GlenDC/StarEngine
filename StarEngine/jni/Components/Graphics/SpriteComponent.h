@@ -25,22 +25,40 @@ namespace star
 	class SpriteComponent : public BaseComponent
 	{
 	public:
-		SpriteComponent(const tstring& filepath, const tstring& spriteName, bool bIsHUDElement = false, bool bIsUberHUD = false, int32 widthSegments = 1, int32 heightSegments = 1);
+		SpriteComponent(
+			const tstring& filepath,
+			const tstring& spriteName,
+			uint32 widthSegments = 1,
+			uint32 heightSegments = 1
+			);
+
 		virtual ~SpriteComponent();
 
 		void Draw();
-		virtual void Update(const Context& context) {};
+		virtual void Update(const Context& context);
+
+		virtual bool CheckCulling(
+			float left,
+			float right,
+			float top,
+			float bottom
+			) const;
 
 		const tstring& GetFilePath() const;
 		const tstring& GetName() const;
-		int32 GetWidth() const;
-		int32 GetHeight() const;
+		virtual int32 GetWidth() const;
+		virtual int32 GetHeight() const;
 		std::vector<GLfloat> GetVertices() const;
 		std::vector<GLfloat> GetUVCoords() const;
 		
-		void SetCurrentSegment(int32 widthSegment, int32 heightSegment);
+		void SetCurrentSegment(uint32 widthSegment, uint32 heightSegment);
+		void SetCurrentHorizontalSegment(uint32 segment);
+		void SetCurrentVerticalSegment(uint32 segment);
 
-		void SetTexture(const tstring& filepath, const tstring& spriteName, bool bIsHUDElement = false, int32 widthSegments = 1, int32 heightSegments = 1);
+		void SetHUDOptionEnabled(bool enabled);
+		bool IsHUDOptionEnabled() const;
+
+		void SetTexture(const tstring& filepath, const tstring& spriteName, uint32 widthSegments = 1, uint32 heightSegments = 1);
 
 	protected:
 		virtual void InitializeComponent();
@@ -49,13 +67,18 @@ namespace star
 
 		GLfloat m_Vertices[12];
 		GLfloat m_UvCoords[8];
-		int32 m_Width, m_WidthSegments, m_CurrentWidthSegment;
-		int32 m_Heigth, m_HeightSegments, m_CurrentHeightSegment;
+
+		uint32	m_WidthSegments,
+				m_HeightSegments, 
+				m_CurrentWidthSegment,
+				m_CurrentHeightSegment;
+
+		int32 m_Width, m_Heigth;
 
 	private:
 		Filepath m_FilePath;
 		tstring m_SpriteName;
-		bool m_bIsHudElement, m_bIsUberHUD;
+		bool m_bIsHudElement;
 		
 		SpriteInfo m_SpriteInfo;
 

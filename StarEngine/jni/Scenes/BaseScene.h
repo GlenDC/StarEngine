@@ -37,10 +37,25 @@ namespace star
 		bool IsInitialized() const;
 
 		void AddObject(Object * object); 
+		void AddObject(Object * object, const tstring & name); 
 		void RemoveObject(Object * object);
+		void RemoveObject(const tstring & name);
+
+		Object * GetObjectByName(const tstring & name);
+		void SetObjectFrozen(const tstring & name, bool freeze);
+		void SetObjectDisabled(const tstring & name, bool disabled);
+		void SetObjectVisible(const tstring & name, bool visible);
+
+		void SetGroupFrozen(const tstring & tag, bool freeze);
+		void SetGroupDisabled(const tstring & tag, bool disabled);
+		void SetGroupVisible(const tstring & tag, bool visable);
+		void GetGroup(const tstring & tag, std::vector<Object*> & group);
 
 		void SetActiveCamera(BaseCamera* pCamera);
 		BaseCamera* GetActiveCamera() const;
+
+		void SetCullingIsEnabled(bool enabled);
+		bool IsCullingEnabled() const;
 
 		void SetCullingOffset(int32 offset);
 		void SetCullingOffset(int32 offsetX, int32 offsetY);
@@ -63,13 +78,18 @@ namespace star
 		std::shared_ptr<CollisionManager> m_CollisionManagerPtr;
 
 		std::vector<Object*> m_Objects;
+		std::vector<Object*> m_Garbage;
 		BaseCamera* m_pDefaultCamera;
 		std::shared_ptr<Stopwatch> m_pStopwatch;
 
 	private:
+
+		void CollectGarbage();
+
 		int32 m_CullingOffsetX,
 			m_CullingOffsetY;
-		bool m_Initialized;
+		bool m_Initialized,
+			 m_CullingIsEnabled;
 		tstring m_Name;
 	
 		BaseScene(const BaseScene& t);

@@ -4,32 +4,55 @@
 #include "CircleColliderComponent.h"
 #include "../TransformComponent.h"
 #include "../../Helpers/Math.h"
-
+#include "../../Scenes/SceneManager.h"
+#include "../../Scenes/BaseScene.h"
+#include "../../Physics/Collision/CollisionManager.h"
 
 namespace star
 {
 	const tstring BaseColliderComponent::DEFAULT_LAYER_NAME = _T("default");
+
 	BaseColliderComponent::BaseColliderComponent()
 		: BaseComponent()
 		, m_bIsTrigger(false)
 		, m_bIsStatic(false)
-		, m_Layers(&DEFAULT_LAYER_NAME)
-		, m_NrOfElementsInLayers(1)		
+		, m_Entered(false)
+		, m_Exited(true)
+		, m_OnEnter(nullptr)
+		, m_OnStay(nullptr)
+		, m_OnExit(nullptr)
 	{
+		m_Layers.amount = 1;
+		m_Layers.elements = new tstring[1];
+		m_Layers.elements[0] = DEFAULT_LAYER_NAME;
+
+		SetVisible(false);
 	}
 
 	BaseColliderComponent::BaseColliderComponent(const tstring* layers, uint8 n)
 		: BaseComponent()
 		, m_bIsTrigger(false)
 		, m_bIsStatic(false)
-		, m_Layers(layers)
-		, m_NrOfElementsInLayers(n)
+		, m_Entered(false)
+		, m_Exited(true)
+		, m_OnEnter(nullptr)
+		, m_OnStay(nullptr)
+		, m_OnExit(nullptr)
 	{
-		
+		m_Layers.amount = n;
+		m_Layers.elements = new tstring[m_Layers.amount];
+		for(uint8 i = 0; i < m_Layers.amount; ++i)
+		{
+			m_Layers.elements[i] = layers[i];
+		}
+
+		SetVisible(false);
 	}
 
 	BaseColliderComponent::~BaseColliderComponent()
 	{
+		SceneManager::GetInstance()->GetActiveScene()->GetCollisionManager()->RemoveComponent(this);
+		delete[] m_Layers.elements;
 	}
 
 	void BaseColliderComponent::InitializeComponent()
@@ -46,6 +69,49 @@ namespace star
 		and by the force he moves and rotates a little bit. 
 		IN this update we’ll handle that. 
 		*/
+		/*if(!m_bIsStatic && !m_bIsTrigger)
+		{
+
+		}*/
+	}
+
+	void BaseColliderComponent::SetOnEnterCallback(Callback onEnter)
+	{
+		m_OnEnter = onEnter;
+	}
+
+	void BaseColliderComponent::SetOnStayCallback(Callback onStay)
+	{
+		m_OnStay = onStay;
+	}
+
+	void BaseColliderComponent::SetOnExitCallback(Callback onExit)
+	{
+		m_OnExit = onExit;
+	}
+
+	void BaseColliderComponent::TriggerOnEnter()
+	{
+		if(m_OnEnter)
+		{
+			m_OnEnter();		
+		}
+	}
+
+	void BaseColliderComponent::TriggerOnStay()
+	{
+		if(m_OnStay)
+		{
+			m_OnStay();
+		}
+	}
+
+	void BaseColliderComponent::TriggerOnExit()
+	{
+		if(m_OnExit)
+		{
+			m_OnExit();
+		}
 	}
 
 	void BaseColliderComponent::Draw()
@@ -73,9 +139,35 @@ namespace star
 		return m_bIsStatic;
 	}
 
+	void BaseColliderComponent::SetEntered(bool hasEntered)
+	{
+		m_Entered = hasEntered;
+	}
+
+	bool BaseColliderComponent::GetEntered() const
+	{
+		return m_Entered;
+	}
+
+	void BaseColliderComponent::SetExited(bool hasLeft)
+	{
+		m_Exited = hasLeft;
+	}
+
+	bool BaseColliderComponent::GetExited() const
+	{
+		return m_Exited;
+	}
+
+	const PointerArray<tstring> & BaseColliderComponent::GetLayers() const
+	{
+		return m_Layers;
+	}
+
 	bool BaseColliderComponent::RectangleCircleCollision(
 		const RectangleColliderComponent* rect, 
-		const CircleColliderComponent* circle) const
+		const CircleColliderComponent* circle
+) const
 	{
 		Rect realRect = rect->GetCollisionRect();
 		float32 radius = circle->GetRealRadius();
@@ -108,34 +200,25 @@ namespace star
 
 	vec2 BaseColliderComponent::FindClosestPointToOOBB(
 		const vec2& point, 
-		const RectangleColliderComponent* oobb) const
+		const RectangleColliderComponent* oobb
+		) const
 	{
 		//http://notmagi.me/closest-point-on-line-aabb-and-obb-to-point/
 		vec2 pos = oobb->GetCenterPoint();
+		Rect rect = oobb->GetCollisionRect();
 		vec2 distVec = point - pos;
-		vec2 u0 = oobb->GetOrientatedUnitVecX();
+		vec2 width = rect.GetRightBottom() - rect.GetLeftBottom();
+		vec2 height = rect.GetLeftTop() - rect.GetLeftBottom();
+		vec2 u0(0,0);
+		Normalize(width, u0);
 		vec2 u1(-u0.y , u0.x);
 		float32 distance = Dot(distVec, u0);
-		float32 halfWidth = oobb->GetCollisionRectWidth() / 2.0f;
-		if(distance > halfWidth)
-		{
-			distance = halfWidth;
-		}
-		else if(distance < -halfWidth)
-		{
-			distance = -halfWidth;
-		}
+		float32 halfWidth = Mag(width) / 2.0f;
+		Clamp(distance, -halfWidth, halfWidth);
 		pos += u0 * distance;
 		distance = Dot(distVec, u1);
-		float32 halfHeight = oobb->GetCollisionRectHeight() / 2.0f;
-		if(distance > halfHeight)
-		{
-			distance = halfHeight;
-		}
-		else if(distance < -halfHeight)
-		{
-			distance = -halfHeight;
-		}
+		float32 halfHeight = Mag(height) / 2.0f;
+		Clamp(distance, -halfHeight, halfHeight);
 		pos += u1 * distance;
 		return pos;
 	}
