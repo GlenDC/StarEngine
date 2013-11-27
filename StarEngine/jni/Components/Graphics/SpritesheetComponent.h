@@ -10,7 +10,7 @@ namespace star
 	class SpritesheetComponent final : public SpriteComponent
 	{
 	public:
-		SpritesheetComponent(const tstring& filePath, const tstring& spriteName, const tstring & spritesheet, bool isHUD = false);
+		SpritesheetComponent(const tstring& filePath, const tstring& spriteName, const tstring & spritesheet);
 		~SpritesheetComponent();
 
 		void Update(const Context& context);
@@ -36,6 +36,8 @@ namespace star
 
 		int32 GetFramesHorizontal() const;
 		int32 GetFramesVertical() const;
+		int32 GetWidth() const;
+		int32 GetHeight() const;
 
 		void SetCallbackAnimations(const std::function<void()> & callback);
 

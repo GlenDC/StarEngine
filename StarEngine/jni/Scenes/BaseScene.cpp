@@ -12,14 +12,17 @@
 
 namespace star 
 {
+	bool BaseScene::CULLING_IS_ENABLED = true;
+
 	BaseScene::BaseScene(const tstring & name)
 		: m_GestureManagerPtr(nullptr)
 		, m_CollisionManagerPtr(nullptr)
 		, m_Objects()
+		, m_Garbage()
 		, m_pDefaultCamera(nullptr)
 		, m_CullingOffsetX(0)
 		, m_CullingOffsetY(0)
-		, m_Initialized(false) 
+		, m_Initialized(false)
 		, m_Name(name)
 	{
 		m_pStopwatch = std::make_shared<Stopwatch>();
@@ -44,7 +47,11 @@ namespace star
 		{
 			CreateObjects();
 
-			m_pDefaultCamera = new BaseCamera();
+			if(m_pDefaultCamera == nullptr)
+			{
+				m_pDefaultCamera = new BaseCamera();
+				AddObject(m_pDefaultCamera);
+			}
 
 			m_Initialized = true;
 			for(auto object : m_Objects)
@@ -57,6 +64,7 @@ namespace star
 
 	void BaseScene::BaseAfterInitializedObjects()
 	{
+		SetActiveCamera(m_pDefaultCamera);
 		AfterInitializedObjects();
 	}
 
@@ -73,23 +81,38 @@ namespace star
 
 	void BaseScene::BaseUpdate(const Context& context)
 	{	
-		m_pStopwatch->Update(context);
+		CollectGarbage();
 
+		m_pStopwatch->Update(context);
+		
 		for(auto object : m_Objects)
 		{
 			object->BaseUpdate(context);
 		}
-
 		Update(context);
+		//[COMMENT] Updating the collisionManager before the objects or here?
+		//			If i do it before the objects, there is the problem that
+		//			the objects won't be translated correctly...
+		//			So i think here is best, unless somebody proves me wrong
+		m_CollisionManagerPtr->Update(context);
 	}
 
 	void BaseScene::BaseDraw()
 	{
 		for(auto object : m_Objects)
 		{
-			if(CheckCulling(object))
+			if(!CULLING_IS_ENABLED ||
+				(object->IsVisible() && CheckCulling(object)))
 			{
 				object->BaseDraw();
+			}
+			for(auto child : object->GetChildren())
+			{
+				if(!CULLING_IS_ENABLED ||
+					(child->IsVisible() && CheckCulling(child)))
+				{
+					child->BaseDraw();
+				}
 			}
 		}
 		Draw(); 
@@ -128,6 +151,30 @@ namespace star
 			m_Objects.push_back(object);
 			object->SetScene(this);
 		}
+		else
+		{
+			Logger::GetInstance()->Log(LogLevel::Warning,
+				_T("BaseScene::AddObject: \
+				   Trying to add a duplicate object."));
+		}
+	}
+
+	void BaseScene::AddObject(Object * object, const tstring & name)
+	{
+		auto it = std::find(m_Objects.begin(), m_Objects.end(), object);
+		if(it == m_Objects.end())
+		{
+			object->SetName(name);
+			m_Objects.push_back(object);
+			object->SetScene(this);
+		}
+		else
+		{
+			Logger::GetInstance()->Log(LogLevel::Warning,
+				_T("BaseScene::AddObject: \
+				   Trying to add a duplicate object '")
+				   + name + _T("'."));
+		}
 	}
 
 	void BaseScene::RemoveObject(Object * object)
@@ -135,8 +182,139 @@ namespace star
 		auto it = std::find(m_Objects.begin(), m_Objects.end(), object);
 		if(it != m_Objects.end())
 		{
-			m_Objects.erase(it);
+			m_Garbage.push_back(object);
 			object->UnsetScene();
+		}
+		else
+		{
+			Logger::GetInstance()->Log(LogLevel::Warning,
+				_T("BaseScene::RemoveObject: \
+				   Trying to remove an unknown object."));
+		}
+	}
+	
+	void BaseScene::RemoveObject(const tstring & name)
+	{
+		for(auto object : m_Objects)
+		{
+			if(object->CompareName(name))
+			{
+				RemoveObject(object);
+				return;
+			}
+		}
+		Logger::GetInstance()->Log(LogLevel::Warning,
+				_T("BaseScene::RemoveObject: \
+				   Trying to remove an unknown object '")
+				   + name + _T("'."));
+	}
+
+	Object * BaseScene::GetObjectByName(const tstring & name)
+	{
+		for(auto object : m_Objects)
+		{
+			if(object->CompareName(name))
+			{
+				return object;
+			}
+		}
+		Logger::GetInstance()->Log(LogLevel::Warning,
+				_T("BaseScene::GetObjectByName: \
+				   Trying to get an unknown object '")
+				   + name + _T("'."));
+		return nullptr;
+	}
+
+	void BaseScene::SetObjectFrozen(const tstring & name, bool freeze)
+	{
+		for(auto object : m_Objects)
+		{
+			if(object->CompareName(name))
+			{
+				object->Freeze(freeze);
+				return;
+			}
+		}
+		Logger::GetInstance()->Log(LogLevel::Warning,
+				_T("BaseScene::SetObjectFrozen: \
+				   Trying to (un)freeze an unknown object '")
+				   + name + _T("'."));
+	}
+
+	void BaseScene::SetObjectDisabled(const tstring & name, bool disabled)
+	{
+		for(auto object : m_Objects)
+		{
+			if(object->CompareName(name))
+			{
+				object->SetDisabled(disabled);
+				return;
+			}
+		}
+		Logger::GetInstance()->Log(LogLevel::Warning,
+				_T("BaseScene::SetObjectDisabled: \
+				   Trying to enable/disable an unknown object '")
+				   + name + _T("'."));
+	}
+
+	void BaseScene::SetObjectVisible(const tstring & name, bool visible)
+	{
+		for(auto object : m_Objects)
+		{
+			if(object->CompareName(name))
+			{
+				object->SetVisible(visible);
+				return;
+			}
+		}
+		Logger::GetInstance()->Log(LogLevel::Warning,
+				_T("BaseScene::SetObjectVisible: \
+				   Trying to (un)hide an unknown object '")
+				   + name + _T("'."));
+	}
+
+	void BaseScene::SetGroupFrozen(const tstring & tag, bool visible)
+	{
+		for(auto object : m_Objects)
+		{
+			if(object->CompareGroupTag(tag))
+			{
+				object->Freeze(visible);
+			}
+		}
+	}
+
+	void BaseScene::SetGroupDisabled(const tstring & tag, bool visible)
+	{
+		for(auto object : m_Objects)
+		{
+			if(object->CompareGroupTag(tag))
+			{
+				object->SetDisabled(visible);
+			}
+		}
+	}
+
+	void BaseScene::SetGroupVisible(const tstring & tag, bool visible)
+	{
+		for(auto object : m_Objects)
+		{
+			if(object->CompareGroupTag(tag))
+			{
+				object->SetVisible(visible);
+			}
+		}
+	}
+
+	void BaseScene::GetGroup(const tstring & tag, std::vector<Object*> & group)
+	{
+		group.clear();
+		for(auto object : m_Objects)
+		{
+			if(object->CompareGroupTag(tag))
+			{
+				group.push_back(object);
+			}
 		}
 	}
 
@@ -161,6 +339,16 @@ namespace star
 	{
 		return m_pDefaultCamera;
 	}
+
+	void BaseScene::SetCullingIsEnabled(bool enabled)
+	{
+		CULLING_IS_ENABLED = enabled;
+	}
+
+	bool BaseScene::IsCullingEnabled()
+	{
+		return CULLING_IS_ENABLED;
+	}
 	
 	std::shared_ptr<Stopwatch> BaseScene::GetStopwatch() const
 	{
@@ -179,41 +367,31 @@ namespace star
 
 	bool BaseScene::CheckCulling(Object* object)
 	{
-		pos objectPos = object->GetTransform()->GetWorldPosition();
 		pos camPos = m_pDefaultCamera->GetTransform()->GetWorldPosition();
-		float32 xPos = (camPos.pos2D().x) * ((star::ScaleSystem::GetInstance()->GetWorkingResolution().x) / 2.0f);
-		float32 yPos = (camPos.pos2D().y) * ((star::ScaleSystem::GetInstance()->GetWorkingResolution().y) / 2.0f); 
+
+		float32 xPos = camPos.pos2D().x *
+			((star::ScaleSystem::GetInstance()->GetWorkingResolution().x) / 2.0f);
+		float32 yPos = camPos.pos2D().y *
+			((star::ScaleSystem::GetInstance()->GetWorkingResolution().y) / 2.0f); 
+
 		int32 screenWidth = GraphicsManager::GetInstance()->GetScreenWidth();
 		int32 screenHeight = GraphicsManager::GetInstance()->GetScreenHeight();
-		SpriteComponent* sprite = object->GetComponent<SpriteComponent>();
-		SpritesheetComponent* spritesheet = object->GetComponent<SpritesheetComponent>();
-		if(sprite == nullptr && spritesheet == nullptr)
+
+		const auto & objComponents = object->GetComponents();
+		for ( auto component : objComponents)
 		{
-			return false;
+			if(component->CheckCulling(
+				xPos - m_CullingOffsetX,
+				xPos + screenWidth + m_CullingOffsetX,
+				yPos + screenHeight + m_CullingOffsetY,
+				yPos - m_CullingOffsetY
+				))
+			{
+				return true;
+			}
 		}
 
-		int32 spriteWidth;
-		int32 spriteHeight;
-
-		if(sprite != nullptr)
-		{
-			spriteWidth = int32(float32(sprite->GetWidth()) * object->GetTransform()->GetWorldScale().x);
-			spriteHeight = int32(float32(sprite->GetHeight()) * object->GetTransform()->GetWorldScale().y);
-		}
-		if(spritesheet != nullptr)
-		{
-			spriteWidth = int32(float32(spritesheet->GetWidth()) * object->GetTransform()->GetWorldScale().x);
-			spriteHeight = int32(float32(spritesheet->GetHeight()) * object->GetTransform()->GetWorldScale().y);
-		}
-
-		if(	objectPos.x > xPos + screenWidth + m_CullingOffsetX ||
-			objectPos.x + spriteWidth < xPos - m_CullingOffsetX ||
-			objectPos.y > yPos + screenHeight + m_CullingOffsetY ||
-			objectPos.y + spriteHeight < yPos - m_CullingOffsetY)
-		{
-			return false;
-		}
-		return true;
+		return false;
 	}
 
 	void BaseScene::SetCullingOffset(int32 offset)
@@ -226,5 +404,18 @@ namespace star
 	{
 		m_CullingOffsetX = offsetX;
 		m_CullingOffsetY = offsetY;
+	}
+
+	void BaseScene::CollectGarbage()
+	{
+		for(auto elem : m_Garbage)
+		{
+			auto it = std::find(m_Objects.begin(), m_Objects.end(), elem);
+			ASSERT(it != m_Objects.end(), _T("BaseScene::CollectGarbage: Trying to delete unknown object"));
+			m_Objects.erase(it);
+			delete elem;
+		}
+		m_Garbage.clear();
+		
 	}
 }

@@ -5,17 +5,19 @@
 
 namespace star
 {
-	BaseComponent::BaseComponent():
-		m_pParentObject(nullptr),
-		m_bInitialized(false),
-		m_bIsEnabled(true)
+	BaseComponent::BaseComponent()
+		: m_pParentObject(nullptr)
+		, m_bInitialized(false)
+		, m_bIsEnabled(true)
+		, m_bIsVisible(true)
 	{
 	}
 
-	BaseComponent::BaseComponent(Object* parent):
-		m_pParentObject(parent),
-		m_bInitialized(false),
-		m_bIsEnabled(true)
+	BaseComponent::BaseComponent(Object* parent)
+		: m_pParentObject(parent)
+		, m_bInitialized(false)
+		, m_bIsEnabled(true)
+		, m_bIsVisible(true)
 	{
 	}
 
@@ -32,26 +34,24 @@ namespace star
 #endif
 			return;
 		}
-		InitializeComponent();
 		m_bInitialized = true;
+		InitializeComponent();
 	}
 
 	void BaseComponent::BaseUpdate(const Context& context)
 	{
-		if(!m_bIsEnabled)
+		if(m_bIsEnabled)
 		{
-			return;
+			Update(context);
 		}
-		Update(context);
 	}
 
 	void BaseComponent::BaseDraw()
 	{
-		if(!m_bIsEnabled)
+		if(m_bIsEnabled && m_bIsVisible)
 		{
-			return;
+			Draw();
 		}
-		Draw();
 	}
 	
 	bool BaseComponent::IsInitialized() const
@@ -79,6 +79,16 @@ namespace star
 		 return m_pParentObject->GetComponent<TransformComponent>();
 	}
 
+	bool BaseComponent::CheckCulling(
+		float left,
+		float right,
+		float top,
+		float bottom
+		) const
+	{
+		return false;
+	}
+
 	void BaseComponent::SetEnabled(bool bEnabled)
 	{
 		m_bIsEnabled = bEnabled;
@@ -88,4 +98,15 @@ namespace star
 	{
 		return m_bIsEnabled;
 	}
+
+	void BaseComponent::SetVisible(bool bVisible)
+	{
+		m_bIsVisible = bVisible;
+	}
+
+	bool BaseComponent::IsVisible() const
+	{
+		return m_bIsVisible;
+	}
+
 }

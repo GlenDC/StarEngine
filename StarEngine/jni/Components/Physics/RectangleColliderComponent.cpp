@@ -76,11 +76,12 @@ namespace star
 			if(spriteComp)
 			{
 				ASSERT(spriteComp->IsInitialized(),_T("First add the spriteComponent and then the rectColliderComp"));
-				m_CollisionRect.SetPoints(vec2(0,0),
+				m_CollisionRect.SetPoints(
+					vec2(0, 0),
 					vec2(spriteComp->GetWidth(), 0), 
 					vec2(0, spriteComp->GetHeight()), 
-					vec2(spriteComp->GetWidth(), 
-						spriteComp->GetHeight()));
+					vec2(spriteComp->GetWidth(), spriteComp->GetHeight())
+					);
 			}
 			else
 			{
@@ -91,7 +92,7 @@ namespace star
 			}
 		}
 
-		COLLISION_MANAGER->AddComponent(this, m_Layers, m_NrOfElementsInLayers);
+		COLLISION_MANAGER->AddComponent(this, m_Layers.elements, m_Layers.amount);
 	}
 
 	bool RectangleColliderComponent::CollidesWithPoint(const vec2& point) const
@@ -189,16 +190,10 @@ namespace star
 		}
 	}
 
-	void RectangleColliderComponent::CollidesWith(const BaseColliderComponent* other) const
+	bool RectangleColliderComponent::CollidesWith(const BaseColliderComponent* other) const
 	{
-		if(other == nullptr)
-		{
-			Logger::GetInstance()->
-				Log(LogLevel::Warning, _T("Checking Collision with a nullptr!"));
-			Logger::GetInstance()->
-				Log(LogLevel::Warning, _T("Make sure the collider exists!"));
-			return;
-		}
+		ASSERT(other != nullptr, _T("RectangleColliderComponent::CollidesWith: \
+			   The collierComponent to check is a nullptr"));
 		const CircleColliderComponent* otherCircleComp = 
 			dynamic_cast<const CircleColliderComponent*>(other);
 		const RectangleColliderComponent* otherRectComp = 
@@ -209,35 +204,27 @@ namespace star
 			Rect thisRect = GetCollisionRect();
 			Rect otherRect = otherRectComp->GetCollisionRect();
 			//Check to perform AABB or OOBB CollisionCheck!
-			if(GetTransform()->GetWorldRotation() == 0.0f && 
+			if(	GetTransform()->GetWorldRotation() == 0.0f && 
 				otherRectComp->GetTransform()->GetWorldRotation() == 0.0f)
 			{
-				if(AABBRectangleRectangleCollision(thisRect, otherRect))
-				{
-					Logger::GetInstance()->Log(LogLevel::Info, _T("AABB - Collision Detected"));
-				}
+				return AABBRectangleRectangleCollision(thisRect, otherRect);
 			}
 			else
 			{
-				if(OOBBRectangleRectangleCollision(thisRect, otherRect))
-				{
-					Logger::GetInstance()->Log(LogLevel::Info, _T("OOBB - Collision Detected"));
-				}
+				return OOBBRectangleRectangleCollision(thisRect, otherRect);
 			}
 			
 		}
 		else if(otherCircleComp != nullptr)
 		{
 
-			if(RectangleCircleCollision(this, otherCircleComp))
-			{
-
-			}
+			return RectangleCircleCollision(this, otherCircleComp);
 		}
 		else
 		{
 			Logger::GetInstance()->
 				Log(LogLevel::Warning, _T("Checking collision with an unknown collider type!"));
+			return false;
 		}
 	}
 
