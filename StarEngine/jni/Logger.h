@@ -14,9 +14,9 @@ namespace star
 
 	struct Context;
 
-    class Logger final 
+	class Logger final 
 	{
-    public:
+	public:
 		~Logger();
 		static Logger* GetInstance();
 
@@ -28,6 +28,7 @@ namespace star
 		void Update(const Context & context);
 
 		void Log(LogLevel level, const tstring& pMessage, const tstring& tag = ANDROID_LOG_TAG);
+		void Log(bool assert, const tstring& pMessage, const tstring& tag = ANDROID_LOG_TAG);
 		void _CheckGlError(const schar* file, int32 line);
 		#define CheckGlError() _CheckGlError(__FILE__,__LINE__);
 
@@ -53,5 +54,5 @@ namespace star
 		Logger(Logger&& t);
 		Logger& operator=(const Logger& t);
 		Logger& operator=(Logger&& t);
-    };
+	};
 }

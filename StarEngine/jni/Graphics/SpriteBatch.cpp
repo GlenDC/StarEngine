@@ -17,7 +17,6 @@ namespace star
 	SpriteBatch::SpriteBatch(void):
 		m_SpriteQueue(),
 		m_HudSpriteQueue(),
-		m_UberHudSpriteQueue(),
 		m_TextBackQueue(),
 		m_TextFrontQueue(),
 		m_HUDTextQueue(),
@@ -79,7 +78,6 @@ namespace star
 	{
 		m_SpriteQueue.clear();
 		m_HudSpriteQueue.clear();
-		m_UberHudSpriteQueue.clear();
 		m_TextBackQueue.clear();
 		m_TextFrontQueue.clear();
 		m_HUDTextQueue.clear();
@@ -127,8 +125,6 @@ namespace star
 		m_UvCoordBuffer.clear();
 		m_CurrentSprite = 0;
 		m_CurrentHudSprite = 0;
-
-		FlushSprites(m_UberHudSpriteQueue);
 
 		End();
 	}
@@ -178,30 +174,34 @@ namespace star
 		
 			for(int32 j = 0; j < ((batchSize/4)); ++j)
 			{
+				const auto & sprite = spriteQueue[m_CurrentSprite + j];
+
 				//Set attributes and buffers
 				glVertexAttribPointer(ATTRIB_VERTEX, 3, GL_FLOAT,0,0, 
 					reinterpret_cast<GLvoid*>(&m_VertexBuffer[12*j]));
 				glVertexAttribPointer(ATTRIB_UV, 2, GL_FLOAT, 0, 0, 
 					reinterpret_cast<GLvoid*>(&m_UvCoordBuffer[8*j]));
+
+				GLint s_colorId = glGetUniformLocation(m_Shader.GetID(), "colorMultiplier");
+				glUniform4f(
+					s_colorId,
+					sprite.colorMultiplier.r,
+					sprite.colorMultiplier.g,
+					sprite.colorMultiplier.b,
+					sprite.colorMultiplier.a
+					);
 			
-				if(spriteQueue[m_CurrentSprite + j].bIsHUD)
-				{
-					glUniformMatrix4fv(glGetUniformLocation(m_Shader.GetID(),"MVP"),
-						1, GL_FALSE, ToPointerValue(
-							Transpose(spriteQueue[m_CurrentSprite + j].transform) * 
-							scaleMat *
-							GraphicsManager::GetInstance()->GetProjectionMatrix()
+				glUniformMatrix4fv(glGetUniformLocation(m_Shader.GetID(),"MVP"),
+					1, GL_FALSE, ToPointerValue(
+						Transpose(sprite.transform) * 
+						scaleMat *
+						(sprite.bIsHUD ?
+							GraphicsManager::GetInstance()->GetProjectionMatrix() :
+							GraphicsManager::GetInstance()->GetViewProjectionMatrix()
 							)
-						);
-				}
-				else
-				{
-					glUniformMatrix4fv(glGetUniformLocation(m_Shader.GetID(),"MVP"),
-						1, GL_FALSE, ToPointerValue(
-							Transpose(spriteQueue[m_CurrentSprite + j].transform) *
-							scaleMat *
-							GraphicsManager::GetInstance()->GetViewProjectionMatrix()));
-				}
+						)
+					);
+
 				glDrawArrays(GL_TRIANGLE_STRIP,batchStart,4);
 			}			
 		
@@ -219,15 +219,28 @@ namespace star
 	
 	void SpriteBatch::FlushText(const TextDesc& textDesc)
 	{
-		FlushText(textDesc.Text, textDesc.Fontname, textDesc.TransformComp, textDesc.TextColor);
+		FlushText(
+			textDesc.Text,
+			textDesc.Fontname,
+			textDesc.VerticalSpacing, 
+			textDesc.TransformComp,
+			textDesc.TextColor,
+			textDesc.IsHUDText);
 	}
 
-	void SpriteBatch::FlushText(const std::vector<sstring>& text, 
-		const tstring& fontname,TransformComponent* transform,const Color& color)
+	void SpriteBatch::FlushText(
+		const tstring & text, 
+		const tstring& fontname,
+		int32 spacing, 
+		TransformComponent* transform,
+		const Color& color,
+		bool isHUD
+		)
 	{
 		if(text.size() == 0)
 		{
-			Logger::GetInstance()->Log(LogLevel::Warning,	_T("FontManager::DrawText: Drawing an empty string..."));
+			Logger::GetInstance()->Log(LogLevel::Warning,
+				_T("FontManager::DrawText: Drawing an empty string..."));
 			return;
 		}
 		
@@ -258,13 +271,18 @@ namespace star
 
 		int32 offsetX(0);
 		int32 offsetY(0);
-		for(auto it = text.begin(); it != text.end() ; ++it)
-		{
-			const schar *start_line=it->c_str();
-			for(int32 i = 0 ; start_line[i] != 0 ; ++i) 
-			{
 
-				glBindTexture(GL_TEXTURE_2D,textures[ start_line[i] ]);
+		const tchar *start_line = text.c_str();
+		for(int32 i = 0 ; start_line[i] != 0 ; ++i) 
+		{
+			if(start_line[i] == _T('\n'))
+			{
+				offsetY -= curfont.GetMaxLetterHeight() + spacing;
+				offsetX = 0;	
+			}
+			else
+			{
+				glBindTexture(GL_TEXTURE_2D, textures[start_line[i]]);
 
 				//Set attributes and buffers
 				glVertexAttribPointer(ATTRIB_VERTEX, 3, GL_FLOAT,0,0,
@@ -276,9 +294,13 @@ namespace star
 				
 				if(start_line[i] != 0)
 				{
-					int32 offset = curfont.GetMaxLetterHeight() - tempsizes[start_line[i]].y;
 					offsetTrans = Translate(
-						vec3(offsetX, offsetY - curfont.GetMaxLetterHeight() - offset, 0));
+						vec3(
+							offsetX,
+							offsetY + tempsizes[start_line[i]].y,
+							0
+							)
+						);
 					offsetX += tempsizes[start_line[i]].x;
 				}
 				else
@@ -292,14 +314,15 @@ namespace star
 					ToPointerValue(
 						Transpose(world) *
 						scaleMat *
-						GraphicsManager::GetInstance()->GetViewProjectionMatrix()
+						(isHUD ?
+							GraphicsManager::GetInstance()->GetProjectionMatrix() :
+							GraphicsManager::GetInstance()->GetViewProjectionMatrix()
+							)
 						)
 					);
 				glDrawArrays(GL_TRIANGLE_STRIP,0,4);
 			}
-			offsetY -= curfont.GetMaxLetterHeight();
-			offsetX = 0;
-		}	
+		}
 
 		//Unbind attributes and buffers
 		glDisableVertexAttribArray(ATTRIB_VERTEX);
@@ -330,13 +353,9 @@ namespace star
 		}
 	}
 
-	void SpriteBatch::AddSpriteToQueue(const SpriteInfo& spriteInfo, bool bIsHud, bool m_bIsUberHUD)
+	void SpriteBatch::AddSpriteToQueue(const SpriteInfo& spriteInfo, bool bIsHud)
 	{
-		if(m_bIsUberHUD)
-		{
-			m_UberHudSpriteQueue.push_back(spriteInfo);
-		}
-		else if(bIsHud)
+		if(bIsHud)
 		{
 			m_HudSpriteQueue.push_back(spriteInfo);
 		}

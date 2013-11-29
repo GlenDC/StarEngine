@@ -75,23 +75,26 @@ namespace star
 			SpriteComponent* spriteComp = GetParent()->GetComponent<SpriteComponent>();
 			if(spriteComp)
 			{
-				ASSERT(spriteComp->IsInitialized(),_T("First add the spriteComponent and then the rectColliderComp"));
-				m_CollisionRect.SetPoints(vec2(0,0),
+				Logger::GetInstance()->Log(spriteComp->IsInitialized(),
+					_T("First add the spriteComponent and then the rectColliderComp"));
+				m_CollisionRect.SetPoints(
+					vec2(0, 0),
 					vec2(spriteComp->GetWidth(), 0), 
 					vec2(0, spriteComp->GetHeight()), 
-					vec2(spriteComp->GetWidth(), 
-						spriteComp->GetHeight()));
+					vec2(spriteComp->GetWidth(), spriteComp->GetHeight())
+					);
 			}
 			else
 			{
-				ASSERT(false, _T("If you use the default constructor of the RectangleColliderComponent()\n\
-								, make sure to also add a SpriteComponent or SpriteSheetComponent. \n\
-								If you don't need this, please specify a width and height in the constructor of \n\
-								the RectangleColliderComponent."));
+				Logger::GetInstance()->Log(false, 
+					_T("If you use the default constructor of the RectangleColliderComponent()\
+, make sure to also add a SpriteComponent or SpriteSheetComponent. \
+If you don't need this, please specify a width and height in the constructor of \
+the RectangleColliderComponent."));
 			}
 		}
 
-		COLLISION_MANAGER->AddComponent(this, m_Layers, m_NrOfElementsInLayers);
+		COLLISION_MANAGER->AddComponent(this, m_Layers.elements, m_Layers.amount);
 	}
 
 	bool RectangleColliderComponent::CollidesWithPoint(const vec2& point) const
@@ -126,7 +129,8 @@ namespace star
 
 	bool RectangleColliderComponent::CollidesWithLine(const vec2& point1, const vec2& point2) const
 	{
-		ASSERT(point1 != point2, _T("Please provide 2 different points to make a line!"));
+		Logger::GetInstance()->Log(point1 != point2,
+			_T("Please provide 2 different points to make a line!"));
 
 		if(GetTransform()->GetWorldRotation() == 0.0f && (point1.x == point2.x || point1.y == point2.y))
 		{
@@ -189,16 +193,10 @@ namespace star
 		}
 	}
 
-	void RectangleColliderComponent::CollidesWith(const BaseColliderComponent* other) const
+	bool RectangleColliderComponent::CollidesWith(const BaseColliderComponent* other) const
 	{
-		if(other == nullptr)
-		{
-			Logger::GetInstance()->
-				Log(LogLevel::Warning, _T("Checking Collision with a nullptr!"));
-			Logger::GetInstance()->
-				Log(LogLevel::Warning, _T("Make sure the collider exists!"));
-			return;
-		}
+		Logger::GetInstance()->Log(other != nullptr, _T("RectangleColliderComponent::CollidesWith: \
+The collierComponent to check is a nullptr"));
 		const CircleColliderComponent* otherCircleComp = 
 			dynamic_cast<const CircleColliderComponent*>(other);
 		const RectangleColliderComponent* otherRectComp = 
@@ -209,35 +207,27 @@ namespace star
 			Rect thisRect = GetCollisionRect();
 			Rect otherRect = otherRectComp->GetCollisionRect();
 			//Check to perform AABB or OOBB CollisionCheck!
-			if(GetTransform()->GetWorldRotation() == 0.0f && 
+			if(	GetTransform()->GetWorldRotation() == 0.0f && 
 				otherRectComp->GetTransform()->GetWorldRotation() == 0.0f)
 			{
-				if(AABBRectangleRectangleCollision(thisRect, otherRect))
-				{
-					Logger::GetInstance()->Log(LogLevel::Info, _T("AABB - Collision Detected"));
-				}
+				return AABBRectangleRectangleCollision(thisRect, otherRect);
 			}
 			else
 			{
-				if(OOBBRectangleRectangleCollision(thisRect, otherRect))
-				{
-					Logger::GetInstance()->Log(LogLevel::Info, _T("OOBB - Collision Detected"));
-				}
+				return OOBBRectangleRectangleCollision(thisRect, otherRect);
 			}
 			
 		}
 		else if(otherCircleComp != nullptr)
 		{
 
-			if(RectangleCircleCollision(this, otherCircleComp))
-			{
-
-			}
+			return RectangleCircleCollision(this, otherCircleComp);
 		}
 		else
 		{
 			Logger::GetInstance()->
 				Log(LogLevel::Warning, _T("Checking collision with an unknown collider type!"));
+			return false;
 		}
 	}
 
@@ -380,7 +370,8 @@ namespace star
 
 	float32 RectangleColliderComponent::CalculateMinimum(const float32* vec, uint8 size) const
 	{
-		ASSERT(size != 0, _T("You can't calculate the minimum of 0 elements!"));
+		Logger::GetInstance()->Log(size != 0,
+			_T("You can't calculate the minimum of 0 elements!"));
 		float32 minimum = vec[0];
 		for(int32 i = 1; i < size; ++i)
 		{
@@ -394,7 +385,8 @@ namespace star
 
 	float32 RectangleColliderComponent::CalculateMaximum(const float32* vec, uint8 size) const
 	{
-		ASSERT(size != 0, _T("You can't calculate the maximum of 0 elements!"));
+		Logger::GetInstance()->Log(size != 0, 
+			_T("You can't calculate the maximum of 0 elements!"));
 		float32 maximum = vec[0];
 		for(int32 i = 1; i < size; ++i)
 		{

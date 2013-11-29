@@ -18,7 +18,7 @@ namespace star
 	}
 
 	void CollisionManager::AddComponent(
-		const BaseColliderComponent* component, 
+		BaseColliderComponent* component, 
 		const tstring* layers, 
 		uint8 n)
 	{
@@ -32,10 +32,8 @@ namespace star
 				auto vecIt = std::find((*it).second.begin(), (*it).second.end(), component);
 				if(vecIt != (*it).second.end())
 				{
-					ASSERT(false, _T("CollisionManager::AddComponent \n\
-						The component you tried to add is already in the CollisionManager"));
-					Logger::GetInstance()->Log(LogLevel::Error, _T("CollisionManager::AddComponent \n\
-						The component you tried to add is already in the CollisionManager"));
+					Logger::GetInstance()->Log(false, _T("CollisionManager::AddComponent \
+The component you tried to add is already in the CollisionManager"));
 				}			
 				else
 				{
@@ -46,18 +44,17 @@ namespace star
 			else
 			{
 				m_CollisionMap.insert(
-					std::pair<tstring, std::vector<const BaseColliderComponent*>>(
-					layers[i],std::vector<const BaseColliderComponent*>()));
+					std::pair<tstring, std::vector<BaseColliderComponent*>>(
+					layers[i],std::vector<BaseColliderComponent*>()));
 				m_CollisionMap.at(layers[i]).push_back(component);
 			}
 		}
 	}
 
-	void CollisionManager::RemoveComponent(
-		const BaseColliderComponent* component, 
-		const tstring* layers, 
-		uint8 n)
+	void CollisionManager::RemoveComponent(const BaseColliderComponent* component)
 	{
+		const tstring* layers = component->GetLayers().elements;
+		uint8 n = component->GetLayers().amount;
 		for(uint8 i = 0; i < n; ++i)
 		{
 			auto it = m_CollisionMap.find(layers[i]);
@@ -75,18 +72,65 @@ namespace star
 				}
 				else
 				{
-					ASSERT(false, _T("CollisionManager::RemoveComponent \n\
-						The component you tried to remove is not in the CollisionManager"));
-					Logger::GetInstance()->Log(LogLevel::Error, _T("CollisionManager::RemoveComponent \n\
-						The component you tried to remove is not in the CollisionManager"));
+					Logger::GetInstance()->Log(false, _T("CollisionManager::RemoveComponent: \
+The component you tried to remove is not in the CollisionManager"));
+					Logger::GetInstance()->Log(LogLevel::Error, _T("CollisionManager::RemoveComponent: \
+The component you tried to remove is not in the CollisionManager"));
 				}
 			}
 			else
 			{
-				ASSERT(false, _T("CollisionManager::RemoveComponent \n\
-						The component you tried to remove is not in the CollisionManager"));
-				Logger::GetInstance()->Log(LogLevel::Error, _T("CollisionManager::RemoveComponent \n\
-						The component you tried to remove is not in the CollisionManager"));
+				Logger::GetInstance()->Log(false, _T("CollisionManager::RemoveComponent: \
+The component you tried to remove is not in the CollisionManager"));
+				Logger::GetInstance()->Log(LogLevel::Error, _T("CollisionManager::RemoveComponent: \
+The component you tried to remove is not in the CollisionManager"));
+			}
+		}
+	}
+
+	void CollisionManager::Update(const Context& context)
+	{
+		for(auto& key : m_CollisionMap)
+		{
+
+			for(auto iter1 = key.second.begin(); iter1 != key.second.end(); ++iter1)
+			{
+				for(auto iter2 = iter1 +1; iter2 != key.second.end(); ++iter2)
+				{
+					if(iter1 != iter2)
+					{
+						if((*iter1)->CollidesWith(*iter2))
+						{
+							if(!(*iter1)->GetEntered())
+							{
+								(*iter1)->SetEntered(true);
+								(*iter2)->SetEntered(true);
+								(*iter1)->SetExited(false);
+								(*iter2)->SetExited(false);
+								(*iter1)->TriggerOnEnter();
+								(*iter2)->TriggerOnEnter();
+								continue;
+							}
+							else
+							{
+								(*iter1)->TriggerOnStay();
+								(*iter2)->TriggerOnStay();
+							}
+						}
+						else
+						{
+							if(!(*iter1)->GetExited())
+							{
+								(*iter1)->SetEntered(false);
+								(*iter2)->SetEntered(false);
+								(*iter1)->SetExited(true);
+								(*iter2)->SetExited(true);
+								(*iter1)->TriggerOnExit();
+								(*iter2)->TriggerOnExit();
+							}
+						}
+					}
+				}
 			}
 		}
 	}
