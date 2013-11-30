@@ -22,7 +22,7 @@ namespace star
 			const tstring& name,
 			uint8 channel = 0
 			);
-		void LoadSoundEffect(
+		void LoadEffect(
 			const tstring& path,
 			const tstring& name,
 			uint8 channel = 0
@@ -34,7 +34,7 @@ namespace star
 			float32 volume,
 			uint8 channel = 0
 			);
-		void LoadSoundEffect(
+		void LoadEffect(
 			const tstring& path,
 			const tstring& name,
 			float32 volume,
@@ -44,47 +44,47 @@ namespace star
 		void PlayMusic(
 			const tstring& path,
 			const tstring& name,
-			uint8 channel = 0,
-			int32 loopTimes = 0
+			uint8 channel,
+			int32 loopTimes
 			);
 		void PlayMusic(
 			const tstring& name,
 			int32 loopTimes = 0
 			);
-		void PlaySoundEffect(
+		void PlayEffect(
 			const tstring& path,
 			const tstring& name,
-			uint8 channel = 0,
-			int32 loopTimes = 0
+			uint8 channel,
+			int32 loopTimes
 			);
-		void PlaySoundEffect(
+		void PlayEffect(
 			const tstring& name,
-			int32 loopTimes = 0.0f
+			int32 loopTimes = 0
 			);
 
 		void PlayMusic(
 			const tstring& path,
 			const tstring& name,
 			float32 volume,
-			uint8 channel = 0,
-			int32 loopTimes = 0
+			uint8 channel,
+			int32 loopTimes
 			);
 		void PlayMusic(
 			const tstring& name,
 			float32 volume,
-			int32 loopTimes = 0
+			int32 loopTimes
 			);
-		void PlaySoundEffect(
+		void PlayEffect(
 			const tstring& path,
 			const tstring& name,
 			float32 volume,
-			uint8 channel = 0,
-			int32 loopTimes = 0
+			uint8 channel,
+			int32 loopTimes
 			);
-		void PlaySoundEffect(
+		void PlayEffect(
 			const tstring& name,
 			float32 volume,
-			int32 loopTimes = 0.0f
+			int32 loopTimes
 			);
 
 		void AddToBackgroundQueue(const tstring& name);
@@ -122,9 +122,11 @@ namespace star
 		void IncreaseEffectVolume(const tstring& name, float32 volume);
 		void DecreaseEffectVolume(const tstring& name, float32 volume);
 
+		void MuteAllMusic(bool mute);
 		void SetMusicMuted(const tstring& name, bool muted);
 		bool IsMusicMuted(const tstring& name) const;
 
+		void MuteAllEffects(bool mute);
 		void SetEffectMuted(const tstring& name, bool muted);
 		bool IsEffectMuted(const tstring& name) const;
 
@@ -226,6 +228,9 @@ namespace star
 		SoundEffect* mCurrentSoundEffect;
 
 		float32 mVolume;
+
+		bool	mbMusicMuted,
+				mbEffectsMuted;
 
 #ifdef ANDROID
 		SLObjectItf mEngineObj;

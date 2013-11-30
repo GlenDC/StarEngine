@@ -30,12 +30,17 @@ namespace star
 			:Text()
 			,Fontname(EMPTY_STRING)
 			,TransformComp(nullptr)
-			,TextColor(Color::Black)
+			,TextColor(Color::White)
+			,VerticalSpacing(5)
+			,IsHUDText(false)
 		{}
-		std::vector<sstring> Text;
+		tstring Text;
 		tstring Fontname;
 		Color TextColor;
 		TransformComponent* TransformComp; 
+		int32 VerticalSpacing;
+		std::vector<int32> HorizontalTextOffset;
+		bool IsHUDText;
 	};
 
 	class FontManager final
@@ -45,13 +50,15 @@ namespace star
 
 		static FontManager * GetInstance();
 
-		bool LoadFont(const tstring& path, const tstring& name, int32 size);
+		bool LoadFont(const tstring& path, const tstring& name, uint32 size);
 		const Font& GetFont(const tstring& name);
 		bool DeleteFont(const tstring& name);
 		void EraseFonts();
 		bool DrawText(const tstring& text, const tstring& fontname,TransformComponent* transform, Color color = Color::Black);
 		bool DrawText(TextDesc textDesc);
 		void SplitIntoLines(std::vector<sstring> &list, const sstring &string);
+		void SetFontPath(const tstring & path);
+		const tstring & GetFontPath() const;
 	private:
 		//Data Members
 		static FontManager * mFontManager;
@@ -60,6 +67,8 @@ namespace star
 
 		std::map<tstring, Font> mFontList;
 		std::vector<tstring> mPathList;
+
+		tstring mFontPath;
 
 		Shader m_Shader;
 
