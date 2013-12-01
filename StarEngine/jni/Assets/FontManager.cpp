@@ -28,7 +28,8 @@ namespace star
 	}
 
 	FontManager::FontManager():
-		mLibrary(0)
+		mLibrary(0),
+		mFontPath(_T("Fonts/"))
 	{
 		auto error = FT_Init_FreeType(&mLibrary);
 		if(error)
@@ -67,7 +68,7 @@ namespace star
 		FT_Done_FreeType(mLibrary);
 	}
 
-	bool FontManager::LoadFont(const tstring& path, const tstring& name, int32 size)
+	bool FontManager::LoadFont(const tstring& path, const tstring& name, uint32 size)
 	{
 		if(mFontManager == nullptr)
 		{
@@ -76,13 +77,15 @@ namespace star
 
 		if(mFontList.find(name) != mFontList.end())
 		{
-			return false;
+			star::Logger::GetInstance()->Log(star::LogLevel::Info,
+				_T("Font Manager : Font ")+name+_T(" already exist, using that"));
+			return true;
 		}
 
-		star::Filepath filepath(_T("Fonts/"),path);
+		star::Filepath filepath(mFontPath, path);
 
 		Font tempfont;
-		if(tempfont.Init(filepath.GetAssetsPath(),size,mLibrary))
+		if(tempfont.Init(filepath.GetAssetsPath(), size, mLibrary))
 		{
 			mFontList[name] = tempfont;
 
@@ -109,14 +112,25 @@ namespace star
 	{
 		sstringstream stream(string);
 		sstring line;
-		while (std::getline(stream,line)){
+		while (std::getline(stream,line))
+		{
 			list.push_back(line);
 		}
 	}
 
-	const Font& FontManager::GetFont( const tstring& name )
+	void FontManager::SetFontPath(const tstring & path)
 	{
-		ASSERT(mFontList.find(name) != mFontList.end(),_T("No such font"));
+		mFontPath = path;
+	}
+
+	const tstring & FontManager::GetFontPath() const
+	{
+		return mFontPath;
+	}
+
+	const Font& FontManager::GetFont(const tstring& name)
+	{
+		Logger::GetInstance()->Log(mFontList.find(name) != mFontList.end(),_T("No such font"));
 		return mFontList[name];
 	}
 }

@@ -154,7 +154,9 @@ namespace star
 		, mNoChannelAssigned(true)
 #ifdef DESKTOP
 		, mIsMuted(false)
-		, mVolume(0)
+		, mVolume(1)
+#else
+		, mPath(EMPTY_STRING)
 #endif
 		, mChannel(0)
 		, mSoundVolume()
@@ -303,13 +305,15 @@ namespace star
 		SLVolumeItf volumeItf;
 		if(GetVolumeInterface(sound, player, &volumeItf))
 		{
+			volume /= 10.0f;
+			volume += 0.9f;
 			volume = Clamp(volume, 0.0f, 1.0f);
 			SLmillibel actualMillibelLevel, maxMillibelLevel;
 			SLresult result = (*volumeItf)->GetMaxVolumeLevel(
 					volumeItf,
 					&maxMillibelLevel
 					);
-			ASSERT(result == SL_RESULT_SUCCESS,
+			Logger::GetInstance()->Log(result == SL_RESULT_SUCCESS,
 					_T("Sound: Couldn't get the maximum volume level!"));
 			actualMillibelLevel = SLmillibel(
 					(1.0f - volume) *
@@ -319,7 +323,7 @@ namespace star
 				volumeItf,
 				actualMillibelLevel
 				);
-			ASSERT(result == SL_RESULT_SUCCESS,
+			Logger::GetInstance()->Log(result == SL_RESULT_SUCCESS,
 					_T("Sound: Couldn't set the volume!"));
 		}
 	}
@@ -340,7 +344,8 @@ namespace star
 					sound, SL_IID_VOLUME, pInterface
 					);
 				bool isOK = result == SL_RESULT_SUCCESS;
-				ASSERT(isOK, _T("Sound: Couldn't get the interface!"));
+				Logger::GetInstance()->Log(isOK,
+					_T("Sound: Couldn't get the interface!"));
 				return isOK;
 			}
 		}
@@ -360,13 +365,13 @@ namespace star
 					volumeItf,
 					&actualMillibelLevel
 					);
-			ASSERT(result == SL_RESULT_SUCCESS,
+			Logger::GetInstance()->Log(result == SL_RESULT_SUCCESS,
 					_T("Sound: Couldn't get the volume!"));
 			result = (*volumeItf)->GetMaxVolumeLevel(
 					volumeItf,
 					&maxMillibelLevel
 					);
-			ASSERT(result == SL_RESULT_SUCCESS,
+			Logger::GetInstance()->Log(result == SL_RESULT_SUCCESS,
 					_T("Sound: Couldn't get the maximum volume level!"));
 			float32 posMinVol = float32(SL_MILLIBEL_MIN) * -1.0f;
 			float32 volume =
@@ -389,7 +394,7 @@ namespace star
 			SLresult result = (*volumeItf)->SetMute(
 				volumeItf, SLboolean(muted)
 				);
-			ASSERT(result == SL_RESULT_SUCCESS,
+			Logger::GetInstance()->Log(result == SL_RESULT_SUCCESS,
 					_T("BaseSound::SetMuted: Couldn't set muted state!"));
 		}
 	}
@@ -406,7 +411,7 @@ namespace star
 			SLresult result = (*volumeItf)->GetMute(
 				volumeItf, &isMuted
 				);
-			ASSERT(result == SL_RESULT_SUCCESS,
+			Logger::GetInstance()->Log(result == SL_RESULT_SUCCESS,
 					_T("BaseSound::SetMuted: Couldn't get muted state!"));
 			return bool(isMuted);
 		}

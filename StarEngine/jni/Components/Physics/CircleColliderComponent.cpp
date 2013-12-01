@@ -10,8 +10,6 @@
 
 namespace star
 {
-#define COLLISION_MANAGER (SceneManager::GetInstance()->GetActiveScene()->GetCollisionManager())
-
 	CircleColliderComponent::CircleColliderComponent()
 		: BaseColliderComponent()
 		, m_Radius(0)
@@ -21,7 +19,9 @@ namespace star
 
 	}
 
-	CircleColliderComponent::CircleColliderComponent(const tstring* layers, uint8 n)
+	CircleColliderComponent::CircleColliderComponent(
+		const tstring* layers, 
+		uint8 n)
 		: BaseColliderComponent(layers, n)
 		, m_Radius(0)
 		, m_Offset()
@@ -38,7 +38,10 @@ namespace star
 	{
 	}
 
-	CircleColliderComponent::CircleColliderComponent(float32 radius, const tstring* layers, uint8 tag)
+	CircleColliderComponent::CircleColliderComponent(
+		float32 radius, 
+		const tstring* layers, 
+		uint8 tag)
 		: BaseColliderComponent(layers, tag)
 		, m_Radius(radius)
 		, m_Offset()
@@ -46,7 +49,9 @@ namespace star
 	{
 	}
 
-	CircleColliderComponent::CircleColliderComponent(float32 radius, const vec2& offset)
+	CircleColliderComponent::CircleColliderComponent
+		(float32 radius, 
+		const vec2& offset)
 		: BaseColliderComponent()
 		, m_Radius(radius)
 		, m_Offset(offset)
@@ -54,12 +59,15 @@ namespace star
 	{
 	}
 
-	CircleColliderComponent::CircleColliderComponent(float32 radius, const vec2& offset,
-		const tstring* layers, uint8 tag)
-			: BaseColliderComponent(layers, tag)
-			, m_Radius(radius)
-			, m_Offset(offset)
-			, m_bDefaultInitialized(false)
+	CircleColliderComponent::CircleColliderComponent(
+		float32 radius, 
+		const vec2& offset,
+		const tstring* layers, 
+		uint8 tag)
+		: BaseColliderComponent(layers, tag)
+		, m_Radius(radius)
+		, m_Offset(offset)
+		, m_bDefaultInitialized(false)
 	{
 	}
 
@@ -76,7 +84,8 @@ namespace star
 			SpriteComponent* spriteComp = GetParent()->GetComponent<SpriteComponent>();
 			if(spriteComp)
 			{
-				ASSERT(spriteComp->IsInitialized(),_T("First add the spriteComponent and then the rectColliderComp"));
+				Logger::GetInstance()->Log(spriteComp->IsInitialized(),
+					_T("First add the spriteComponent and then the rectColliderComp"));
 				if(spriteComp->GetWidth() > spriteComp->GetHeight())
 				{
 					m_Radius = float32(spriteComp->GetWidth() / 2.0f);
@@ -90,15 +99,17 @@ namespace star
 			}
 			else
 			{
-				ASSERT(false, _T("If you use the default constructor of the CircleColliderComponent()\n\
-								, make sure to also add a SpriteComponent or SpriteSheetComponent. \n\
-								If you don't need this, please specify a radius in the constructor of \n\
-								the CircleColliderComponent."));
+				Logger::GetInstance()->Log(false,
+					_T("If you use the default constructor of the CircleColliderComponent()\
+, make sure to also add a SpriteComponent or SpriteSheetComponent. \
+If you don't need this, please specify a radius in the constructor of \
+the CircleColliderComponent."));
 			}
 		}
-		ASSERT(m_Radius > 0, _T("Invalid Radius: Radius has to be > 0"));
+		Logger::GetInstance()->Log(m_Radius > 0, _T("Invalid Radius: Radius has to be > 0"));
 
-		COLLISION_MANAGER->AddComponent(this, m_Layers, m_NrOfElementsInLayers);
+		GetParent()->GetScene()->GetCollisionManager()->
+			AddComponent(this, m_Layers.elements, m_Layers.amount);
 	}
 
 	bool CircleColliderComponent::CollidesWithPoint(const vec2& point) const
@@ -107,7 +118,10 @@ namespace star
 		return (Mag(point - GetPosition()) <= GetRealRadius());
 	}
 
-	bool CircleColliderComponent::CollidesWithLine(const vec2& point1, const vec2& point2) const
+	bool CircleColliderComponent::CollidesWithLine(
+		const vec2& point1,
+		const vec2& point2
+		) const
 	{
 		//Check if circle is inside of boundaries of the line.
 		vec2 circlePos(GetPosition());
@@ -168,29 +182,35 @@ namespace star
 		
 	}
 
-	void CircleColliderComponent::CollidesWith(const BaseColliderComponent* other) const
+	bool CircleColliderComponent::CollidesWith(const BaseColliderComponent* other) const
 	{
+		Logger::GetInstance()->Log(other != nullptr, 
+			_T("CircleColliderComponent::CollidesWith: \
+The collierComponent to check is a nullptr"));
+
 		auto otherCircleComp = dynamic_cast<const CircleColliderComponent*>(other);
 		auto otherRectComp = dynamic_cast<const RectangleColliderComponent*>(other);
 
 		if(otherCircleComp != nullptr)
 		{
-			if(CircleCircleCollision(this, otherCircleComp))
-			{
-				
-			}
+			return CircleCircleCollision(this, otherCircleComp);
 		}
 		else if(otherRectComp != nullptr)
 		{
-			if(RectangleCircleCollision(otherRectComp, this))
-			{
-				Logger::GetInstance()->Log(LogLevel::Info, _T("Collision between circle and rect"));
-			}
+			return RectangleCircleCollision(otherRectComp, this);
+		}
+		else
+		{
+			Logger::GetInstance()->
+				Log(LogLevel::Warning, _T("Checking collision with an unknown collider type!"));
+			return false;
 		}
 	}
 
-	bool CircleColliderComponent::CircleCircleCollision(const CircleColliderComponent* collider1, 
-		const CircleColliderComponent* collider2) const
+	bool CircleColliderComponent::CircleCircleCollision(
+		const CircleColliderComponent* collider1, 
+		const CircleColliderComponent* collider2
+		) const
 	{
 		float32 radius1 = collider1->GetRealRadius();
 		float32 radius2 = collider2->GetRealRadius();
