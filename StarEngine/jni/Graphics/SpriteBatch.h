@@ -16,7 +16,10 @@ namespace star
 
 		void Initialize();
 		void Flush();
-		void AddSpriteToQueue(const SpriteInfo& spriteInfo, bool bIsHud = false,  bool m_bIsUberHUD = false);
+		void AddSpriteToQueue(
+			const SpriteInfo& spriteInfo,
+			bool bIsHud
+			);
 		void AddTextToQueue(const TextDesc& text, bool bInFrontOfSprites);
 		void CleanUp();
 
@@ -27,14 +30,21 @@ namespace star
 		void CreateSpriteQuad(const std::vector<SpriteInfo>& spriteQueue);
 		void FlushSprites(const std::vector<SpriteInfo>& spriteQueue);
 		void FlushText(const TextDesc& textDesc);
-		void FlushText(const std::vector<sstring>& text, const tstring& fontname,TransformComponent* transform, const Color& color);
+		void FlushText(
+			const tstring & text,
+			const tstring& fontname,
+			int32 spacing,
+			const std::vector<int32> & horOffset,
+			TransformComponent* transform,
+			const Color& color,
+			bool isHUD
+			);
 
 		static SpriteBatch * m_pSpriteBatch;
 		static const int32 BATCHSIZE = 50;
 
 		std::vector<SpriteInfo> m_SpriteQueue,
-								m_HudSpriteQueue,
-								m_UberHudSpriteQueue;
+								m_HudSpriteQueue;
 		std::vector<TextDesc> m_TextBackQueue,
 							  m_TextFrontQueue,
 							  m_HUDTextQueue;
@@ -47,7 +57,6 @@ namespace star
 			m_CurrentHudSprite;
 		Shader m_Shader;	
 
-		//disabling default copy constructor
 		SpriteBatch(const SpriteBatch& yRef);
 		SpriteBatch(SpriteBatch&& yRef);
 		SpriteBatch& operator=(const SpriteBatch& yRef);

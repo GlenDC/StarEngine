@@ -65,7 +65,7 @@ namespace star
 
 		auto texture = new SpriteComponent(
 			set.Texture, 
-			GetSpritesheetName(set), false, false, tx, ty);
+			GetSpritesheetName(set), tx, ty);
 		texture->SetCurrentSegment(gid % tx, gid / tx);
 
 		return texture;
@@ -132,7 +132,9 @@ namespace star
 		XMLContainer container;
 		XMLFileParser parser(file);
 
-		ASSERT(parser.Read(container, mode), _T("An error occured while trying to read the level."));
+		Logger::GetInstance()->Log(parser.Read(container, mode),
+			_T("An error occured while trying to read the level."),
+			STARENGINE_LOG_TAG);
 
 		BaseCreateLevel(container);
 	}
@@ -143,7 +145,9 @@ namespace star
 		XMLContainer container;
 		XMLFileParser parser(file);
 
-		ASSERT(parser.Read(container, binary_file, mode), _T("An error occured while trying to read the level."));
+		Logger::GetInstance()->Log(parser.Read(container, binary_file, mode),
+			_T("An error occured while trying to read the level."),
+			STARENGINE_LOG_TAG);
 
 		BaseCreateLevel(container);
 	}
@@ -204,7 +208,9 @@ namespace star
 			auto layerProperties = OIT->second->at(_T("properties"));
 			auto lpIT = layerProperties->lower_bound(_T("property"));
 			auto lpEnd = layerProperties->upper_bound(_T("property"));
-			ASSERT(lpIT != lpEnd, _T("This layer has no properties. Make sure to define all necacary properties!"));
+			Logger::GetInstance()->Log(lpIT != lpEnd,
+				_T("This layer has no properties. Make sure to define all necacary properties!"),
+				STARENGINE_LOG_TAG);
 			do
 			{
 				auto attributes = lpIT->second->GetAttributes();
@@ -274,7 +280,9 @@ namespace star
 			auto objectProperties = GIT->second->at(_T("properties"));
 			auto opIT = objectProperties->lower_bound(_T("property"));
 			auto opEnd = objectProperties->upper_bound(_T("property"));
-			ASSERT(opIT != opEnd, _T("[TILED] This Object Group has no properties. Make sure to define all necacary properties!"));
+			Logger::GetInstance()->Log(opIT != opEnd,
+				_T("[TILED] This Object Group has no properties. Make sure to define all necacary properties!"),
+				STARENGINE_LOG_TAG);
 			do
 			{
 				auto attributes = opIT->second->GetAttributes();
@@ -341,7 +349,9 @@ namespace star
 
 				const auto rType = objAttributes.lower_bound(_T("type"));
 				bool foundType = rType != objAttributes.end();
-				ASSERT(foundType, _T("[TILED] Couldn't find the type of the object. Please define this!"));
+				Logger::GetInstance()->Log(foundType,
+					_T("[TILED] Couldn't find the type of the object. Please define this!"),
+					STARENGINE_LOG_TAG);
 				if(foundType)
 				{
 					tObj.type = rType->second;
@@ -371,7 +381,8 @@ namespace star
 				else
 				{
 					Logger::GetInstance()->Log(LogLevel::Error, 
-						_T("[TILED] Object with type '") + tObj.type + _T("' wasn't defined!"));
+						_T("[TILED] Object with type '") + tObj.type + _T("' wasn't defined!"),
+						STARENGINE_LOG_TAG);
 				}
 				++OIT;
 			}
