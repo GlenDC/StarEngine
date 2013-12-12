@@ -57,7 +57,9 @@ namespace star
 
 		InputManager::GetInstance()->EndUpdate();
 		Logger::GetInstance()->Update(context);
+#if defined(DEBUG) | defined(_DEBUG)
 		Logger::GetInstance()->CheckGlError();
+#endif
 		m_bInitialized = true;
 	}
 
@@ -137,6 +139,13 @@ namespace star
 	std::mt19937& StarEngine::GetMt19937Engine()
 	{
 		return m_RandomEngine;
+	}
+
+	void StarEngine::Quit()
+	{
+#ifdef _WIN32
+		PostQuitMessage(0);
+#endif
 	}
 
 #ifdef ANDROID
