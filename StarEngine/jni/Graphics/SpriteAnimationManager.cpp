@@ -1,6 +1,7 @@
 #include "SpriteAnimationManager.h"
 #include "../Input/XMLFileParser.h"
 #include "../Input/XMLContainer.h"
+#include "../Logger.h"
 
 namespace star
 {
@@ -20,11 +21,16 @@ namespace star
 		tstring name = container.GetAttributes()[_T("name")];
 		auto it = m_Spritesheets.find(name);
 		bool isValid = it == m_Spritesheets.end();
-		//ASSERT(isValid, _T("This spritesheet already exists!"));
 		if(isValid)
 		{
 			Spritesheet spritesheet(container);
 			m_Spritesheets.insert(std::pair<tstring, Spritesheet>(name, spritesheet));
+		}
+		else
+		{
+			Logger::GetInstance()->Log(LogLevel::Warning,
+				_T("SpriteAnimationManager::AddSpritesheet: This spritesheet already exists!"),
+				STARENGINE_LOG_TAG);
 		}
 	}
 	
@@ -38,11 +44,16 @@ namespace star
 		tstring name = container.GetAttributes()[_T("name")];
 		auto it = m_Spritesheets.find(name);
 		bool isValid = it == m_Spritesheets.end();
-		//ASSERT(isValid, _T("This spritesheet already exists!"));
 		if(isValid)
 		{
 			Spritesheet spritesheet(container);
 			m_Spritesheets.insert(std::pair<tstring, Spritesheet>(name, spritesheet));
+		}
+		else
+		{
+			Logger::GetInstance()->Log(LogLevel::Warning,
+				_T("SpriteAnimationManager::AddSpritesheet: This spritesheet already exists!"),
+				STARENGINE_LOG_TAG);
 		}
 	}
 
@@ -51,7 +62,9 @@ namespace star
 	{
 		auto it = m_Spritesheets.find(name);
 		bool isValid = it != m_Spritesheets.end();
-		ASSERT(isValid, _T("Couldn't find this spritesheet..."));
+		Logger::GetInstance()->Log(isValid,
+			_T("Couldn't find this spritesheet..."),
+			STARENGINE_LOG_TAG);
 		return m_Spritesheets.at(name);
 	}
 

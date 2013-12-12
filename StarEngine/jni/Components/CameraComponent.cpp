@@ -1,5 +1,6 @@
 #include "CameraComponent.h"
 #include "../Graphics/GraphicsManager.h"
+#include "../Scenes/BaseScene.h"
 #include "../Objects/Object.h"
 #include "../Input/InputManager.h"
 #include "../Context.h"
@@ -145,7 +146,8 @@ namespace star
 		{
 			Logger::GetInstance()->Log( 
 				LogLevel::Error,
-				_T("Can't set camera active, add this camera to a scene first!")
+				_T("Can't set camera active, add this camera to a scene first!"),
+				STARENGINE_LOG_TAG
 				);
 		}
 		else
