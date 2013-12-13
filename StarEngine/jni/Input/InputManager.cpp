@@ -78,6 +78,8 @@ namespace star
 		, m_ActivePointerID(0)
 		, m_PointerVec()
 		, m_OldPointerVec()
+		, m_OnBackButtonDown(nullptr)
+		, m_OnMenuButtonDown(nullptr)
 	#endif
 		, m_GestureManager(nullptr)
 		, m_OldMousePosition()
@@ -88,6 +90,7 @@ namespace star
 		//Init new keyboard states
 		GetKeyboardState(m_pKeyboardState0);
 		GetKeyboardState(m_pKeyboardState1);
+		UpdateWin();
 #endif
 	}
 
@@ -364,7 +367,7 @@ namespace star
 						{
 							currAction->IsTriggered = true;
 							Logger::GetInstance()->Log(LogLevel::Info, 
-								_T("Clicked mouse button."));
+								_T("Clicked mouse button."), STARENGINE_LOG_TAG);
 						}
 					}
 
@@ -610,7 +613,8 @@ namespace star
 			return VK_XBUTTON2;
 		default:
 			Logger::GetInstance()->Log(LogLevel::Warning,
-				_T("Only 5 (0 - 4) finger Indices supported for mouse. Using VK_XBUTTON2"));
+				_T("Only 5 (0 - 4) finger Indices supported for mouse. Using VK_XBUTTON2"),
+				STARENGINE_LOG_TAG);
 			return VK_XBUTTON2;
 		}
 	}
@@ -748,10 +752,12 @@ namespace star
 			break;
 		case AMOTION_EVENT_ACTION_CANCEL:
 			m_ActivePointerID = INVALID_POINTER_ID;
-			Logger::GetInstance()->Log(LogLevel::Info, _T("Canceled"));
+			Logger::GetInstance()->Log(LogLevel::Info,
+				_T("Canceled"), STARENGINE_LOG_TAG);
 			break;
 		case AMOTION_EVENT_ACTION_OUTSIDE:
-			Logger::GetInstance()->Log(LogLevel::Info, _T("Outside"));
+			Logger::GetInstance()->Log(LogLevel::Info,
+			_T("Outside"), STARENGINE_LOG_TAG);
 			break;
 		case AMOTION_EVENT_ACTION_MOVE:
 			break;
@@ -794,27 +800,37 @@ namespace star
 			//Try: (schar) cast the keycode
 			switch(AKeyEvent_getKeyCode(pEvent))
 			{
-			case AKEYCODE_HOME:
+			case AKEYCODE_MENU:
+				if(m_OnMenuButtonDown)
+				{
+					m_OnMenuButtonDown();
+					return true;
+				}
 				break;
 			case AKEYCODE_BACK:
-				break;
-			case AKEYCODE_VOLUME_DOWN:
+				if(m_OnBackButtonDown)
+				{
+					m_OnBackButtonDown();
+					return true;
+				}
 				break;
 			}
 			return false;
 		}
 		else
 		{
-			switch(AKeyEvent_getKeyCode(pEvent))
-			{
-			case AKEYCODE_MENU:
-				//return false;
-				break;
-			case AKEYCODE_BACK:
-				break;
-			}
 			return false;
 		}
+	}
+
+	void InputManager::SetOnBackButtonCallback(CallBack callback)
+	{
+		m_OnBackButtonDown = callback;
+	}
+
+	void InputManager::SetOnMenuButtonCallback(CallBack callback)
+	{
+		m_OnMenuButtonDown = callback;
 	}
 
 	FingerPointerANDR InputManager::GetTouchPropertiesANDR(uint8 fingerIndex)const
