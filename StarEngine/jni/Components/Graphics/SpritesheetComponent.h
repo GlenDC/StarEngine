@@ -10,7 +10,7 @@ namespace star
 	class SpritesheetComponent final : public SpriteComponent
 	{
 	public:
-		SpritesheetComponent(const tstring& filePath, const tstring& spriteName, const tstring & spritesheet, bool isHUD = false);
+		SpritesheetComponent(const tstring& filePath, const tstring& spriteName, const tstring & spritesheet);
 		~SpritesheetComponent();
 
 		void Update(const Context& context);
@@ -20,9 +20,34 @@ namespace star
 		void Pause();
 		void Stop();
 
-		void PushAnimation(const tstring & animation);
-		void PlayAnimation(const tstring & animation);
-		void PlayAnimation(const tstring & animation, int32 startFrame);
+		void PushAnimation(
+			const tstring & animation,
+			const std::function<void()> & callback = nullptr
+			);
+		void PlayAnimation(
+			const tstring & animation,
+			const std::function<void()> & callback = nullptr
+			);
+		void PlayAnimation(
+			const tstring & animation,
+			int32 startFrame,
+			const std::function<void()> & callback = nullptr
+			);
+
+		bool PushAnimationSafe(
+			const tstring & animation,
+			const std::function<void()> & callback = nullptr
+			);
+		bool PlayAnimationSafe(
+			const tstring & animation,
+			const std::function<void()> & callback = nullptr
+			);
+		bool PlayAnimationSafe(
+			const tstring & animation,
+			int32 startFrame,
+			const std::function<void()> & callback = nullptr
+			);
+
 		void PlayNextAnimation();
 		void PlayNextAnimation(int32 startFrame);
 		void Reset();
@@ -43,7 +68,6 @@ namespace star
 
 	protected:
 		void InitializeComponent();
-		void CreateVertices();
 		tstring m_SpritesheetName;
 		Spritesheet m_Spritesheet;
 

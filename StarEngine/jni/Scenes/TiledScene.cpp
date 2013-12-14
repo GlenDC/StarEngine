@@ -3,6 +3,7 @@
 #include "../Input/XMLFileParser.h"
 #include "../Helpers/Helpers.h"
 #include "../Objects/Object.h"
+#include "../Objects/FreeCamera.h"
 
 #include "../Components/Graphics/SpriteComponent.h"
 
@@ -12,12 +13,12 @@ namespace star
 		const tstring & name,
 		float32 scale )
 		: BaseScene(name)
-		, m_pActiveCamera(nullptr)
 		, m_Width(0)
 		, m_Height(0)
 		, m_TileWidth(0)
 		, m_TileHeight(0)
 		, m_TileSets()
+		, m_TiledObjects()
 		, m_Scale(scale)
 	{
 
@@ -25,6 +26,17 @@ namespace star
 
 	TiledScene::~TiledScene()
 	{
+	}
+
+	void TiledScene::RemoveObject(Object * object)
+	{
+		auto it = std::find(m_TiledObjects.begin(), m_TiledObjects.end(), object);
+		if(it != m_TiledObjects.end())
+		{
+			m_TiledObjects.erase(it);
+		}
+
+		BaseScene::RemoveObject(object);
 	}
 
 	void TiledScene::DefineSpecialObject(
@@ -65,7 +77,7 @@ namespace star
 
 		auto texture = new SpriteComponent(
 			set.Texture, 
-			GetSpritesheetName(set), false, false, tx, ty);
+			GetSpritesheetName(set), tx, ty);
 		texture->SetCurrentSegment(gid % tx, gid / tx);
 
 		return texture;
@@ -91,19 +103,19 @@ namespace star
 
 	void TiledScene::CreateObjects()
 	{
-		if(m_pActiveCamera == nullptr)
+		if(m_pDefaultCamera == nullptr)
 		{
-			m_pActiveCamera = new FreeCamera();
-			m_pActiveCamera->SetStatic(false);
-			m_pActiveCamera->SetZoomEnabled(true);
-			m_pActiveCamera->SetMoveSpeed(2.0f);
-			AddObject(m_pActiveCamera);
+			auto defaultCamera = new FreeCamera();
+			defaultCamera->SetStatic(false);
+			defaultCamera->SetZoomEnabled(true);
+			defaultCamera->SetMoveSpeed(2.0f);
+			AddObject(defaultCamera);
+			m_pDefaultCamera = defaultCamera;
 		}
 	}
 
 	void TiledScene::AfterInitializedObjects()
 	{
-		SetActiveCamera(m_pActiveCamera);
 	}
 
 	void TiledScene::OnActivate()
@@ -132,7 +144,9 @@ namespace star
 		XMLContainer container;
 		XMLFileParser parser(file);
 
-		ASSERT(parser.Read(container, mode), _T("An error occured while trying to read the level."));
+		Logger::GetInstance()->Log(parser.Read(container, mode),
+			_T("An error occured while trying to read the level."),
+			STARENGINE_LOG_TAG);
 
 		BaseCreateLevel(container);
 	}
@@ -143,7 +157,9 @@ namespace star
 		XMLContainer container;
 		XMLFileParser parser(file);
 
-		ASSERT(parser.Read(container, binary_file, mode), _T("An error occured while trying to read the level."));
+		Logger::GetInstance()->Log(parser.Read(container, binary_file, mode),
+			_T("An error occured while trying to read the level."),
+			STARENGINE_LOG_TAG);
 
 		BaseCreateLevel(container);
 	}
@@ -188,6 +204,15 @@ namespace star
 		CreateGroupedObjects(container);
 	}
 
+	void TiledScene::ClearLevel()
+	{
+		for(auto obj : m_TiledObjects)
+		{
+			RemoveObject(obj);
+		}
+		m_TiledObjects.clear();
+	}
+
 	void TiledScene::CreateTiledObjects(XMLContainer & container)
 	{
 		auto OIT = container.lower_bound(_T("layer"));
@@ -204,7 +229,9 @@ namespace star
 			auto layerProperties = OIT->second->at(_T("properties"));
 			auto lpIT = layerProperties->lower_bound(_T("property"));
 			auto lpEnd = layerProperties->upper_bound(_T("property"));
-			ASSERT(lpIT != lpEnd, _T("This layer has no properties. Make sure to define all necacary properties!"));
+			Logger::GetInstance()->Log(lpIT != lpEnd,
+				_T("This layer has no properties. Make sure to define all necacary properties!"),
+				STARENGINE_LOG_TAG);
 			do
 			{
 				auto attributes = lpIT->second->GetAttributes();
@@ -251,6 +278,7 @@ namespace star
 					auto texture = CreateSpriteFromGid(tID, tileSet);
 					obj->AddComponent(texture);
 					AddObject(obj);
+					m_TiledObjects.push_back(obj);
 				}
 				++i;
 				++TIT;
@@ -274,7 +302,9 @@ namespace star
 			auto objectProperties = GIT->second->at(_T("properties"));
 			auto opIT = objectProperties->lower_bound(_T("property"));
 			auto opEnd = objectProperties->upper_bound(_T("property"));
-			ASSERT(opIT != opEnd, _T("[TILED] This Object Group has no properties. Make sure to define all necacary properties!"));
+			Logger::GetInstance()->Log(opIT != opEnd,
+				_T("[TILED] This Object Group has no properties. Make sure to define all necacary properties!"),
+				STARENGINE_LOG_TAG);
 			do
 			{
 				auto attributes = opIT->second->GetAttributes();
@@ -341,7 +371,9 @@ namespace star
 
 				const auto rType = objAttributes.lower_bound(_T("type"));
 				bool foundType = rType != objAttributes.end();
-				ASSERT(foundType, _T("[TILED] Couldn't find the type of the object. Please define this!"));
+				Logger::GetInstance()->Log(foundType,
+					_T("[TILED] Couldn't find the type of the object. Please define this!"),
+					STARENGINE_LOG_TAG);
 				if(foundType)
 				{
 					tObj.type = rType->second;
@@ -367,11 +399,13 @@ namespace star
 					transform->Scale(m_Scale, m_Scale, m_Scale);
 	#endif
 					AddObject(obj);
+					m_TiledObjects.push_back(obj);
 				}
 				else
 				{
 					Logger::GetInstance()->Log(LogLevel::Error, 
-						_T("[TILED] Object with type '") + tObj.type + _T("' wasn't defined!"));
+						_T("[TILED] Object with type '") + tObj.type + _T("' wasn't defined!"),
+						STARENGINE_LOG_TAG);
 				}
 				++OIT;
 			}
