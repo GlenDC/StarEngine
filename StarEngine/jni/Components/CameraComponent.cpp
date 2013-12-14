@@ -1,11 +1,13 @@
 #include "CameraComponent.h"
 #include "../Graphics/GraphicsManager.h"
+#include "../Scenes/BaseScene.h"
 #include "../Objects/Object.h"
 #include "../Input/InputManager.h"
 #include "../Context.h"
 #include "../Logger.h"
 #include "../Helpers/Math.h"
 #include "../Objects/BaseCamera.h"
+#include "../Graphics/ScaleSystem.h"
 
 namespace star
 {
@@ -84,9 +86,13 @@ namespace star
 #ifdef STAR2D
 		auto pos = m_pParentObject->GetTransform()->GetWorldPosition();
 		vec3 vEyePt = pos.pos3D();
+		vEyePt.x = vEyePt.x / (star::ScaleSystem::GetInstance()->GetWorkingResolution().x / 2.0f);
+		vEyePt.y = vEyePt.y / (star::ScaleSystem::GetInstance()->GetWorkingResolution().y / 2.0f);
 #else
 		vec3 vEyePt = m_pParentObject->GetTransform()->GetWorldPosition();
-#endif
+		vEyePt.x = vEyePt.x / (star::ScaleSystem::GetInstance()->GetWorkingResolution().x / 2.0f);
+		vEyePt.y = vEyePt.y / (star::ScaleSystem::GetInstance()->GetWorkingResolution().y / 2.0f);
+#endif	
 		vec3 vLookat, vUpVec;
 		mat4 rotTransform;
 	
@@ -145,7 +151,8 @@ namespace star
 		{
 			Logger::GetInstance()->Log( 
 				LogLevel::Error,
-				_T("Can't set camera active, add this camera to a scene first!")
+				_T("Can't set camera active, add this camera to a scene first!"),
+				STARENGINE_LOG_TAG
 				);
 		}
 		else
