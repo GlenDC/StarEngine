@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../defines.h"
+#include "../Entity.h"
 
 #include "../Helpers/Stopwatch.h"
+#include "../Objects/Object.h"
 
 #include <vector>
 #include <memory>
@@ -10,37 +11,71 @@
 namespace star 
 {
 	struct Context;
-	class Object;
 	class CameraComponent;
 	class CollisionManager;
 	class GestureManager;
 	class BaseCamera;
+	class UIBaseCursor;
+	class BaseGesture;
 
-	class BaseScene
+	class BaseScene : public Entity
 	{
 	public:
-		BaseScene(const tstring & name);
+		explicit BaseScene(const tstring & name);
 		virtual ~BaseScene();
-		
-		void	BaseInitialize();
-		void	BaseAfterInitializedObjects();
-		void	BaseOnActivate();
-		void	BaseOnDeactivate();
-		void	BaseUpdate(const Context& context);
-		void	BaseDraw();
 
-		virtual void OnSaveState(void** pData,size_t* pSize);
+		void Destroy();
+		
+		void BaseInitialize();
+		void BaseAfterInitializedObjects();
+		void BaseOnActivate();
+		void BaseOnDeactivate();
+		void BaseUpdate(const Context& context);
+		void BaseDraw();
+
+		virtual void OnSaveState(void** pData, size_t* pSize);
 		virtual void OnConfigurationChanged();
 		virtual void OnLowMemory();
 
-		const tstring & GetName() const;
 		bool IsInitialized() const;
 
-		void AddObject(Object * object); 
-		void RemoveObject(Object * object);
+		virtual void AddObject(Object * object); 
+		void AddObject(Object * object, const tstring & name); 
+		virtual void RemoveObject(Object * object);
+		void RemoveObject(const tstring & name);
+
+		void AddGesture(BaseGesture* gesture);
+		void AddGesture(BaseGesture* gesture, const tstring & name);
+		void RemoveGesture(BaseGesture* gesture);
+		void RemoveGesture(const tstring & name);
+
+		template <typename T>
+		T * GetObjectByName(const tstring & name);
+
+		void SetObjectFrozen(const tstring & name, bool freeze);
+		void SetObjectDisabled(const tstring & name, bool disabled);
+		void SetObjectVisible(const tstring & name, bool visible);
+
+		void SetGroupFrozen(const tstring & tag, bool freeze);
+		void SetGroupDisabled(const tstring & tag, bool disabled);
+		void SetGroupVisible(const tstring & tag, bool visable);
+		void GetGroup(const tstring & tag, std::vector<Object*> & group);
 
 		void SetActiveCamera(BaseCamera* pCamera);
 		BaseCamera* GetActiveCamera() const;
+
+		static void SetCullingIsEnabled(bool enabled);
+		static bool IsCullingEnabled();
+
+		void SetCursorHidden(bool hidden);
+		void SetSystemCursorHidden(bool hidden);
+
+		void SetCursor(UIBaseCursor * cursor);
+		void UnsetCursor(bool showSystemCursor = true);
+
+		void SetStateActiveCursor(const tstring & state);
+		void SetActiveCursorLocked(bool locked);
+		bool IsActiveCursorLocked() const;
 
 		void SetCullingOffset(int32 offset);
 		void SetCullingOffset(int32 offsetX, int32 offsetY);
@@ -57,20 +92,27 @@ namespace star
 		virtual void OnDeactivate() = 0;
 		virtual void Update(const Context& context) = 0;
 		virtual void Draw() = 0;
-		bool CheckCulling(Object* object);
+
+		void SetOSCursorHidden(bool hidden);
 
 		std::shared_ptr<GestureManager> m_GestureManagerPtr;
 		std::shared_ptr<CollisionManager> m_CollisionManagerPtr;
 
 		std::vector<Object*> m_Objects;
-		BaseCamera* m_pDefaultCamera;
+		std::vector<Object*> m_Garbage;
+		BaseCamera *m_pDefaultCamera, *m_pActiveCamera;
 		std::shared_ptr<Stopwatch> m_pStopwatch;
+		UIBaseCursor *m_pCursor;
 
 	private:
+		void CollectGarbage();
+
 		int32 m_CullingOffsetX,
 			m_CullingOffsetY;
 		bool m_Initialized;
-		tstring m_Name;
+		static bool CULLING_IS_ENABLED;
+		bool m_CursorIsHidden, m_SystemCursorIsHidden;
+		uint32 m_GestureID;
 	
 		BaseScene(const BaseScene& t);
 		BaseScene(BaseScene&& t);
@@ -78,3 +120,5 @@ namespace star
 		BaseScene& operator=(BaseScene&& t);
 	};
 }
+
+#include "BaseScene.inl"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\defines.h"
+#include "../Entity.h"
 
 namespace star
 {
@@ -9,12 +9,14 @@ namespace star
 	class TransformComponent;
 	class Object;
 
-	class BaseComponent
+	class BaseComponent : public Entity
 	{
 	public:
-		BaseComponent(void);
+		BaseComponent();
 		BaseComponent(Object* parent);
-		virtual ~BaseComponent(void);
+		virtual ~BaseComponent();
+
+		void Destroy();
 
 		void Initialize();
 		void BaseUpdate(const Context& context);
@@ -30,15 +32,31 @@ namespace star
 		BaseScene* GetGameScene() const;
 		TransformComponent* GetTransform() const;
 
+		virtual bool CheckCulling(
+			float left,
+			float right,
+			float top,
+			float bottom
+			) const;
+
 		void SetEnabled(bool bEnabled);
 		bool IsEnabled() const;
+
+		void SetVisible(bool bVisible);
+		bool IsVisible() const;
+
+		const ivec2 & GetDimensions() const;
+		virtual int32 GetWidth() const;
+		virtual int32 GetHeight() const;
 
 	protected:
 		virtual void InitializeComponent() = 0;
 
 		Object* m_pParentObject;
-		bool m_bInitialized,
-			 m_bIsEnabled;
+		bool	m_bInitialized,
+				m_bIsEnabled,
+				m_bIsVisible;
+		ivec2	m_Dimensions;
 
 	private:
 		BaseComponent(const BaseComponent& t);
