@@ -1,45 +1,253 @@
 #include "UIUserElement.h"
+#include "../../Input/InputManager.h"
+#include "../../Scenes/BaseScene.h"
+#include "../../Sound/AudioManager.h"
 
 namespace star
 {
-	UIUserElement::UIUserElement(void)
-		: Object()
+	UIUserElement::UIUserElement(const tstring & name)
+		: UIElement(name)
 		, m_SelectCallback(nullptr)
-#ifdef DESKTOP
+		, m_DownCallback(nullptr)
 		, m_HoverCallback(nullptr)
 		, m_UnhoverCallback(nullptr)
-#endif
 		, m_ElementState(ElementStates::IDLE)
 	{
+		m_Effects[HOVER_EFFECT].Name = EMPTY_STRING;
+		m_Effects[HOVER_EFFECT].Volume = 1.0f;
 
+		m_Effects[CLICK_EFFECT].Name = EMPTY_STRING;
+		m_Effects[CLICK_EFFECT].Volume = 1.0f;
 	}
 
-	UIUserElement::~UIUserElement(void)
+	UIUserElement::~UIUserElement()
 	{
 
 	}
-
-	void UIUserElement::Initialize()
+	
+	void UIUserElement::SetLocked(bool locked)
 	{
-		Object::Initialize();
+		bool isUnlocking =
+			!locked && m_ElementState == ElementStates::LOCKED;
+		m_ElementState = 
+			locked ?
+			ElementStates::LOCKED :
+			ElementStates::IDLE;
+		if(isUnlocking)
+		{
+			if(m_SelectCallback)
+			{
+				m_SelectCallback();
+			}
+			Reset();
+		}
+	}
+	
+	void UIUserElement::SetUIDisabled(bool disable)
+	{
+		GetScene()->GetStopwatch()->CreateTimer(
+			m_UniqueUIObjectID + _T("_") + _T("DisableTimer"),
+			STOPWATCH_ONE_FRAME_DELAY,
+			false,
+			false,
+			[&, disable]()
+			{
+				bool isEnabling =
+					!disable && m_ElementState == ElementStates::DISABLED;
+				auto elementAdress = &m_ElementState;
+				m_ElementState = 
+					disable ?
+					ElementStates::DISABLED :
+					ElementStates::IDLE;
+				if(isEnabling)
+				{
+					GoIdle();
+					return;
+				}
+				GoDisable();
+			},
+			false
+			);
+	}
+
+	void UIUserElement::SetHoverSoundEffect(const tstring & name)
+	{
+		m_Effects[HOVER_EFFECT].Name = name;
+	}
+
+	void UIUserElement::SetHoverSoundEffect(const tstring & name, float32 volume)
+	{
+		m_Effects[HOVER_EFFECT].Name = name;
+		m_Effects[HOVER_EFFECT].Volume = volume;
+	}
+
+	void UIUserElement::SetClickSoundEffect(const tstring & name)
+	{
+		m_Effects[CLICK_EFFECT].Name = name;
+	}
+
+	void UIUserElement::SetClickSoundEffect(const tstring & name, float32 volume)
+	{
+		m_Effects[CLICK_EFFECT].Name = name;
+		m_Effects[CLICK_EFFECT].Volume = volume;
 	}
 
 	void UIUserElement::Update(const Context& context)
 	{
+		if(m_ElementState != ElementStates::DISABLED
+			&& m_ElementState != ElementStates::LOCKED)
+		{
+			if(IsFingerWithinRange())
+			{
+				if(m_ElementState != ElementStates::CLICK
+					&& InputManager::GetInstance()->IsFingerDownCP(0))
+				{
+					if(!GetScene()->IsActiveCursorLocked())
+					{
+						m_ElementState = ElementStates::CLICK;
+						GoDown();
+					}
+				}
+				else if(m_ElementState == ElementStates::CLICK
+				&& InputManager::GetInstance()->IsFingerReleasedCP(0))
+				{
+					GoUp();
+					Reset();
+				}
+			#ifdef DESKTOP
+				else if(m_ElementState == ElementStates::IDLE
+					&& !GetScene()->IsActiveCursorLocked())
+				{
+					m_ElementState = ElementStates::HOVER;
+					GoHover();
+				}
+			#endif
+			}
+			else if(m_ElementState != ElementStates::IDLE)
+			{
+				m_ElementState = ElementStates::IDLE;
+				GoIdle();
+			}
+			
+			UIElement::Update(context);
+		}
 	}
 
-	void UIUserElement::Draw()
+	void UIUserElement::GoIdle()
 	{
+#ifdef DESKTOP
+		if(m_UnhoverCallback != nullptr)
+		{
+			m_UnhoverCallback();
+		}
+#endif
+		GetScene()->SetStateActiveCursor(UI_STATE_IDLE);
 	}
 
-	bool UIUserElement::IsToggled() const
+#ifdef DESKTOP
+	void UIUserElement::GoHover()
 	{
-		return m_ElementState == ElementStates::TOGGLE;
+		if(m_HoverCallback != nullptr)
+		{
+			m_HoverCallback();
+		}
+		
+		if(m_Effects[HOVER_EFFECT].Name != EMPTY_STRING)
+		{
+			AudioManager::GetInstance()->PlayEffect(
+				m_Effects[HOVER_EFFECT].Name,
+				m_Effects[HOVER_EFFECT].Volume,
+				0
+				);
+		}
+
+		GetScene()->GetStopwatch()->CreateTimer(
+			_T("HCT"),
+			0.1f,
+			false,
+			false,
+			[&] ()
+			{
+				GetScene()->SetStateActiveCursor(UI_STATE_HOVER);
+			}, false);
+	}
+#endif
+
+	void UIUserElement::GoDown()
+	{
+		GetScene()->GetStopwatch()->CreateTimer(
+			_T("HCT"),
+			0.1f,
+			false,
+			false,
+			[&] ()
+			{
+				GetScene()->SetStateActiveCursor(UI_STATE_CLICK);
+			}, false);
+
+		if(m_DownCallback != nullptr)
+		{
+			m_DownCallback();
+		}
 	}
 
-	bool UIUserElement::IsDisabled() const
+	void UIUserElement::GoUp()
 	{
-		return m_ElementState == ElementStates::DISABLED;
+		if(m_SelectCallback != nullptr)
+		{
+			m_SelectCallback();
+		}
+
+		if(m_Effects[CLICK_EFFECT].Name != EMPTY_STRING)
+		{
+			AudioManager::GetInstance()->PlayEffect(
+				m_Effects[CLICK_EFFECT].Name,
+				m_Effects[CLICK_EFFECT].Volume,
+				0
+				);
+		}
+
+		GetScene()->GetStopwatch()->CreateTimer(
+			_T("HCT"),
+			0.1f,
+			false,
+			false,
+			[&] ()
+			{
+				GetScene()->SetStateActiveCursor(UI_STATE_HOVER);
+			}, false);
+	}
+
+	void UIUserElement::GoDisable()
+	{
+
+	}
+
+	bool UIUserElement::IsFingerWithinRange() const
+	{
+		auto fingerPos = InputManager::GetInstance()->GetCurrentFingerPosCP(0);
+		auto buttonPos = GetTransform()->GetWorldPosition().pos2D();
+		auto dimensions = GetDimensions();
+		auto scale = GetTransform()->GetWorldScale();
+		
+		dimensions.x *= scale.x;
+		dimensions.y *= scale.y;
+		
+		return 
+			fingerPos.x >= buttonPos.x &&
+			fingerPos.x <= buttonPos.x + dimensions.x &&
+			fingerPos.y >= buttonPos.y &&
+			fingerPos.y <= buttonPos.y + dimensions.y;
+	}
+
+	void UIUserElement::Reset()
+	{
+		if(m_ElementState != ElementStates::DISABLED)
+		{
+			GoIdle();
+			m_ElementState = ElementStates::IDLE;
+		}
+		UIObject::Reset();
 	}
 
 	void UIUserElement::SetSelectCallback(std::function<void()> callback)
@@ -47,7 +255,11 @@ namespace star
 		m_SelectCallback = callback;
 	}
 
-#ifdef DESKTOP
+	void UIUserElement::SetDownCallback(std::function<void()> callback)
+	{
+		m_DownCallback = callback;
+	}
+
 	void UIUserElement::SetHoverCallback(std::function<void()> callback)
 	{
 		m_HoverCallback = callback;
@@ -57,5 +269,19 @@ namespace star
 	{
 		m_UnhoverCallback = callback;
 	}
-#endif
+
+	bool UIUserElement::IsIdle() const
+	{
+		return m_ElementState == ElementStates::IDLE;
+	}
+
+	bool UIUserElement::IsHover() const
+	{
+		return m_ElementState == ElementStates::HOVER;
+	}
+
+	bool UIUserElement::IsDown() const
+	{
+		return m_ElementState == ElementStates::CLICK;
+	}
 }
