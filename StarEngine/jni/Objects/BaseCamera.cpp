@@ -10,6 +10,9 @@ namespace star
 		Object()
 		,m_pCamera(nullptr)
 	{
+		//Camera Component
+		m_pCamera = new CameraComponent();
+		AddComponent(m_pCamera);
 	}
 
 	BaseCamera::~BaseCamera()
@@ -18,10 +21,26 @@ namespace star
 
 	void BaseCamera::Initialize()
 	{
-		//Camera Component
-		m_pCamera = new CameraComponent();
-		AddComponent(m_pCamera);
+		
+	}
 
-		m_pCamera->SetActive();
+	void BaseCamera::Translate(const vec2& translation)
+	{
+		GetComponent<CameraComponent>()->Translate(translation);
+	}
+
+	void BaseCamera::Translate(float32 x, float32 y)
+	{
+		GetComponent<CameraComponent>()->Translate(x, y);
+	}
+
+	void BaseCamera::TranslateX(float32 x)
+	{
+		GetComponent<CameraComponent>()->TranslateX(x);
+	}
+
+	void BaseCamera::TranslateY(float32 y)
+	{
+		GetComponent<CameraComponent>()->TranslateY(y);
 	}
 }

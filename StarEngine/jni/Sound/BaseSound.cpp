@@ -154,7 +154,9 @@ namespace star
 		, mNoChannelAssigned(true)
 #ifdef DESKTOP
 		, mIsMuted(false)
-		, mVolume(0)
+		, mVolume(1)
+#else
+		, mPath(EMPTY_STRING)
 #endif
 		, mChannel(0)
 		, mSoundVolume()
@@ -178,16 +180,13 @@ namespace star
 	{
 		SLresult lRes;
 
-		Resource lResource(
-				star::StarEngine::GetInstance()->GetAndroidApp(),
-				path
-				);
+		Resource lResource(path);
 
 		ResourceDescriptor lDescriptor = lResource.DeScript();
 		if(lDescriptor.mDescriptor < 0)
 		{
 			star::Logger::GetInstance()->Log(star::LogLevel::Error,
-				_T("Sound: Could not open file"));
+				_T("Sound: Could not open file"), STARENGINE_LOG_TAG);
 			return;
 		}
 		SLDataLocator_AndroidFD lDataLocatorIn;
@@ -226,7 +225,7 @@ namespace star
 		if (lRes != SL_RESULT_SUCCESS)
 		{
 			star::Logger::GetInstance()->Log(star::LogLevel::Error,
-				_T("Sound: Can't create audio player"));
+				_T("Sound: Can't create audio player"), STARENGINE_LOG_TAG);
 			Stop();
 			return;
 		}
@@ -236,7 +235,7 @@ namespace star
 		if (lRes != SL_RESULT_SUCCESS)
 		{
 			star::Logger::GetInstance()->Log(star::LogLevel::Error,
-				_T("Sound: Can't realise audio player"));
+				_T("Sound: Can't realise audio player"), STARENGINE_LOG_TAG);
 			Stop();
 			return;
 		}
@@ -246,7 +245,7 @@ namespace star
 		if (lRes != SL_RESULT_SUCCESS)
 		{
 			star::Logger::GetInstance()->Log(star::LogLevel::Error,
-				_T("Sound: Can't get audio play interface"));
+				_T("Sound: Can't get audio play interface"), STARENGINE_LOG_TAG);
 			Stop();
 			return;
 		}
@@ -255,7 +254,7 @@ namespace star
 			player, SL_PLAYSTATE_STOPPED) != SL_RESULT_SUCCESS)
 		{
 			star::Logger::GetInstance()->Log(star::LogLevel::Error,
-				_T("Sound: Can't set callback flags"));
+				_T("Sound: Can't set callback flags"), STARENGINE_LOG_TAG);
 		}
 
 		CreateSoundDetails();
@@ -279,7 +278,7 @@ namespace star
 				sound = NULL;
 				player = NULL;
 				star::Logger::GetInstance()->Log(star::LogLevel::Error,
-					_T("Sound: Soundfile Destroyed"));
+					_T("Sound: Soundfile Destroyed"), STARENGINE_LOG_TAG);
 			}
 		}
 	}
@@ -304,13 +303,14 @@ namespace star
 		if(GetVolumeInterface(sound, player, &volumeItf))
 		{
 			volume = Clamp(volume, 0.0f, 1.0f);
+			volume = (volume / 10.0f) + 0.9f;
 			SLmillibel actualMillibelLevel, maxMillibelLevel;
 			SLresult result = (*volumeItf)->GetMaxVolumeLevel(
 					volumeItf,
 					&maxMillibelLevel
 					);
-			ASSERT(result == SL_RESULT_SUCCESS,
-					_T("Sound: Couldn't get the maximum volume level!"));
+			Logger::GetInstance()->Log(result == SL_RESULT_SUCCESS,
+					_T("Sound: Couldn't get the maximum volume level!"), STARENGINE_LOG_TAG);
 			actualMillibelLevel = SLmillibel(
 					(1.0f - volume) *
 					float32(SL_MILLIBEL_MIN - maxMillibelLevel))
@@ -319,8 +319,8 @@ namespace star
 				volumeItf,
 				actualMillibelLevel
 				);
-			ASSERT(result == SL_RESULT_SUCCESS,
-					_T("Sound: Couldn't set the volume!"));
+			Logger::GetInstance()->Log(result == SL_RESULT_SUCCESS,
+					_T("Sound: Couldn't set the volume!"), STARENGINE_LOG_TAG);
 		}
 	}
 
@@ -340,7 +340,9 @@ namespace star
 					sound, SL_IID_VOLUME, pInterface
 					);
 				bool isOK = result == SL_RESULT_SUCCESS;
-				ASSERT(isOK, _T("Sound: Couldn't get the interface!"));
+				Logger::GetInstance()->Log(isOK,
+					_T("Sound: Couldn't get the interface!"),
+					STARENGINE_LOG_TAG);
 				return isOK;
 			}
 		}
@@ -360,14 +362,16 @@ namespace star
 					volumeItf,
 					&actualMillibelLevel
 					);
-			ASSERT(result == SL_RESULT_SUCCESS,
-					_T("Sound: Couldn't get the volume!"));
+			Logger::GetInstance()->Log(result == SL_RESULT_SUCCESS,
+					_T("Sound: Couldn't get the volume!"),
+					STARENGINE_LOG_TAG);
 			result = (*volumeItf)->GetMaxVolumeLevel(
 					volumeItf,
 					&maxMillibelLevel
 					);
-			ASSERT(result == SL_RESULT_SUCCESS,
-					_T("Sound: Couldn't get the maximum volume level!"));
+			Logger::GetInstance()->Log(result == SL_RESULT_SUCCESS,
+					_T("Sound: Couldn't get the maximum volume level!"),
+					STARENGINE_LOG_TAG);
 			float32 posMinVol = float32(SL_MILLIBEL_MIN) * -1.0f;
 			float32 volume =
 					float32(actualMillibelLevel + posMinVol) /
@@ -389,8 +393,9 @@ namespace star
 			SLresult result = (*volumeItf)->SetMute(
 				volumeItf, SLboolean(muted)
 				);
-			ASSERT(result == SL_RESULT_SUCCESS,
-					_T("BaseSound::SetMuted: Couldn't set muted state!"));
+			Logger::GetInstance()->Log(result == SL_RESULT_SUCCESS,
+					_T("BaseSound::SetMuted: Couldn't set muted state!"),
+					STARENGINE_LOG_TAG);
 		}
 	}
 
@@ -406,8 +411,9 @@ namespace star
 			SLresult result = (*volumeItf)->GetMute(
 				volumeItf, &isMuted
 				);
-			ASSERT(result == SL_RESULT_SUCCESS,
-					_T("BaseSound::SetMuted: Couldn't get muted state!"));
+			Logger::GetInstance()->Log(result == SL_RESULT_SUCCESS,
+					_T("BaseSound::SetMuted: Couldn't get muted state!"),
+					STARENGINE_LOG_TAG);
 			return bool(isMuted);
 		}
 		return false;
