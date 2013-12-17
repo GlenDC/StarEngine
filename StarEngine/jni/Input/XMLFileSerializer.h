@@ -1,7 +1,7 @@
 #pragma once
 
 #include "..\defines.h"
-#include "..\Helpers\Filepath.h"
+#include "..\Helpers\FilePath.h"
 
 namespace star
 {
@@ -13,11 +13,17 @@ namespace star
 		XMLFileSerializer(const tstring & path);
 		~XMLFileSerializer();
 
-		void Write(XMLContainer & container);
+		void Write(XMLContainer & container, DirectoryMode mode = DEFAULT_DIRECTORY_MODE);
+		void Write(
+			XMLContainer & container,
+			const tstring & binaryPath,
+			DirectoryMode mode = DEFAULT_DIRECTORY_MODE
+			);
 
 	private:
-		Filepath m_File;
-		#define TAB _T("    ")
+		tstring m_File;
+
+		tstring WriteFile(XMLContainer & container);
 
 		void WriteAtributes(tstringstream & strstr, XMLContainer & element);
 		void WriteChild(tstringstream & strstr, XMLContainer & element, uint32 & tabs);

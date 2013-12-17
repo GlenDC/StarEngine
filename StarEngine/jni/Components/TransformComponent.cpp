@@ -10,12 +10,9 @@ namespace star
 	TransformComponent::TransformComponent(star::Object* parent):
 		m_IsChanged(TransformChanged::ALL),
 		m_Invalidate(false),
-		m_bRotationCenterChanged(false),
-		m_bRotationIsLocal(false),
 	#ifdef STAR2D
 		m_WorldPosition(0,0),
 		m_LocalPosition(0,0),
-		m_CenterPosition(0,0),
 	#else
 		m_WorldPosition(0,0,0),
 		m_LocalPosition(0,0,0),
@@ -25,6 +22,9 @@ namespace star
 	#ifdef STAR2D
 		m_WorldScale(1,1),
 		m_LocalScale(1,1),
+		m_CenterPosition(0,0),
+		m_IsMirroredX(false),
+		m_IsMirroredY(false),
 	#else
 		m_WorldScale(1,1,1),
 		m_LocalScale(1,1,1),
@@ -116,31 +116,15 @@ namespace star
 
 	void TransformComponent::Rotate(float32 rotation)
 	{
-		m_bRotationCenterChanged = false;
-		m_bRotationIsLocal = false;
 		m_LocalRotation = rotation;
 		m_IsChanged |= TransformChanged::ROTATION;
 	}
 
-	void TransformComponent::Rotate(float32 rotation, const pos& centerPoint)
+	void TransformComponent::Rotate(float32 rotation, const vec2& centerPoint)
 	{
-		m_bRotationCenterChanged = true;
-		m_bRotationIsLocal = false;
 		m_LocalRotation = rotation;
-		m_CenterPosition = centerPoint;
+		SetCenterPoint(centerPoint);
 		m_IsChanged |= TransformChanged::ROTATION;
-	}
-
-	void TransformComponent::RotateLocal(float32 rotation)
-	{
-		Rotate(rotation);
-		m_bRotationIsLocal = m_pParentObject->GetParent() != nullptr;
-	}
-
-	void TransformComponent::RotateLocal(float32 rotation, const pos& centerPoint)
-	{
-		Rotate(rotation, centerPoint);
-		m_bRotationIsLocal = m_pParentObject->GetParent() != nullptr;
 	}
 
 	void TransformComponent::Scale(const vec2 & scale)
@@ -171,6 +155,22 @@ namespace star
 		m_IsChanged |= TransformChanged::SCALE;
 	}
 
+	void TransformComponent::Mirror(bool x, bool y)
+	{
+		m_IsMirroredX = x;
+		m_IsMirroredY = y;
+	}
+
+	void TransformComponent::MirrorX(bool x)
+	{
+		m_IsMirroredX = x;
+	}
+
+	void TransformComponent::MirrorY(bool y)
+	{
+		m_IsMirroredY = y;
+	}
+
 	const pos & TransformComponent::GetWorldPosition()
 	{
 		return m_WorldPosition;
@@ -199,6 +199,83 @@ namespace star
 	const vec2 & TransformComponent::GetLocalScale()
 	{
 		return m_LocalScale;
+	}
+
+	void TransformComponent::SetCenterPoint(const vec2 & centerPoint)
+	{
+		m_CenterPosition = centerPoint;
+	}
+
+	void TransformComponent::SetCenterPoint(float32 x, float32 y)
+	{
+		m_CenterPosition.x = x;
+		m_CenterPosition.y = y;
+	}
+
+	void TransformComponent::SetCenterX(float32 x)
+	{
+		m_CenterPosition.x = x;
+	}
+
+	void TransformComponent::SetCenterY(float32 y)
+	{
+		m_CenterPosition.y = y;
+	}
+
+	void TransformComponent::SetDimensions(int32 x, int32 y)
+	{
+		m_Dimensions.x = x;
+		m_Dimensions.y = y;
+	}
+
+	void TransformComponent::SetDimensions(const ivec2 & dimensions)
+	{
+		m_Dimensions = dimensions;
+	}
+
+	void TransformComponent::SetDimensionsX(int32 x)
+	{
+		m_Dimensions.x = x;
+	}
+
+	void TransformComponent::SetDimensionsY(int32 y)
+	{
+		m_Dimensions.y = y;
+	}
+
+	void TransformComponent::SetDimensionsSafe(int32 x, int32 y)
+	{
+		SetDimensionsXSafe(x);
+		SetDimensionsYSafe(y);
+	}
+
+	void TransformComponent::SetDimensionsSafe(const ivec2 & dimensions)
+	{
+		SetDimensionsSafe(dimensions.x, dimensions.y);
+	}
+
+	void TransformComponent::SetDimensionsXSafe(int32 x)
+	{
+		if(x > m_Dimensions.x)
+		{
+			m_Dimensions.x = x;
+		}
+		else if(x < m_Dimensions.x)
+		{
+			m_pParentObject->RecalculateDimensions();
+		}
+	}
+
+	void TransformComponent::SetDimensionsYSafe(int32 y)
+	{
+		if(y > m_Dimensions.y)
+		{
+			m_Dimensions.y = y;
+		}
+		else if(y < m_Dimensions.y)
+		{
+			m_pParentObject->RecalculateDimensions();
+		}
 	}
 
 #else
@@ -430,6 +507,16 @@ namespace star
 		}
 
 		DecomposeMatrix(m_World, m_WorldPosition, m_WorldScale, m_WorldRotation);
+
+		if(m_IsMirroredX)
+		{
+			m_WorldPosition.x -= m_Dimensions.x;
+		}
+
+		if(m_IsMirroredY)
+		{
+			m_WorldPosition.y -= m_Dimensions.y;
+		}
 	}
 		
 	void TransformComponent::SingleUpdate(mat4 & world)
@@ -439,19 +526,41 @@ namespace star
 		matTrans = star::Translate(m_LocalPosition.pos3D());
 		matRot   = ToMat4(quat(vec3(0, 0, m_LocalRotation)));
 		matScale = star::Scale(vec3(m_LocalScale.x, m_LocalScale.y, 1.0f));
-			
-		if(m_bRotationCenterChanged)
-		{
-			m_bRotationCenterChanged = true;
-			vec3 centerPos(m_CenterPosition.x, m_CenterPosition.y, 0);
-			matC = star::Translate(-centerPos);
-			matCI = star::Translate(centerPos);
+		
+		vec3 centerPos(m_CenterPosition.x, m_CenterPosition.y, 0);
+		matC = star::Translate(-centerPos);
 
-			world = matTrans * matCI * matRot * matScale * matC;
-		}
-		else
+		world = matTrans * matRot * matScale * matC;
+
+		if(m_IsMirroredX || m_IsMirroredY)
 		{
-			world = matTrans * matRot * matScale;
+			world *= star::Translate(
+				m_Dimensions.x / 2.0f,
+				m_Dimensions.y / 2.0f,
+				0
+				);
+
+			if(m_IsMirroredX)
+			{
+				if(m_IsMirroredY)
+				{
+					world *= star::Scale(vec3(-1,-1,1));
+				}
+				else
+				{
+					world *= star::Scale(vec3(-1,1,1));
+				}
+			}
+			else
+			{
+				world *= star::Scale(vec3(1,-1,1));
+			}
+
+			world *= star::Translate(
+				m_Dimensions.x / -2.0f,
+				m_Dimensions.y / -2.0f,
+				0
+				);
 		}
 	}
 
