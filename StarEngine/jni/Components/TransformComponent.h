@@ -8,7 +8,7 @@ namespace star
 	struct Context;
 	class Object;
 
-	class TransformComponent final: public star::BaseComponent
+	class TransformComponent final: public BaseComponent
 	{
 	public:
 		enum TransformChanged : byte
@@ -42,15 +42,17 @@ namespace star
 		void MoveY(float32 y);
 
 		void Rotate(float32 rotation);
-		void Rotate(float32 rotation, const pos& centerPoint);
-		void RotateLocal(float32 rotation);
-		void RotateLocal(float32 rotation, const pos& centerPoint);
+		void Rotate(float32 rotation, const vec2& centerPoint);
 
 		void Scale(const vec2& scale);
 		void Scale(float32 x, float32 y);
 		void Scale(float32 u);
 		void ScaleX(float32 x);
 		void ScaleY(float32 y);
+
+		void Mirror(bool x, bool y);
+		void MirrorX(bool x);
+		void MirrorY(bool y);
 				
 		const pos& GetWorldPosition();
 		const pos& GetLocalPosition();
@@ -58,6 +60,21 @@ namespace star
 		float32 GetLocalRotation() const;
 		const vec2& GetWorldScale();
 		const vec2& GetLocalScale();
+
+		void SetCenterPoint(const vec2 & centerPoint);
+		void SetCenterPoint(float32 x, float32 y);
+		void SetCenterX(float32 x);
+		void SetCenterY(float32 y);
+
+		void SetDimensions(int32 x, int32 y);
+		void SetDimensions(const ivec2 & dimensions);
+		void SetDimensionsX(int32 x);
+		void SetDimensionsY(int32 y);
+
+		void SetDimensionsSafe(int32 x, int32 y);
+		void SetDimensionsSafe(const ivec2 & dimensions);
+		void SetDimensionsXSafe(int32 x);
+		void SetDimensionsYSafe(int32 y);
 #else
 		void Translate(const vec3& translation);
 		void Translate(float32 x, float32 y, float32 z);
@@ -106,16 +123,21 @@ namespace star
 
 		suchar m_IsChanged;
 		bool m_Invalidate;
-		bool m_bRotationCenterChanged, m_bRotationIsLocal;
 
 #ifdef STAR2D
-		pos m_WorldPosition, m_LocalPosition,m_CenterPosition;
+		pos m_WorldPosition, m_LocalPosition;
 		float32 m_WorldRotation, m_LocalRotation;
-		vec2 m_WorldScale, m_LocalScale;
+		vec2 
+			m_WorldScale,
+			m_LocalScale,
+			m_CenterPosition;
+		bool m_IsMirroredX;
+		bool m_IsMirroredY;
 #else
 		vec3 m_WorldPosition, m_LocalPosition;
 		quat m_WorldRotation, m_LocalRotation;
 		vec3 m_WorldScale, m_LocalScale;
+		// [TODO] add 3D mirroring!
 #endif
 		mat4 m_World;
 

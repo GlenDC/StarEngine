@@ -4,50 +4,70 @@
 #include <memory>
 #include "Shader.h"
 #include "../Components/Graphics/SpriteComponent.h"
-#include "../Assets/FontManager.h"
+#include "../Components/Graphics/TextComponent.h"
 
 namespace star
 {
 	class SpriteBatch final
 	{
 	public:
-		~SpriteBatch(void);
+		enum SpriteSortingMode
+		{
+			BackToFront,
+			FrontToBack,
+			TextureID
+		};
+
+		~SpriteBatch();
 		static SpriteBatch * GetInstance();
 
 		void Initialize();
 		void Flush();
-		void AddSpriteToQueue(const SpriteInfo& spriteInfo, bool bIsHud = false,  bool m_bIsUberHUD = false);
-		void AddTextToQueue(const TextDesc& text, bool bInFrontOfSprites);
-		void CleanUp();
+		void AddSpriteToQueue(const SpriteInfo* spriteInfo);
+		void AddTextToQueue(const TextInfo* text);
+
+		void SetSpriteSortingMode(SpriteSortingMode mode);
 
 	private:
-		SpriteBatch(void);
+		SpriteBatch();
 		void Begin();
 		void End();
-		void CreateSpriteQuad(const std::vector<SpriteInfo>& spriteQueue);
-		void FlushSprites(const std::vector<SpriteInfo>& spriteQueue);
-		void FlushText(const TextDesc& textDesc);
-		void FlushText(const std::vector<sstring>& text, const tstring& fontname,TransformComponent* transform, const Color& color);
+		void CreateSpriteQuads();
+		void CreateTextQuads();
+		void SortSprites(SpriteSortingMode mode);
+		void DrawSprites();
+		void FlushSprites(uint32 start, uint32 size, uint32 texture);
+		void DrawTextSprites();
 
 		static SpriteBatch * m_pSpriteBatch;
-		static const int32 BATCHSIZE = 50;
+		static const uint32 BATCHSIZE = 50;
+		static const uint32 VERTEX_AMOUNT = 18;
+		static const uint32 UV_AMOUNT = 12;
+		static const uint32 FIRST_REAL_ASCII_CHAR = 31;
 
-		std::vector<SpriteInfo> m_SpriteQueue,
-								m_HudSpriteQueue,
-								m_UberHudSpriteQueue;
-		std::vector<TextDesc> m_TextBackQueue,
-							  m_TextFrontQueue,
-							  m_HUDTextQueue;
-		std::vector<GLfloat> m_VertexBuffer,
-							 m_HUDVertexBuffer;
-		std::vector<GLfloat> m_UvCoordBuffer,
-							 m_HUDUvCoordBuffer;
-		std::vector<mat4> m_WorldMatBuffer;
-		int32 m_CurrentSprite,
-			m_CurrentHudSprite;
-		Shader m_Shader;	
+		std::vector<const SpriteInfo*> m_SpriteQueue;
+		std::vector<const TextInfo*> m_TextQueue;
 
-		//disabling default copy constructor
+		//[TODO] Check if can be changed to vector<vec4 or vec2>
+		std::vector<vec4> m_VertexBuffer;
+		std::vector<float32> m_UvCoordBuffer;
+		std::vector<float32> m_IsHUDBuffer;
+		std::vector<Color> m_ColorBuffer;
+		
+		GLuint m_VertexID,
+			   m_UVID,
+			   m_IsHUDID;
+
+		GLuint	m_TextureSamplerID,
+				m_ColorID,
+				m_ScalingID,
+				m_ViewInverseID,
+				m_ProjectionID;
+
+		Shader* m_ShaderPtr;	
+
+		SpriteSortingMode m_SpriteSortingMode;
+
 		SpriteBatch(const SpriteBatch& yRef);
 		SpriteBatch(SpriteBatch&& yRef);
 		SpriteBatch& operator=(const SpriteBatch& yRef);
