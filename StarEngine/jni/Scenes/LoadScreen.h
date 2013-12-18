@@ -2,7 +2,7 @@
 
 #include "../defines.h"
 #include "../Graphics/Shader.h"
-#include "../Helpers/Filepath.h"
+#include "../Helpers/FilePath.h"
 #ifdef _WIN32
 #else
 #include <GLES2/gl2.h>
@@ -25,14 +25,16 @@ namespace star
 		void CreateSquare();
 
 		Shader m_Shader;
-		Filepath m_FilePath;
+		FilePath m_FilePath;
 		tstring m_SpriteName;
 		
 		int32 m_Width;
-		int32 m_Heigth;
+		int32 m_Height;
 
 		GLfloat m_Vertices[8];
 		GLfloat m_UvCoords[8];
+
+		GLint m_TextureId;
 
 	private:
 		LoadScreen(const LoadScreen &);

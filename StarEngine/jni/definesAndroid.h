@@ -7,6 +7,10 @@
 typedef uint8_t		BYTE, byte;
 typedef uint8_t *        PBYTE;
 
+/// <summary>
+/// A point data structure that contains 2 integer values
+/// representing the x and y values of a position.
+/// </summary>
 typedef struct myPoint
 {
 	int32_t  x;
@@ -27,8 +31,15 @@ typedef struct myPoint
 		LocalAssert(bool isOK, const tchar* message=_T("")) { \
 		if ( !isOK ) { \
 		tstringstream buffer; \
-		buffer << _T("ERROR!! Assert failed on line ") << LocalAssert().mLine << _T(" in file '") << __FILE__ << std::endl << _T("Message: \"") << message << _T("\"\n"); \
-		__android_log_assert(_T("ASSERT"), ANDROID_LOG_TAG, "%s", buffer.str().c_str()); \
+		buffer << _T("ERROR!! Assert failed on line "); \
+		buffer << LocalAssert().mLine << _T(" in file '"); \
+		buffer << __FILE__ << std::endl << _T("Message: \""); \
+		buffer << message << _T("\"\n"); \
+		__android_log_assert( \
+			_T("ASSERT"), \
+			STARENGINE_LOG_TAG.c_str(), \
+			"%s", \
+			buffer.str().c_str()); \
 		} \
 	} \
 	} myAsserter = LocalAssert
@@ -41,8 +52,15 @@ typedef struct myPoint
 		LocalAssert(bool isOK, const schar* message="") { \
 		if ( !isOK ) { \
 		sstringstream buffer; \
-		buffer << "ERROR!! Assert failed on line " << LocalAssert().mLine << " in file '" << __FILE__ << std::endl << "Message: \"" << message << "\"\n"; \
-		__android_log_assert("ASSERT", ANDROID_LOG_TAG, "%s", buffer.str().c_str()); \
+		buffer << "ERROR!! Assert failed on line "; \
+		buffer << LocalAssert().mLine << " in file '"; \
+		buffer << __FILE__ << std::endl << "Message: \""; \
+		buffer << message << "\"\n"; \
+		__android_log_assert( \
+			"ASSERT", \
+			STARENGINE_LOG_TAG, \
+			"%s", \
+			buffer.str().c_str()); \
 		} \
 	} \
 	} myAsserter = LocalAssert
