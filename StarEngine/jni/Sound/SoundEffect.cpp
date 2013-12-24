@@ -1,9 +1,9 @@
 #include "SoundEffect.h"
 #include "AudioManager.h"
 #include "../Logger.h"
-#include "../Assets/Resource.h"
+#include "../Graphics/Resource.h"
 #include "../Helpers/Helpers.h"
-#include "../Helpers/Filepath.h"
+#include "../Helpers/FilePath.h"
 #include "../Helpers/Math.h"
 
 #ifdef ANDROID
@@ -12,14 +12,9 @@
 
 namespace star
 {
-	#ifdef DESKTOP
-	int32 SoundEffect::PLAY_CHANNELS = 0;
-	#endif
-
 	SoundEffect::SoundEffect(const tstring& path, uint8 channel)
 		: BaseSound(channel)
 	#ifdef DESKTOP
-		, mPlayChannel(PLAY_CHANNELS++)
 		, mpSound(nullptr)
 	#else
 		, mPlayerObjs(MAX_SAMPLES)
@@ -34,14 +29,15 @@ namespace star
 			mLoopTimes.push_back(0);
 		}
 	#else
-		Filepath real_path(path);
+		FilePath real_path(path);
 		sstring sound_path = string_cast<sstring>(real_path.GetAssetsPath());
 		mpSound = Mix_LoadWAV(sound_path.c_str());
 		if(!mpSound)
 		{
 			star::Logger::GetInstance()->Log(star::LogLevel::Error,
 				_T("SoundEffect: Could not load sound, reason : ")
-				+ string_cast<tstring>(Mix_GetError()));
+				+ string_cast<tstring>(Mix_GetError()),
+				STARENGINE_LOG_TAG);
 		}
 	#endif
 		SetChannel(channel);
@@ -50,7 +46,11 @@ namespace star
 	SoundEffect::~SoundEffect()
 	{
 	#ifdef DESKTOP
-		Mix_HaltChannel(mPlayChannel);
+		for(auto it : mPlayChannels)
+		{
+			Mix_HaltChannel(it);
+		}
+		mPlayChannels.clear();
 	#else
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
 		{
@@ -67,7 +67,7 @@ namespace star
 	{
 		BaseSound::Play(loopTime);
 	#ifdef DESKTOP
-		Mix_PlayChannel(mPlayChannel, mpSound, loopTime);
+		mPlayChannels.push_back(Mix_PlayChannel(-1, mpSound, loopTime));
 	#else
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
 		{
@@ -80,7 +80,7 @@ namespace star
 				if (lRes != SL_RESULT_SUCCESS)
 				{
 					star::Logger::GetInstance()->Log(star::LogLevel::Error,
-						_T("SoundEffect: Can't play audio!"));
+						_T("SoundEffect: Can't play audio!"), STARENGINE_LOG_TAG);
 					Stop();
 					return;
 				};
@@ -94,7 +94,11 @@ namespace star
 	{
 		BaseSound::Stop();
 #ifdef DESKTOP
-		Mix_HaltChannel(mPlayChannel);
+		for(auto it : mPlayChannels)
+		{
+			Mix_HaltChannel(it);
+		}
+		mPlayChannels.clear();
 #else	
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
 		{
@@ -107,7 +111,10 @@ namespace star
 	{
 		BaseSound::Pause();
 #ifdef DESKTOP
-		Mix_Pause(mPlayChannel);
+		for(auto it : mPlayChannels)
+		{
+			Mix_Pause(it);
+		}
 #else
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
 		{
@@ -128,7 +135,10 @@ namespace star
 	{
 		BaseSound::Resume();
 #ifdef DESKTOP
-		Mix_Resume(mPlayChannel);
+		for(auto it : mPlayChannels)
+		{
+			Mix_Resume(it);
+		}
 #else
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
 		{
@@ -174,7 +184,8 @@ namespace star
 		}
 		else
 		{
-			float32 volume = float32(Mix_Volume(mPlayChannel, -1));
+			if(mPlayChannels.size()==0)return 0;
+			float32 volume = float32(Mix_Volume(mPlayChannels[0], -1));
 			return volume / float32(MIX_MAX_VOLUME);
 		}
 #endif
@@ -204,7 +215,10 @@ namespace star
 #ifdef DESKTOP
 	void SoundEffect::SetSoundVolume(int32 volume)
 	{
-		Mix_Volume(mPlayChannel, volume);
+		for(auto it : mPlayChannels)
+		{
+			Mix_Volume(it, volume);
+		}
 	}
 #else
 	void SoundEffect::RegisterCallback(SLPlayItf & player)
@@ -214,7 +228,8 @@ namespace star
 			this) != SL_RESULT_SUCCESS)
 		{
 			star::Logger::GetInstance()->Log(star::LogLevel::Error,
-				_T("SoundEffect::RegisterCallback: unable to register the class-defined callback function."));
+				_T("SoundEffect::RegisterCallback: unable to register the class-defined callback function."),
+				STARENGINE_LOG_TAG);
 		}
 	}
 
