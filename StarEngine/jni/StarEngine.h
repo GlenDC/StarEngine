@@ -7,10 +7,13 @@
 #include <random>
 
 #ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 #include "android_native_app_glue.h"
 #include  <SLES/OpenSLES.h>
 #include  <SLES/OpenSLES_Android.h>
 #include  <SLES/OpenSLES_AndroidConfiguration.h>
+*/
 #elif defined(_WIN32)
 class Window;
 #endif
@@ -50,8 +53,11 @@ namespace star
 		void Quit();
 
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		void SetAndroidApp(android_app * app);
 		android_app * GetAndroidApp() const;
+		*/
 #endif
 
 	private:
@@ -62,7 +68,10 @@ namespace star
 		std::mt19937 m_RandomEngine;
 
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		android_app *m_pAndroidApp;
+		*/
 #endif
 		bool m_bInitialized;
 		StarEngine();

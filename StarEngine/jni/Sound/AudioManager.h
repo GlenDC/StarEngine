@@ -180,8 +180,11 @@ namespace star
 		void DecreaseVolume(float32 volume);
 
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		const SLEngineItf& GetEngine() const;
 		const SLObjectItf& GetOutputMixObject() const;
+		*/
 #endif
 
 	private:
@@ -238,10 +241,13 @@ namespace star
 				mbEffectsMuted;
 
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		SLObjectItf mEngineObj;
 		SLEngineItf mEngine;
 		SLObjectItf mOutputMixObj;
 		SLVolumeItf mOutputMixVolume;
+		*/
 #endif
 		AudioManager(const AudioManager& yRef);
 		AudioManager(AudioManager&& yRef);

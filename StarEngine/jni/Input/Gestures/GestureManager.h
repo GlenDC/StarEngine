@@ -1,7 +1,8 @@
 #pragma once
-#ifdef _WIN32
-#else
+#ifdef ANDROID
+/*
 #include <android_native_app_glue.h>
+*/
 #endif
 #include <map>
 #include <memory>
@@ -27,7 +28,10 @@ namespace star
 #ifdef _WIN32
 		void OnUpdateWinInputState();
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		void OnTouchEvent(AInputEvent* pEvent);
+		*/
 #endif
 	private:
 		std::map<tstring, BaseGesture*> m_GestureMap;

@@ -15,8 +15,11 @@
 #ifdef DESKTOP
 #include <glew.h>
 #else
+/*
+//[TODO] Implent new android code (2.0)
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+*/
 #endif
 
 namespace star

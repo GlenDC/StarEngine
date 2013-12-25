@@ -1,5 +1,6 @@
 #ifdef ANDROID
-
+/*
+//[TODO] Implent new android code (2.0)
 #include "EventLoop.h"
 #include "Logger.h"
 #include "Scenes/SceneManager.h"
@@ -217,4 +218,5 @@ namespace star {
 		return SceneManager::GetInstance()->processInputEvent(pEvent);
 	}
 }
+*/
 #endif

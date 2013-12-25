@@ -7,7 +7,10 @@
 #ifdef DESKTOP
 #include <glew.h>
 #else
+/*
+//[TODO] Implent new android code (2.0)
 #include "GLES/gl.h"
+*/
 #endif
 
 namespace star
@@ -29,7 +32,6 @@ namespace star
 		bool ReloadAllTextures();
 
 	private:
-		//Data Members
 		static TextureManager * mTextureManager;
 		std::map<tstring, std::shared_ptr<Texture2D>> mTextureMap;
 		std::map<tstring,tstring> mPathList;

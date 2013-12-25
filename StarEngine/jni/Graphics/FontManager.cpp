@@ -10,7 +10,10 @@
 #include "../Helpers/Math.h"
 
 #ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 #include "../StarEngine.h"
+*/
 #endif
 
 namespace star 

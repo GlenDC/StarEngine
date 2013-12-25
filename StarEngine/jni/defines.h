@@ -40,7 +40,10 @@ static const tstring GAME_LOG_TAG = _T("GAME");
 #endif
 
 #ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 #include "definesAndroid.h"
+*/
 #endif
 
 #ifdef _WIN32

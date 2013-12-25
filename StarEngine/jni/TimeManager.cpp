@@ -10,9 +10,12 @@ namespace star
 		,mF1()
 		,mF2()
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		:mF1(0)
 		,mF2(0)
 		,mElapsed(0)
+		*/
 #endif
 		,mDeltaMs(0)
 		,mDeltaS(0)
@@ -32,9 +35,12 @@ namespace star
 #ifdef _WIN32
 		QueryPerformanceCounter(&mF1);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		timespec lTimeVal;
 		clock_gettime(CLOCK_MONOTONIC, &lTimeVal);
 		mF1 = lTimeVal.tv_sec + (lTimeVal.tv_nsec*NSMULTIPLIER);
+		*/
 #endif
 	}
 
@@ -48,12 +54,15 @@ namespace star
 		mDeltaMs = (mF2.QuadPart - mF1.QuadPart) * MILLIMULTIPLIER / mFrequency.QuadPart;
 		mDeltaS	 = (mF2.QuadPart - mF1.QuadPart) * SECONDMULTIPLIER / mFrequency.QuadPart;
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		timespec lTimeVal;
 		clock_gettime(CLOCK_MONOTONIC, &lTimeVal);
 		mF2 = lTimeVal.tv_sec + (lTimeVal.tv_nsec * NSMULTIPLIER);
 		mDeltauS = (mF2 - mF1) * MICROMULTIPLIER;
 		mDeltaMs = (mF2 - mF1) * MILLIMULTIPLIER;
 		mDeltaS  = (mF2 - mF1);
+		*/
 #endif
 		mTotalMS += mDeltaMs;
 	}

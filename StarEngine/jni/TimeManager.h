@@ -38,9 +38,12 @@ namespace star
 		LARGE_INTEGER	mF1,
 						mF2;
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		float64 	mF1,
 				mF2;
 		float32 mElapsed;
+		*/
 #endif
 
 		float64	mDeltaMs,

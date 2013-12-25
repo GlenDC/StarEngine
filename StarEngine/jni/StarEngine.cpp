@@ -42,7 +42,7 @@ namespace star
 #ifdef DESKTOP
 		GraphicsManager::GetInstance()->Initialize(window_width,window_height);
 #endif
-
+		
 		AudioManager::GetInstance()->Start();
 		GraphicsManager::GetInstance()->CalculateViewPort();
 		DebugDraw::GetInstance()->Initialize();
@@ -144,11 +144,16 @@ namespace star
 #ifdef _WIN32
 		PostQuitMessage(0);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		ANativeActivity_finish(m_pAndroidApp->activity);
+		*/
 #endif
 	}
 
 #ifdef ANDROID
+	/*
+	//[TODO] Implent new android code (2.0)
 	void StarEngine::SetAndroidApp(android_app * app)
 	{
 		m_pAndroidApp = app;
@@ -158,6 +163,7 @@ namespace star
 	{
 		return m_pAndroidApp;
 	}
+	*/
 #endif
 
 	StarEngine::StarEngine()

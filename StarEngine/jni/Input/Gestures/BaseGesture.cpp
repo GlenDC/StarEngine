@@ -28,6 +28,8 @@ namespace star
 			//Use everything from the WinInputState struct at your will to define your gestures.
 		}
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		void BaseGesture::OnTouchEventBase(AInputEvent* pEvent)
 		{
 			m_bCompletedGesture = false;
@@ -42,31 +44,29 @@ namespace star
 			// If you want to use Gestures for android.
 			//***********************************************
 
-			/*
+			//int32 action = AMotionEvent_getAction(pEvent);
+			//uint32 flags = action & AMOTION_EVENT_ACTION_MASK;
+			//switch(flags)
+			//{
+			//case AMOTION_EVENT_ACTION_DOWN:
+			//	break;
+			//case AMOTION_EVENT_ACTION_UP:
+			//	break;
+			//case AMOTION_EVENT_ACTION_MOVE:
+			//	break;
+			//case AMOTION_EVENT_ACTION_CANCEL:
+			//	break;
+			//case AMOTION_EVENT_ACTION_POINTER_DOWN:
+			//	break;
+			//case AMOTION_EVENT_ACTION_POINTER_UP:
+			//	break;
+			//case AMOTION_EVENT_ACTION_OUTSIDE:
+			//	break;
+			//}
 
-			int32 action = AMotionEvent_getAction(pEvent);
-			uint32 flags = action & AMOTION_EVENT_ACTION_MASK;
-			switch(flags)
-			{
-			case AMOTION_EVENT_ACTION_DOWN:
-				break;
-			case AMOTION_EVENT_ACTION_UP:
-				break;
-			case AMOTION_EVENT_ACTION_MOVE:
-				break;
-			case AMOTION_EVENT_ACTION_CANCEL:
-				break;
-			case AMOTION_EVENT_ACTION_POINTER_DOWN:
-				break;
-			case AMOTION_EVENT_ACTION_POINTER_UP:
-				break;
-			case AMOTION_EVENT_ACTION_OUTSIDE:
-				break;
-			}
-
-			*/
+			
 		}
-
+*/
 #endif
 		void BaseGesture::Update(const Context& context)
 		{

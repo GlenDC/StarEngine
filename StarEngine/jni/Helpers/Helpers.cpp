@@ -12,8 +12,11 @@
 #endif
 
 #ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 #include "HelpersAndroid.h"
 #include "../StarEngine.h"
+*/
 #endif
 
 namespace star
@@ -763,6 +766,8 @@ namespace star
 			DirectoryMode directory)
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		if(directory == DirectoryMode::assets)
 		{
 			SerializedData data;
@@ -801,6 +806,7 @@ namespace star
 				myfile.close();
 			}
 		}
+		*/
 #else
 		tifstream myfile;
 		tstring file_path(EMPTY_STRING);
@@ -829,6 +835,8 @@ namespace star
 	{
 		bool succes(false);
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		if(directory == DirectoryMode::assets)
 		{
 			SerializedData data;
@@ -878,6 +886,7 @@ namespace star
 						strstr.str() + _T("'."), STARENGINE_LOG_TAG);
 			}
 		}
+		*/
 #else
 		tifstream myfile;
 		tstring file_path(EMPTY_STRING);
@@ -915,6 +924,8 @@ namespace star
 			DirectoryMode directory)
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		bool succesfull = directory != DirectoryMode::assets;
 		Logger::GetInstance()->Log(succesfull,
 			_T("Android doesn't support writing to a text file in the assets directory."),
@@ -943,6 +954,7 @@ namespace star
 				myfile.close();
 			}
 		}
+		*/
 #else
 		tstring file_path(EMPTY_STRING);
 		FilePath::GetCorrectPath(file, file_path, directory);
@@ -963,6 +975,8 @@ namespace star
 			DirectoryMode directory)
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		bool succesfull = directory != DirectoryMode::assets;
 		Logger::GetInstance()->Log(succesfull,
 			_T("Android doesn't support writing to a text file in the assets directory."),
@@ -991,6 +1005,7 @@ namespace star
 				myfile.close();
 			}
 		}
+		*/
 #else
 		tstring file_path(EMPTY_STRING);
 		FilePath::GetCorrectPath(file, file_path, directory);
@@ -1011,6 +1026,8 @@ namespace star
 			DirectoryMode directory)
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		if(directory == DirectoryMode::assets)
 		{
 			SerializedData data;
@@ -1050,6 +1067,7 @@ namespace star
 			}
 			return buffer;
 		}
+		*/
 #else
 		tstring file_path(EMPTY_STRING);
 		FilePath::GetCorrectPath(file, file_path, directory);
@@ -1077,6 +1095,8 @@ namespace star
 		uint32 & size, DirectoryMode directory, bool logWarning)
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		if(directory == DirectoryMode::assets)
 		{
 			SerializedData data;
@@ -1119,6 +1139,7 @@ namespace star
 			}
 			return succes;
 		}
+		*/
 #else
 		tstring file_path(EMPTY_STRING);
 		FilePath::GetCorrectPath(file, file_path, directory);
@@ -1148,6 +1169,8 @@ namespace star
 			DirectoryMode directory)
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		bool succesfull = directory != DirectoryMode::assets;
 		Logger::GetInstance()->Log(succesfull,
 			_T("Android doesn't support writing to a binary file in the assets directory."),
@@ -1181,6 +1204,7 @@ namespace star
 				binary_file.close();
 			}
 		}
+		*/
 #else
 		tstring file_path(EMPTY_STRING);
 		FilePath::GetCorrectPath(file, file_path, directory);
@@ -1205,6 +1229,8 @@ namespace star
 			DirectoryMode directory)
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		bool succesfull = directory != DirectoryMode::assets;
 		Logger::GetInstance()->Log(succesfull,
 			_T("Android doesn't support writing to a binary file in the assets directory."),
@@ -1237,6 +1263,7 @@ namespace star
 				binary_file.close();
 			}
 		}
+		*/
 #else
 		tstring file_path(EMPTY_STRING);
 		FilePath::GetCorrectPath(file, file_path, directory);

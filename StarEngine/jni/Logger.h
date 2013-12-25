@@ -23,7 +23,10 @@ namespace star
 #ifdef _WIN32
 		void Initialize(bool useConsole);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		void Initialize();
+		*/
 #endif
 		void Update(const Context & context);
 

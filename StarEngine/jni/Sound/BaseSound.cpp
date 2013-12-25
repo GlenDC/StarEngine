@@ -7,17 +7,23 @@
 #include "../Helpers/Math.h"
 
 #ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 #include "../StarEngine.h"
+*/
 #endif
 
 
 namespace star
 {
 #ifdef ANDROID
+	/*
+	//[TODO] Implent new android code (2.0)
 	const SLInterfaceID BaseSound::PLAYER_ID_ARR[] = 
 		{SL_IID_PLAY, SL_IID_SEEK, SL_IID_VOLUME};
 	const SLboolean BaseSound::PLAYER_REQ_ARR[] =
 		{SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+	*/
 #endif
 
 	BaseSound::~BaseSound()
@@ -156,7 +162,10 @@ namespace star
 		, mIsMuted(false)
 		, mVolume(1)
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		, mPath(EMPTY_STRING)
+		*/
 #endif
 		, mChannel(0)
 		, mSoundVolume()
@@ -166,6 +175,8 @@ namespace star
 	}
 
 #ifdef ANDROID
+	/*
+	//[TODO] Implent new android code (2.0)
 	void BaseSound::CreateSoundDetails()
 	{
 
@@ -418,6 +429,7 @@ namespace star
 		}
 		return false;
 	}
+	*/
 #else
 	void BaseSound::SetSoundMuted(bool muted)
 	{

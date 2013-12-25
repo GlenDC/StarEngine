@@ -22,7 +22,10 @@ namespace star
 		virtual void UnsetChannel();
 
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		void SetVolume(float32 volume);
+		*/
 #endif
 		float32 GetVolume() const;
 
@@ -34,6 +37,8 @@ namespace star
 		void SetSoundVolume(int32 volume);
 		static void MusicStoppedCallback();
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		void CreateSoundDetails();
 		void RegisterCallback(SLPlayItf & player);
 
@@ -42,15 +47,19 @@ namespace star
 			void *pContext,
 			SLuint32 event
 			);
+			*/
 #endif
 
 	private:
 		int32 mLoopTimes;
 		bool mbQueuedPlay;
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		SLObjectItf mPlayerObj;
 		SLPlayItf mPlayer;
 		SLSeekItf mPlayerSeek;
+		*/
 #else
 		Mix_Music * mpSound;
 #endif

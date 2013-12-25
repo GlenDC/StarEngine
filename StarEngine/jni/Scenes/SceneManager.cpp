@@ -31,7 +31,10 @@ namespace star
 		, m_CurrentSceneName(EMPTY_STRING)
 		, m_pDefaultCursor(nullptr)
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		, mApplicationPtr(nullptr)
+		*/
 #endif
 	{
 		m_Stopwatch = std::make_shared<Stopwatch>();
@@ -260,10 +263,13 @@ namespace star
 		m_pDefaultCursor->BaseInitialize();
 		m_bCustomCursorDefined = true;
 #ifdef MOBILE
+		/*
+		//[TODO] Implent new android code (2.0)
 		Logger::GetInstance()->Log(LogLevel::Warning,
 			tstring(_T("SceneManager::SetDefaultCursor: Cursor isn't supported on mobile device."))
 			+ _T(" For optimialisation reasons it's better to disable the code related to\
 the custom cursor code in your game project."), STARENGINE_LOG_TAG);
+*/
 #endif
 	}
 
@@ -272,10 +278,13 @@ the custom cursor code in your game project."), STARENGINE_LOG_TAG);
 		SafeDelete(m_pDefaultCursor);
 		SetSystemCursorHiddenByDefault(false);
 #ifdef MOBILE
+		/*
+		//[TODO] Implent new android code (2.0)
 		Logger::GetInstance()->Log(LogLevel::Warning,
 			tstring(_T("SceneManager::UnsetDefaultCursor: Cursor isn't supported on mobile device."))
 			+ _T(" For optimialisation reasons it's better to disable the code related to\
 the custom cursor code in your game project."), STARENGINE_LOG_TAG);
+*/
 #endif
 		CreateDefaultCursor();
 	}
@@ -311,7 +320,8 @@ the custom cursor code in your game project."), STARENGINE_LOG_TAG);
 	}
 
 #ifdef ANDROID
-
+	/*
+	//[TODO] Implent new android code (2.0)
 	void SceneManager::processActivityEvent(int32 pCommand, android_app* pApplication)
 	{
 		if(m_ActiveScene == nullptr)
@@ -368,5 +378,6 @@ the custom cursor code in your game project."), STARENGINE_LOG_TAG);
 		}
 		return false;
 	}
+	*/
 #endif
 }

@@ -7,7 +7,10 @@
 #include "../Helpers/Math.h"
 
 #ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 #include "../StarEngine.h"
+*/
 #endif
 
 namespace star
@@ -17,17 +20,23 @@ namespace star
 	#ifdef DESKTOP
 		, mpSound(nullptr)
 	#else
+		/*
+		//[TODO] Implent new android code (2.0)
 		, mPlayerObjs(MAX_SAMPLES)
 		, mPlayers(MAX_SAMPLES)
+		*/
 	#endif
 	{
 	#ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		SLEngineItf engine = AudioManager::GetInstance()->GetEngine();
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
 		{
 			CreateSound(mPlayerObjs[i], engine, mPlayers[i], path);
 			mLoopTimes.push_back(0);
 		}
+		*/
 	#else
 		FilePath real_path(path);
 		sstring sound_path = string_cast<sstring>(real_path.GetAssetsPath());
@@ -52,10 +61,13 @@ namespace star
 		}
 		mPlayChannels.clear();
 	#else
+		/*
+		//[TODO] Implent new android code (2.0)
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
 		{
 			DestroySound(mPlayerObjs[i], mPlayers[i]);
 		}
+		*/
 	#endif
 		if(!mNoChannelAssigned)
 		{
@@ -69,6 +81,8 @@ namespace star
 	#ifdef DESKTOP
 		mPlayChannels.push_back(Mix_PlayChannel(-1, mpSound, loopTime));
 	#else
+		/*
+		//[TODO] Implent new android code (2.0)
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
 		{
 			SLresult lRes;
@@ -87,6 +101,7 @@ namespace star
 				return;
 			}
 		}
+		*/
 #endif
 	}
 
@@ -100,10 +115,13 @@ namespace star
 		}
 		mPlayChannels.clear();
 #else	
+		/*
+		//[TODO] Implent new android code (2.0)
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
 		{
 			(*mPlayers[i])->SetPlayState(mPlayers[i], SL_PLAYSTATE_STOPPED);
 		}
+		*/
 #endif
 	}
 	
@@ -116,6 +134,8 @@ namespace star
 			Mix_Pause(it);
 		}
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
 		{
 			SLresult lres = (*mPlayers[i])->GetPlayState(
@@ -128,6 +148,7 @@ namespace star
 					);
 			}
 		}
+		*/
 #endif
 	}
 
@@ -140,10 +161,13 @@ namespace star
 			Mix_Resume(it);
 		}
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
 		{
 			ResumeSound(mPlayers[i]);
 		}
+		*/
 #endif
 	}
 
@@ -160,6 +184,8 @@ namespace star
 	}
 
 #ifdef ANDROID
+	/*
+	//[TODO] Implent new android code (2.0)
 	void SoundEffect::SetVolume(float32 volume)
 	{
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
@@ -171,12 +197,16 @@ namespace star
 				);
 		}
 	}
+	*/
 #endif
 
 	float32 SoundEffect::GetVolume() const
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		return GetSoundVolume(mPlayerObjs[0], mPlayers[0]);
+		*/
 #else
 		if(mIsMuted)
 		{
@@ -194,10 +224,13 @@ namespace star
 	void SoundEffect::SetMuted(bool muted)
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		for(int32 i = 0 ; i < MAX_SAMPLES ; ++i)
 		{
 			SetSoundMuted(mPlayerObjs[i], mPlayers[i], muted);
 		}
+		*/
 #else
 		SetSoundMuted(muted);
 #endif
@@ -206,7 +239,10 @@ namespace star
 	bool SoundEffect::IsMuted() const
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		return GetSoundMuted(mPlayerObjs[0], mPlayers[0]);
+		*/
 #else
 		return mIsMuted;
 #endif
@@ -221,6 +257,8 @@ namespace star
 		}
 	}
 #else
+	/*
+	//[TODO] Implent new android code (2.0)
 	void SoundEffect::RegisterCallback(SLPlayItf & player)
 	{
 		if((*player)->RegisterCallback(
@@ -264,5 +302,6 @@ namespace star
 			}
 		}
 	}
+	*/
 #endif
 }

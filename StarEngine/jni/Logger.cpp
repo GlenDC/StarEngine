@@ -4,12 +4,17 @@
 #include <stdio.h>
 #include "Console.h"
 #elif defined(ANDROID)
+/*
 #include <android/log.h>
+*/
 #endif
 #ifdef DESKTOP
 #include <glew.h>
 #else
+/*
+//[TODO] Implent new android code (2.0)
 #include <GLES2/gl2.h>
+*/
 #endif
 
 #include "Scenes/SceneManager.h"
@@ -29,7 +34,10 @@ namespace star
 		,m_UseConsole(false)
 		,m_LogStream()
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		:m_LogStream()
+		*/
 #endif
 		,m_TimeStamp(_T("00:00:00"))
 	{
@@ -67,12 +75,15 @@ namespace star
 #endif
 	}
 #else
+	/*
+	//[TODO] Implent new android code (2.0)
 	void Logger::Initialize()
 	{
 #ifndef NO_LOG_FILE
 		InitializeLogStream();
 #endif
 	}
+	*/
 #endif
 	
 	void Logger::Update(const Context & context)
@@ -237,6 +248,8 @@ namespace star
 		LogMessage(combinedMessage);
 		#endif
 	#else
+		/*
+		//[TODO] Implent new android code (2.0)
 		switch(level)
 		{
 		case LogLevel::Info:
@@ -267,6 +280,7 @@ namespace star
 		messageBuffer << _T("[") << tag << _T("] ") << _T("[") << levelName <<  _T("] ") << pMessage << std::endl;
 		LogMessage(messageBuffer.str());
 		#endif
+		*/
 	#endif
 #endif
 	}

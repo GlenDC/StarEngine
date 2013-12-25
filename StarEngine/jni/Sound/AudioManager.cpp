@@ -4,7 +4,10 @@
 #include "../Helpers/Math.h"
 
 #ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 #include "../Graphics/Resource.h"
+*/
 #endif
 
 namespace star
@@ -36,10 +39,13 @@ namespace star
 		, mbMusicMuted(false)
 		, mbEffectsMuted(false)
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		, mEngineObj(nullptr)
 		, mEngine(nullptr)
 		, mOutputMixObj(nullptr)
 		, mOutputMixVolume(nullptr)
+		*/
 #endif
 	{
 		mQueueIterator = mBackgroundQueue.begin();
@@ -114,7 +120,7 @@ namespace star
 			_T("Audio : SDL specs : ") + buffer.str(), STARENGINE_LOG_TAG);
 		Mix_Volume(-1,100);
 #else
-		
+		/*
 		SLresult lRes;
 		const SLuint32 lEngineMixIIDCount = 1;
 		const SLInterfaceID lEngineMixIIDs[] = { SL_IID_ENGINE };
@@ -202,6 +208,7 @@ namespace star
 		}
 		star::Logger::GetInstance()->Log(star::LogLevel::Info,
 			_T("Audio : Succesfull made Audio Engine"), STARENGINE_LOG_TAG);
+			*/
 #endif
 	}
 
@@ -215,6 +222,7 @@ namespace star
 		Mix_Quit();
 		SDL_Quit();
 #else
+		/*
 		if(mOutputMixObj != NULL)
 		{
 			(*mOutputMixObj)->Destroy(mOutputMixObj);
@@ -226,6 +234,7 @@ namespace star
 			mEngineObj = NULL;
 			mEngine = NULL;
 		}
+		*/
 #endif
 		star::Logger::GetInstance()->Log(star::LogLevel::Info,
 			_T("Audio : Stopped audio Engine"), STARENGINE_LOG_TAG);
@@ -1567,6 +1576,8 @@ namespace star
 	}
 
 #ifdef ANDROID
+	/*
+	//[TODO] Implent new android code (2.0)
 	const SLEngineItf& AudioManager::GetEngine() const
 	{
 		return mEngine;
@@ -1576,8 +1587,7 @@ namespace star
 	{
 		return mOutputMixObj;
 	}
-
-
+	*/
 #endif
 
 	AudioManager::SoundChannel::SoundChannel()

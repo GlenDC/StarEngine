@@ -1,8 +1,10 @@
 #pragma once
-#ifdef _WIN32
-#else
+#ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 #include <android/input.h>
 #include <android_native_app_glue.h>
+*/
 #endif
 #include "../../defines.h"
 #include <functional>
@@ -20,7 +22,10 @@ namespace star
 #ifdef _WIN32
 		void OnUpdateWinInputStateBase();
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		void OnTouchEventBase(AInputEvent* pEvent);
+		*/
 #endif
 		virtual void Update(const Context& context);
 		void EndUpdate();
@@ -31,7 +36,10 @@ namespace star
 #ifdef _WIN32
 		virtual void OnUpdateWinInputState();
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		virtual void OnTouchEvent(AInputEvent* pEvent);
+		*/
 #endif
 		bool m_bCompletedGesture;
 

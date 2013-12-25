@@ -11,7 +11,10 @@ namespace star
 			, mWidth(0)
 			, mHeight(0)
 #ifdef ANDROID
+			/*
+			//[TODO] Implent new android code (2.0)
 			, mResource(pPath)
+			*/
 #else
 			, mPath(pPath)
 #endif
@@ -19,6 +22,8 @@ namespace star
 		Load();
 	}
 #ifdef ANDROID
+	/*
+	//[TODO] Implent new android code (2.0)
 	void Texture2D::CallbackRead(png_structp png, png_bytep data, png_size_t size)
 	{
 		Resource& lReader = *((Resource*)png_get_io_ptr(png));
@@ -28,6 +33,7 @@ namespace star
 			png_error(png, "Error while reading PNG file");
 		}
 	}
+	*/
 #endif
 
 	Texture2D::~Texture2D()
@@ -68,6 +74,8 @@ namespace star
 
 		fread(header, 8, 1, fp);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		if(!mResource.Open())
 		{
 			mResource.Close();
@@ -83,6 +91,7 @@ namespace star
 				STARENGINE_LOG_TAG);
 			return NULL;
 		}
+		*/
 #endif
 
 		if(png_sig_cmp(header, 0, 8))
@@ -121,6 +130,8 @@ namespace star
 
 		png_init_io(lPngPtr, fp);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		png_set_read_fn(lPngPtr, &mResource, CallbackRead);
 		if(setjmp(png_jmpbuf(lPngPtr)))
 		{
@@ -129,6 +140,7 @@ namespace star
 				_T("PNG : Error during init io"), STARENGINE_LOG_TAG);
 			return NULL;
 		}
+		*/
 #endif
 		png_set_sig_bytes(lPngPtr, 8);
 		png_read_info(lPngPtr,lInfoPtr);
@@ -156,7 +168,10 @@ namespace star
 			lTransparency=true;
 
 #ifdef ANDROID
+			/*
+			//[TODO] Implent new android code (2.0)
 			mResource.Close();
+			*/
 #endif
 			delete [] lRowPtrs;
 			delete [] lImageBuffer;
@@ -245,7 +260,10 @@ namespace star
 #ifdef DESKTOP
 		fclose(fp);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		mResource.Close();
+		*/
 #endif
 		png_destroy_read_struct(&lPngPtr, &lInfoPtr, NULL);
 		delete[] lRowPtrs;
@@ -255,9 +273,12 @@ namespace star
 			_T("PNG : ") + mPath + _T(" Created Succesfull"),
 			STARENGINE_LOG_TAG);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		Logger::GetInstance()->DebugLog(LogLevel::Info,
 					_T("PNG : ") + mResource.GetPath() + _T(" Created Succesfull"),
 					STARENGINE_LOG_TAG);
+		*/
 #endif
 		return lImageBuffer;
 
@@ -335,7 +356,10 @@ namespace star
 #ifdef DESKTOP
 		return mPath;
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		return mResource.GetPath();
+		*/
 #endif
 	}
 

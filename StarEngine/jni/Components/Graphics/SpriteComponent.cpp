@@ -97,7 +97,10 @@ having a SpriteSheet- or TextComponent."));
 	{
 		//[COMMENT] Temp hotfix!
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		FillSpriteInfo();
+		*/
 #endif
 	}
 	

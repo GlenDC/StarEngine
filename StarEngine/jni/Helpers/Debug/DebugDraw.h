@@ -7,7 +7,10 @@
 #ifdef DESKTOP
 #include <gl\GL.h>
 #else
+/*
+//[TODO] Implent new android code (2.0)
 #include <GLES2/gl2.h>
+*/
 #endif
 
 namespace star  

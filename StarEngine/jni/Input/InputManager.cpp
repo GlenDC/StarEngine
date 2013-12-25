@@ -3,8 +3,11 @@
 #ifdef DESKTOP
 #include <future>
 #else
+/*
+//[TODO] Implent new android code (2.0)
 #include <cmath>
 #include <algorithm>
+*/
 #endif
 #include "../Logger.h"
 #include "../StarEngine.h"
@@ -22,7 +25,10 @@ namespace star
 #ifdef DESKTOP
 	const float32 InputManager::BYTE_TO_DOUBLE_VALUE = 255.0f;
 #else
+	/*
+	//[TODO] Implent new android code (2.0)
 	const float32 InputManager::UNDEFINED_POINTER_POSITION = -123456.0f;
+	*/
 #endif
 
 	InputManager * InputManager::m_InputManagerPtr = nullptr;
@@ -52,6 +58,7 @@ namespace star
 	{
 	}
 #else
+	/*
 	FingerPointerANDR::FingerPointerANDR():
 		Position(),
 		RawPosition(),
@@ -61,6 +68,7 @@ namespace star
 		ID(0)
 	{
 	}
+	*/
 #endif
 
 	InputManager::InputManager()
@@ -69,6 +77,8 @@ namespace star
 		, m_KeyboardState0Active(true)
 		, mWindowsHandle()
 	#else
+		/*
+		//[TODO] Implent new android code (2.0)
 		: m_bMainIsDown(false)
 		, m_bMainIsUp(false)
 		, m_bPointerIsDown(false)
@@ -80,6 +90,7 @@ namespace star
 		, m_OldPointerVec()
 		, m_OnBackButtonDown(nullptr)
 		, m_OnMenuButtonDown(nullptr)
+		*/
 	#endif
 		, m_GestureManager(nullptr)
 		, m_IndependantGestureManager(nullptr)
@@ -627,7 +638,8 @@ namespace star
 		}
 	}
 #else
-
+/*
+//[TODO] Implent new android code (2.0)
 	bool InputManager::IsTouchPressedANDR(uint8 fingerIndex) const
 	{
 		if(m_NumberOfPointers >= fingerIndex && (m_bMainIsDown || m_bPointerIsDown))
@@ -850,6 +862,7 @@ namespace star
 		}
 		return (FingerPointerANDR());
 	}
+	*/
 #endif
 
 	bool InputManager::IsFingerPressedCP(uint8 fingerIndex) const
@@ -858,7 +871,10 @@ namespace star
 #ifdef _WIN32
 		return IsMouseButtonPressedWIN(ConvertIndexToVK(fingerIndex));
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		return (IsTouchPressedANDR(fingerIndex));
+		*/
 #endif
 	}
 
@@ -868,7 +884,10 @@ namespace star
 #ifdef _WIN32
 		return IsMouseButtonDownWIN(ConvertIndexToVK(fingerIndex));
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		return (IsTouchDownANDR(fingerIndex));
+		*/
 #endif
 	}
 
@@ -878,7 +897,10 @@ namespace star
 #ifdef _WIN32
 		return IsMouseButtonReleasedWIN(ConvertIndexToVK(fingerIndex));
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		return (IsTouchReleasedANDR(fingerIndex));
+		*/
 #endif
 	}
 
@@ -888,7 +910,10 @@ namespace star
 #ifdef DESKTOP
 		return GetCurrentMousePosition();
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		return GetCurrentTouchPosANDR(fingerIndex);
+		*/
 #endif
 	}
 
@@ -898,7 +923,10 @@ namespace star
 #ifdef DESKTOP
 		return GetOldMousePosition();
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		return (GetOldTouchPosANDR(fingerIndex));
+		*/
 #endif
 	}
 

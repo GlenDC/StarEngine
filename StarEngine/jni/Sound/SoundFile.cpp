@@ -6,7 +6,10 @@
 #include "../Helpers/FilePath.h"
 
 #ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 #include "../StarEngine.h"
+*/
 #endif
 
 namespace star
@@ -16,16 +19,22 @@ namespace star
 		, mLoopTimes(0)
 		, mbQueuedPlay(false)
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		, mPlayerObj(nullptr)
 		, mPlayer(nullptr)
 		, mPlayerSeek(nullptr)
+		*/
 #else
 		, mpSound(nullptr)
 #endif
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		SLEngineItf engine = AudioManager::GetInstance()->GetEngine();
 		CreateSound(mPlayerObj, engine, mPlayer, path);
+		*/
 #else
 		FilePath real_path(path);
 		sstring sound_path = string_cast<sstring>(real_path.GetAssetsPath());
@@ -50,7 +59,10 @@ namespace star
 			mpSound = nullptr;
 		}
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		DestroySound(mPlayerObj, mPlayer);
+		*/
 #endif
 		if(!mNoChannelAssigned)
 		{
@@ -70,6 +82,8 @@ namespace star
 		Mix_HookMusicFinished(NULL);
 		Mix_PlayMusic(mpSound, mLoopTimes);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		SLresult lRes;
 		if(mLoopTimes == -1)
 		{
@@ -100,6 +114,7 @@ namespace star
 			Stop();
 			return;
 		};
+		*/
 #endif
 	}
 	
@@ -113,7 +128,10 @@ namespace star
 		Mix_HookMusicFinished(MusicStoppedCallback);
 		Mix_PlayMusic(mpSound, mLoopTimes);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		Play(mLoopTimes);
+		*/
 #endif
 	}
 
@@ -124,7 +142,10 @@ namespace star
 		Mix_PauseMusic();
 		Mix_RewindMusic();
 #else	
+		/*
+		//[TODO] Implent new android code (2.0)
 		(*mPlayer)->SetPlayState(mPlayer, SL_PLAYSTATE_STOPPED);
+		*/
 #endif
 	}
 
@@ -134,7 +155,10 @@ namespace star
 #ifdef DESKTOP
 		Mix_PauseMusic();
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		(*mPlayer)->SetPlayState(mPlayer, SL_PLAYSTATE_PAUSED);
+		*/
 #endif
 	}
 
@@ -144,7 +168,10 @@ namespace star
 #ifdef DESKTOP
 		Mix_ResumeMusic();
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		ResumeSound(mPlayer);
+		*/
 #endif
 	}
 
@@ -161,15 +188,21 @@ namespace star
 	}
 
 #ifdef ANDROID
+	/*
+	//[TODO] Implent new android code (2.0)
 	void SoundFile::SetVolume(float32 volume)
 	{
 		SetSoundVolume(mPlayerObj, mPlayer, volume);
 	}
+	*/
 #endif
 	float32 SoundFile::GetVolume() const
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		return GetSoundVolume(mPlayerObj, mPlayer);
+		*/
 #else
 		if(mIsMuted)
 		{
@@ -186,7 +219,10 @@ namespace star
 	void SoundFile::SetMuted(bool muted)
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		SetSoundMuted(mPlayerObj, mPlayer, muted);
+		*/
 #else
 		SetSoundMuted(muted);
 #endif
@@ -195,7 +231,10 @@ namespace star
 	bool SoundFile::IsMuted() const
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		return GetSoundMuted(mPlayerObj, mPlayer);
+		*/
 #else
 		return mIsMuted;
 #endif
@@ -212,6 +251,8 @@ namespace star
 		AudioManager::GetInstance()->PlayNextSongInQueue();
 	}
 #else
+	/*
+	//[TODO] Implent new android code (2.0)
 	void SoundFile::CreateSoundDetails()
 	{
 		SLresult lRes =
@@ -272,5 +313,6 @@ namespace star
 			file->Play(file->mLoopTimes);
 		}
 	}
+	*/
 #endif
 }

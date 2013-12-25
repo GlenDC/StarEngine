@@ -1,7 +1,8 @@
 #include "HelpersAndroid.h"
 
 #ifdef ANDROID
-
+/*
+//[TODO] Implent new android code (2.0)
 #include <memory>
 #include <android_native_app_glue.h>
 #include "../StarEngine.h"
@@ -52,5 +53,5 @@ namespace star_a
 		return result;
 	}
 }
-
+*/
 #endif

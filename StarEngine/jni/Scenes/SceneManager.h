@@ -7,7 +7,10 @@
 #include <vector>
 
 #ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 #include <android_native_app_glue.h>
+*/
 #endif
 
 namespace star
@@ -52,11 +55,14 @@ namespace star
 		std::shared_ptr<Stopwatch> GetStopwatch() const;
 
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		void processActivityEvent(int32 pCommand, android_app* pApplication);
 		int32 processInputEvent(AInputEvent* pEvent);
 
 	private:
 		android_app* mApplicationPtr;
+		*/
 #endif
 	private:
 		static SceneManager * m_pSceneManager;

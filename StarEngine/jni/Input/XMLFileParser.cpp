@@ -7,7 +7,10 @@
 #include "..\Logger.h"
 
 #ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 #include "../Helpers/HelpersAndroid.h"
+*/
 #endif
 
 namespace star

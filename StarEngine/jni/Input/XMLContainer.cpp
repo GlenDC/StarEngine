@@ -165,8 +165,11 @@ namespace star
 				string_cast<sstring_16>(value);
 		#endif
 	#else
+		/*
+		//[TODO] Implent new android code (2.0)
 		sstring_16 wValue =
 				string_cast<sstring_16>(value);
+		*/
 	#endif
 		auto size = value.length() * sizeof(swchar);
 		uint8 extra(0);
@@ -179,7 +182,10 @@ namespace star
 		memcpy(*data, wValue.c_str(), size);
 		#endif
 	#else
+		/*
+		//[TODO] Implent new android code (2.0)
 		memcpy(*data, wValue.c_str(), size);
+		*/
 	#endif
 		if(end != NULL)
 		{
@@ -355,10 +361,13 @@ namespace star
 		str = string_cast<sstring>(stringBuffer);
 	#endif
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		sstring_16 stringBuffer;
 		stringBuffer.resize(size / sizeof(schar_16));
 		memcpy(&stringBuffer[0], &buffer[0], size);
 		str = string_cast<tstring>(stringBuffer);
+		*/
 #endif
 	}
 

@@ -1,5 +1,6 @@
 #ifdef ANDROID
-
+/*
+//[TODO] Implent new android code (2.0)
 #pragma once
 
 #include "defines.h"
@@ -44,4 +45,5 @@ namespace star
 		static int32 inputCallback(android_app* pApplication, AInputEvent* pEvent);
 	};
 }
+*/
 #endif

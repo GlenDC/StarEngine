@@ -11,8 +11,11 @@
 #ifdef DESKTOP
 #include <glew.h>
 #else
+/*
+//[TODO] Implent new android code (2.0)
 #include <GLES/gl.h>
 #include <GLES/glext.h>
+*/
 #endif
 
 namespace star
@@ -67,7 +70,10 @@ namespace star
 				mMinLetterHeight;
 
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		BYTE* mFontBuffer;
+		*/
 #endif
 		std::unordered_map<suchar, CharacterInfo> mCharacterInfoMap;
 		uint32 mSize;

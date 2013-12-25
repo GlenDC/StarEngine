@@ -6,12 +6,15 @@
 #include <stdlib.h>
 #include <glew.h>
 #else
+/*
+//[TODO] Implent new android code (2.0)
 #include <stdlib.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <iostream>
 #include <fstream>
 #include "../Graphics/Resource.h"
+*/
 #endif
 
 namespace star
@@ -133,7 +136,10 @@ namespace star
 		GLuint m_FragmentShader;
 
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		static const int32 ANDROID_ERROR_SIZE = 4096;
+		*/
 #endif
 
 		Shader(const Shader& t);

@@ -35,6 +35,8 @@ namespace star
 		sstring font_path = string_cast<sstring>(path);
 		FT_Error error = FT_New_Face(library,font_path.c_str(),0,&mFace);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		Resource resource(path);
 		if(!resource.Open())
 		{
@@ -59,6 +61,7 @@ namespace star
 
 		auto error = FT_New_Memory_Face(library,mFontBuffer,length,0,&mFace);
 		resource.Close();
+		*/
 #endif
 		if(error == FT_Err_Unknown_File_Format)
 		{
@@ -99,7 +102,10 @@ namespace star
 		glDeleteTextures(FONT_TEXTURES,mTextures);
 		delete[] mTextures;
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		delete [] mFontBuffer;
+		*/
 #endif
 	}
 
@@ -144,8 +150,11 @@ namespace star
 #ifdef DESKTOP
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		//For android "internal format" must be the same as "format" in glTexImage2D
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data);
+		*/
 #endif
 		Logger::GetInstance()->CheckGlError();
 		delete[] expanded_data;

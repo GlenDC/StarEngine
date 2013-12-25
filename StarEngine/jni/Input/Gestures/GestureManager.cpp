@@ -34,6 +34,8 @@ namespace star
 		}
 	}
 #else
+	/*
+	//[TODO] Implent new android code (2.0)
 	void GestureManager::OnTouchEvent(AInputEvent* pEvent)
 	{
 		if(!m_GestureMap.empty())
@@ -44,6 +46,7 @@ namespace star
 			}
 		}
 	}
+	*/
 #endif
 	
 	void GestureManager::AddGesture(BaseGesture* gesture, const tstring& tag)

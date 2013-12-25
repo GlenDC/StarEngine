@@ -1,7 +1,10 @@
 #pragma once
 #include "BaseGesture.h"
 #ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 #include <android_native_app_glue.h>
+*/
 #endif
 
 namespace star
@@ -30,7 +33,11 @@ namespace star
 	#ifdef _WIN32
 		virtual void OnUpdateWinInputState();
 	#else
+		/*
+		//[TODO] Implent new android code (2.0)
 		virtual void OnTouchEvent(AInputEvent* pEvent);
+		*/
+
 	#endif
 		void InitializeAllVars();
 

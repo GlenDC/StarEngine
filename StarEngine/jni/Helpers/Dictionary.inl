@@ -157,7 +157,10 @@ namespace star
 #ifdef DESKTOP
 		return (m_MultiMap.lower_bound(key));
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		return m_MultiMap.equal_range(key).first;
+		*/
 #endif
 	}
 
@@ -168,7 +171,10 @@ namespace star
 #ifdef DESKTOP
 		return (m_MultiMap.upper_bound(key));
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		return m_MultiMap.equal_range(key).second;
+		*/
 #endif
 	}
 

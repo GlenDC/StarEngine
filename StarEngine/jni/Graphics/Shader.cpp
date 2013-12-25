@@ -105,6 +105,8 @@ Failed To load Fragment Shader ") + string_cast<tstring>(inlineFrag),
 				
 			}
 #ifdef ANDROID
+			/*
+			//[TODO] Implent new android code (2.0)
 			else
 			{
 				schar* infoLog = new schar[ANDROID_ERROR_SIZE];
@@ -116,6 +118,7 @@ Failed To load Fragment Shader ") + string_cast<tstring>(inlineFrag),
 				delete infoLog;
 				
 			}
+			*/
 #endif
 			glDeleteProgram(m_ProgramID);
 			return false;
@@ -191,6 +194,8 @@ Could not compile shader of type ")
 				}
 			}
 #ifdef ANDROID
+			/*
+			//[TODO] Implent new android code (2.0)
 			else
 			{
 				//This is necessary due to an Android bug!
@@ -222,6 +227,7 @@ Could not compile shader of type ")
 					delete buf;
 				}
 			}
+			*/
 #endif
 			glDeleteShader(*shader);
 			shader = 0;

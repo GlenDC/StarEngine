@@ -101,6 +101,8 @@ namespace star
 		}
 	}
 	#else
+	/*
+	//[TODO] Implent new android code (2.0)
 	void SwipeGesture::OnTouchEvent(AInputEvent* pEvent)
 	{
 		int32 action = AMotionEvent_getAction(pEvent);
@@ -163,8 +165,9 @@ namespace star
 			break;
 		}
 	}
-
+	*/
 	#endif
+
 	void SwipeGesture::Update(const Context& context)
 	{
 		if(m_bIsGestureOk)

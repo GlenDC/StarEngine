@@ -7,10 +7,13 @@
 #include <glew.h>
 #include <wglext.h>
 #else
+/*
+//[TODO] Implent new android code (2.0)
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <EGL/egl.h>
 #include <android_native_app_glue.h>
+*/
 #endif
 
 namespace star
@@ -25,8 +28,11 @@ namespace star
 #ifdef DESKTOP
 		void Initialize(int32 screenWidth, int32 screenHeight);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		void Initialize(const android_app* pApplication);
 		void Destroy();
+		*/
 #endif
 
 		void StartDraw();
@@ -91,9 +97,12 @@ namespace star
 		bool mIsInitialized;
 
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		EGLDisplay mDisplay;
 		EGLSurface mSurface;
 		EGLContext mContext;
+		*/
 #endif
 
 		GraphicsManager(const GraphicsManager& yRef);

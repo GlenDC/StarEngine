@@ -11,11 +11,14 @@
 //#pragma warning (default : 4099)
 #include <glew.h>
 #else
+/*
+//[TODO] Implent new android code (2.0)
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 #include <png.h>
 #include <android_native_app_glue.h>
 #include "Resource.h"
+*/
 #endif
 
 
@@ -40,8 +43,11 @@ namespace star
 		GLint	mFormat;
 		int32 mWidth, mHeight;
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		Resource mResource;
 		static void CallbackRead(png_structp png, png_bytep data, png_size_t size);
+		*/
 #else
 		tstring mPath;
 #endif

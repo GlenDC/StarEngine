@@ -5,8 +5,11 @@
 #endif
 #include "../Logger.h"
 #ifdef ANDROID
+/*
+//[TODO] Implent new android code (2.0)
 	#include <android_native_app_glue.h>
 	#include "../StarEngine.h"
+*/
 #endif
 #include "../Helpers/Helpers.h"
 
@@ -137,9 +140,12 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 	#ifdef DESKTOP
 		internal_path = m_InternalRoot;
 	#else
+		/*
+		//[TODO] Implent new android code (2.0)
 		auto app = StarEngine::GetInstance()->GetAndroidApp();
 		internal_path = string_cast<tstring>(app->activity->internalDataPath);
 		internal_path += _T("/");
+		*/
 	#endif
 		internal_path += m_Path + m_File;
 		return internal_path;
@@ -151,9 +157,12 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 	#ifdef DESKTOP
 		external_path = m_ExternalRoot;
 	#else
+		/*
+		//[TODO] Implent new android code (2.0)
 		auto app = StarEngine::GetInstance()->GetAndroidApp();
 		external_path = string_cast<tstring>(app->activity->externalDataPath);
 		external_path += _T("/");
+		*/
 	#endif
 		external_path += m_Path + m_File;
 		return external_path;

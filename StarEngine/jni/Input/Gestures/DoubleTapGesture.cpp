@@ -75,6 +75,8 @@ namespace star
 		}
 	}
 	#else
+	/*
+	//[TODO] Implent new android code (2.0)
 	void DoubleTapGesture::OnTouchEvent(AInputEvent* pEvent)
 	{
 		int32 action = AMotionEvent_getAction(pEvent);
@@ -127,7 +129,7 @@ namespace star
 			}
 		}
 	}
-
+	*/
 	#endif
 
 	void DoubleTapGesture::Update(const Context& context)

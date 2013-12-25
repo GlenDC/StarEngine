@@ -13,7 +13,10 @@
 #endif
 
 #ifdef MOBILE
+/*
+//[TODO] Implent new android code (2.0)
 #include <GLES/gl.h>
+*/
 #endif
 
 namespace star
@@ -107,10 +110,13 @@ namespace star
 		{
 			mWglSwapIntervalEXT(1);
 		}
-	#else
+#else
+		/*
+		//[TODO] Implent new android code (2.0)
 		Logger::GetInstance()->Log(LogLevel::Warning, 
 			_T("Setting VSync on mobile is not supported. Default VSync is enabled"),
 			STARENGINE_LOG_TAG);
+		*/
 #endif
 	}
 
@@ -119,10 +125,13 @@ namespace star
 #ifdef DESKTOP
 		return !(mWglGetSwapIntervalEXT() == 0);
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		Logger::GetInstance()->Log(LogLevel::Warning, 
 			_T("Toggeling VSync on mobile is not supported. Default VSync is enabled"),
 			STARENGINE_LOG_TAG);
 		return true;
+		*/
 #endif
 	}
 
@@ -154,6 +163,8 @@ namespace star
 		}
 	}
 #else
+	/*
+	//[TODO] Implent new android code (2.0)
 	void GraphicsManager::Initialize(const android_app* pApplication)
 	{
 		if(!mIsInitialized)
@@ -264,6 +275,7 @@ namespace star
 			mIsInitialized = false;
 		}
 	}
+	*/
 #endif
 
 	void GraphicsManager::InitializeOpenGLStates()
@@ -283,10 +295,13 @@ namespace star
 	void GraphicsManager::StopDraw()
 	{
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		 if (eglSwapBuffers(mDisplay, mSurface) != EGL_TRUE)
 		 {
 			 return;
 		 }
+		 */
 #endif
 	}
 

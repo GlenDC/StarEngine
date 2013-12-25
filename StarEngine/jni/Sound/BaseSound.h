@@ -7,10 +7,13 @@
 	#include "SDL.h"
 	#include "SDL_mixer.h"
 #else
+/*
+//[TODO] Implent new android code (2.0)
 	#include "android_native_app_glue.h"
 	#include  <SLES/OpenSLES.h>
 	#include  <SLES/OpenSLES_Android.h>
 	#include  <SLES/OpenSLES_AndroidConfiguration.h>
+	*/
 #endif
 
 namespace star
@@ -60,7 +63,10 @@ namespace star
 
 	protected:
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		virtual void SetVolume(float32 volume) = 0;
+		*/
 #else
 		void SetVolume(float32 volume);
 #endif
@@ -68,6 +74,8 @@ namespace star
 
 		BaseSound(uint8 channel);
 #ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		static const SLuint32 PLAYER_ID_COUNT = 3;
 		static const SLInterfaceID PLAYER_ID_ARR[];
 		static const SLboolean PLAYER_REQ_ARR[];
@@ -118,7 +126,7 @@ namespace star
 			const SLObjectItf & sound,
 			const SLPlayItf & player
 			) const;
-
+*/
 #else
 		bool mIsMuted;
 		float32 mVolume;

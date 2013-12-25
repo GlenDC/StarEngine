@@ -1,7 +1,8 @@
 #pragma once
 
 #ifdef ANDROID
-
+/*
+//[TODO] Implent new android code (2.0)
 #include <stdint.h>
 
 typedef uint8_t		BYTE, byte;
@@ -76,5 +77,5 @@ struct NoAssert { \
 	NoAssert(bool isOK, const tchar* message=_T("")) {} \
 } myAsserter = NoAssert
 #endif
-
+*/
 #endif

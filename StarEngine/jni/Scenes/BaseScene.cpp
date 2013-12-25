@@ -468,10 +468,13 @@ using BaseScene::AddGesture(BaseGesture* gesture) is much slower, use with care!
 		m_pCursor->BaseInitialize();
 		SetSystemCursorHidden(true);
 #ifdef MOBILE
+		/*
+		//[TODO] Implent new android code (2.0)
 		Logger::GetInstance()->Log(LogLevel::Warning,
 			tstring(_T("BaseScene::SetCursor: Cursor isn't supported on mobile device."))
 			+ _T(" For optimialisation reasons it's better to disable the code related to\
 the custom cursor code in your game project."), STARENGINE_LOG_TAG);
+*/
 #endif
 	}
 
@@ -483,10 +486,13 @@ the custom cursor code in your game project."), STARENGINE_LOG_TAG);
 			SetSystemCursorHidden(!showSystemCursor);
 		}
 #ifdef MOBILE
+		/*
+		//[TODO] Implent new android code (2.0)
 		Logger::GetInstance()->Log(LogLevel::Warning,
 			tstring(_T("BaseScene::UnsetCursor: Cursor isn't supported on mobile device."))
 			+ _T(" For optimialisation reasons it's better to disable the code related to\
 the custom cursor code in your game project."), STARENGINE_LOG_TAG);
+*/
 #endif
 	}
 
@@ -496,10 +502,13 @@ the custom cursor code in your game project."), STARENGINE_LOG_TAG);
 		{
 			m_pCursor->SetState(state);
 #ifdef MOBILE
+			/*
+			//[TODO] Implent new android code (2.0)
 		Logger::GetInstance()->Log(LogLevel::Warning,
 			tstring(_T("BaseScene::SetStateActiveCursor: Cursor isn't supported on mobile device."))
 			+ _T(" For optimialisation reasons it's better to disable the code related to\
 the custom cursor code in your game project."), STARENGINE_LOG_TAG);
+*/
 #endif
 			return;
 		}
@@ -516,10 +525,12 @@ the custom cursor code in your game project."), STARENGINE_LOG_TAG);
 		{
 			m_pCursor->SetLocked(locked);
 #ifdef MOBILE
+			/*
 		Logger::GetInstance()->Log(LogLevel::Warning,
 			tstring(_T("BaseScene::SetActiveCursorLocked: Cursor isn't supported on mobile device."))
 			+ _T(" For optimialisation reasons it's better to disable the code related to\
 the custom cursor code in your game project."), STARENGINE_LOG_TAG);
+*/
 #endif
 			return;
 		}

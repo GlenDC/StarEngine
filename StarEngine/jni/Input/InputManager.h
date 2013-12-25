@@ -6,12 +6,18 @@
 #include <XInput.h>
 #include <map>
 
+// [TODO] remove this..
+//		  we don't use inline lib includes
+//		  Use the project management instead.
 #pragma comment(lib, "XInput9_1_0.lib")
 #else
+/*
+//[TODO] Implent new android code (2.0)
 #include <vector>
 #include <android/input.h>
 #include <android_native_app_glue.h>
 #include <functional>
+*/
 #endif
 
 #include "../defines.h"
@@ -54,6 +60,8 @@ namespace star
 	};
 
 #else
+	/*
+	//[TODO] Implent new android code (2.0)
 	struct FingerPointerANDR
 	{
 		FingerPointerANDR();
@@ -67,6 +75,7 @@ namespace star
 	};
 
 	typedef std::function<void()> CallBack;
+	*/
 #endif
 
 	class InputManager
@@ -133,6 +142,8 @@ namespace star
 
 		uint8 ConvertIndexToVK(uint8 fingerIndex) const;
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		bool IsTouchPressedANDR(uint8 fingerIndex = 0) const;
 		bool IsTouchDownANDR(uint8 fingerIndex = 0) const;
 		bool IsTouchReleasedANDR(uint8 fingerIndex = 0) const;
@@ -145,6 +156,7 @@ namespace star
 
 		void SetOnBackButtonCallback(CallBack callback);
 		void SetOnMenuButtonCallback(CallBack callback);
+		*/
 #endif
 
 	private:
@@ -183,6 +195,8 @@ namespace star
 		bool IsKeyboardKeyDown_unsafe(uint8 key, bool previousFrame = false) const;
 		bool IsMouseButtonDown_unsafe(uint8 button, bool previousFrame = false) const;
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		static const int32 INVALID_POINTER_ID = -1;
 		static const float32 UNDEFINED_POINTER_POSITION;
 		bool m_bMainIsDown;
@@ -196,6 +210,7 @@ namespace star
 		std::vector<FingerPointerANDR> m_OldPointerVec;
 		CallBack m_OnBackButtonDown;
 		CallBack m_OnMenuButtonDown;
+		*/
 #endif
 		vec2 m_CurrMousePosition, m_OldMousePosition, m_MouseMovement;
 		std::shared_ptr<GestureManager> m_GestureManager;

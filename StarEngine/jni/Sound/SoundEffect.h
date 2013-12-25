@@ -21,7 +21,10 @@ namespace star
 		virtual void UnsetChannel();
 
 	#ifdef ANDROID
+		/*
+		//[TODO] Implent new android code (2.0)
 		void SetVolume(float32 volume);
+		*/
 	#endif
 		float32 GetVolume() const;
 
@@ -36,6 +39,8 @@ namespace star
 		std::vector<int32> mPlayChannels;
 		Mix_Chunk * mpSound;
 #else
+		/*
+		//[TODO] Implent new android code (2.0)
 		void RegisterCallback(SLPlayItf & player);
 
 		static void MusicStoppedCallback(
@@ -48,6 +53,7 @@ namespace star
 		//SLObjectItf mPlayerObj;
 		std::vector<SLPlayItf> mPlayers;
 		std::vector<int32> mLoopTimes;
+		*/
 #endif	
 
 		SoundEffect(const SoundEffect& yRef);
