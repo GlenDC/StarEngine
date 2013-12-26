@@ -27,7 +27,7 @@ bin/
 gen/
 Debug/
 Release/
-src/
+#src/
 Obj/
 .svn/
 
@@ -38,20 +38,20 @@ Obj/
 *.lnk
 
 # ignore game files
-.cproject
-.classpath
-.project
-AndroidManifest.xml
+#.cproject
+#.classpath
+#.project
+#AndroidManifest.xml
 AutomatedDeploy.bat
-build.xml
+#build.xml
 Game.sln
 Game.vcxproj
 Game.vcxproj.filters
 Game.vcxproj.user
-ic_launcher-web.png
+#ic_launcher-web.png
 lint.xml
-proguard-project.txt
-project.properties
+#proguard-project.txt
+#project.properties
 stargame.rc
 us.stackdump
 Win32Manifest.xml
