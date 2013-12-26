@@ -18,6 +18,10 @@
 *.v11.suo
 StarEngine.v11.suo
 
+# Microsoft Visual Studios Performance analyze files
+*.psess
+*.vspx
+
 # Generated Directories
 bin/
 gen/
@@ -26,6 +30,9 @@ Release/
 src/
 Obj/
 .svn/
+
+# batch files
+*.bat
 
 # ignore unwanted files
 *.lnk

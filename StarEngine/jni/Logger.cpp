@@ -23,7 +23,7 @@ namespace star
 {
 	Logger* Logger::m_LoggerPtr = nullptr;
 
-	Logger::Logger(void)
+	Logger::Logger()
 #ifdef _WIN32
 		:m_ConsoleHandle(nullptr)
 		,m_UseConsole(false)
@@ -33,6 +33,7 @@ namespace star
 #endif
 		,m_TimeStamp(_T("00:00:00"))
 	{
+
 	}
 	
 	Logger::~Logger()
@@ -58,7 +59,7 @@ namespace star
 		m_UseConsole = useConsole;
 		if(useConsole)
 		{
-			WindowsConsole::RedirectIOToConsole();
+			star_w::RedirectIOToConsole();
 			m_ConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 		}
 #ifndef NO_LOG_FILE
@@ -81,8 +82,6 @@ namespace star
 
 	void Logger::Log(LogLevel level, const tstring& pMessage, const tstring& tag)
 	{
-#if LOGGER_MIN_LEVEL > 0
-		
 		tstring levelName;
 		switch(level)
 		{
@@ -100,6 +99,102 @@ namespace star
 			break;
 		}
 
+		PrivateLog(level, pMessage, tag, levelName);
+	}
+
+	void Logger::Log(bool assert, const tstring& pMessage, const tstring& tag)
+	{
+		if(!assert)
+		{
+			Log(LogLevel::Error, pMessage, tag);
+		}
+		ASSERT(assert, pMessage.c_str());
+	}
+
+	void Logger::DebugLog(
+		LogLevel level,
+		const tstring & pMessage,
+		const tstring& tag
+		)
+	{
+	#ifdef _DEBUG
+		tstring levelName;
+		switch(level)
+		{
+		case LogLevel::Info :
+			levelName = _T("INFO-D");
+			break;
+		case LogLevel::Warning:
+			levelName = _T("WARNING-D");
+			break;
+		case LogLevel::Error:
+			levelName = _T("ERROR-D");
+			break;
+		case LogLevel::Debug:
+			levelName = _T("DEBUG");
+			break;
+		}
+
+		PrivateLog(level, pMessage, tag, levelName);
+	#endif
+	}
+
+	void Logger::_CheckGlError(const schar* file, int32 line) 
+	{
+#if LOGGER_MIN_LEVEL > 0
+		GLenum err (glGetError());
+		while(err!= GL_NO_ERROR) 
+		{
+			tstring error;
+			switch(err) 
+			{
+				case GL_INVALID_OPERATION:      
+					error = _T("INVALID_OPERATION");     
+					break;
+				case GL_INVALID_ENUM:
+					error = _T("INVALID_ENUM");
+					break;
+				case GL_INVALID_VALUE:
+					error = _T("INVALID_VALUE");
+					break;
+				case GL_OUT_OF_MEMORY:  
+					error = _T("OUT_OF_MEMORY"); 
+					break;
+				case GL_INVALID_FRAMEBUFFER_OPERATION:
+					error = _T("INVALID_FRAMEBUFFER_OPERATION");
+					break;
+				default:
+					error =_T("UNKNOWN_ERROR");
+					break;
+			}
+			tstringstream buffer;
+			buffer << "GL_" << error << " - " << file << ":" << line << std::endl;
+#ifndef NO_LOG_FILE
+			LogMessage(buffer.str());
+#endif
+			Logger::GetInstance()->Log(LogLevel::Error, buffer.str(),_T("OPENGL"));
+			err = glGetError();
+		}
+#endif
+	}
+
+	void Logger::SetLogSaveDelayTime(float32 seconds)
+	{
+#ifndef NO_LOG_FILE
+		SceneManager::GetInstance()->GetStopwatch()->SetTargetTimeTimer(
+			_T("STAR_LogSaveFileTimer"), seconds, true, false);
+		SaveLogFile();
+#endif
+	}
+	
+	void Logger::PrivateLog(
+		LogLevel level,
+		const tstring& pMessage,
+		const tstring& tag,
+		const tstring& levelName
+		)
+	{
+#if LOGGER_MIN_LEVEL > 0
 	#ifdef DESKTOP
 		tstringstream messageBuffer;
 		messageBuffer << _T("[") << tag << _T("] ") << _T("[") << levelName <<  _T("] ") << pMessage << std::endl;
@@ -126,7 +221,7 @@ namespace star
 				break;
 			case LogLevel::Debug :
 				#if LOGGER_MIN_LEVEL < 5
-				#ifdef DEBUG
+				#ifdef _DEBUG
 				SetConsoleTextAttribute(m_ConsoleHandle, FOREGROUND_INTENSITY | FOREGROUND_GREEN);
 				#endif
 				#endif
@@ -176,54 +271,6 @@ namespace star
 #endif
 	}
 
-	void Logger::_CheckGlError(const schar* file, int32 line) 
-	{
-#if LOGGER_MIN_LEVEL > 0
-		GLenum err (glGetError());
-        while(err!= GL_NO_ERROR) 
-		{
-            tstring error;
-			switch(err) 
-			{
-                case GL_INVALID_OPERATION:      
-					error = _T("INVALID_OPERATION");     
-					break;
-                case GL_INVALID_ENUM:
-					error = _T("INVALID_ENUM");
-					break;
-                case GL_INVALID_VALUE:
-					error = _T("INVALID_VALUE");
-					break;
-                case GL_OUT_OF_MEMORY:  
-					error = _T("OUT_OF_MEMORY"); 
-					break;
-                case GL_INVALID_FRAMEBUFFER_OPERATION:
-					error = _T("INVALID_FRAMEBUFFER_OPERATION");
-					break;
-				default:
-					error =_T("UNKNOWN_ERROR");
-					break;
-            }
-			tstringstream buffer;
-            buffer << "GL_" << error << " - " << file << ":" << line << std::endl;
-#ifndef NO_LOG_FILE
-			LogMessage(buffer.str());
-#endif
-			Logger::GetInstance()->Log(LogLevel::Error, buffer.str(), _T("OPENGL"));
-			err = glGetError();
-        }
-#endif
-	}
-
-	void Logger::SetLogSaveDelayTime(float32 seconds)
-	{
-#ifndef NO_LOG_FILE
-		SceneManager::GetInstance()->GetStopwatch()->SetTargetTimeTimer(
-			_T("STAR_LogSaveFileTimer"), seconds, true, false);
-		SaveLogFile();
-#endif
-	}
-
 	void Logger::InitializeLogStream()
 	{
 		SceneManager::GetInstance()->GetStopwatch()->CreateTimer(_T("STAR_LogSaveFileTimer"), 60.0f,
@@ -231,7 +278,7 @@ namespace star
 
 		m_LogStream << _T("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n");
 		m_LogStream << _T("	Star Engine version ") << STARENGINE_VERSION << std::endl << std::endl;
-		m_LogStream << _T("	Game is build in");
+		m_LogStream << _T("	Game is built in");
 
 	#ifdef _DEBUG
 		m_LogStream << _T(" debug mode.\n");
@@ -251,7 +298,7 @@ namespace star
 	#endif
 		m_LogStream << std::endl;
 		m_LogStream << _T("	The Star Engine is licensed under the MIT License. \n");
-		m_LogStream << _T("	For more information you can go to http://www.starengine.com/ \n\n");
+		m_LogStream << _T("	For more information you can go to http://www.starengine.eu/ \n\n");
 		m_LogStream << _T("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n");
 	}
 	

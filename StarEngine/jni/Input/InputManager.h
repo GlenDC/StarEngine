@@ -11,6 +11,7 @@
 #include <vector>
 #include <android/input.h>
 #include <android_native_app_glue.h>
+#include <functional>
 #endif
 
 #include "../defines.h"
@@ -64,6 +65,8 @@ namespace star
 		float32 ToolMinor;
 		int32 ID;
 	};
+
+	typedef std::function<void()> CallBack;
 #endif
 
 	class InputManager
@@ -81,8 +84,17 @@ namespace star
 		vec2 GetCurrentFingerPosCP(uint8 finger = 0);
 		vec2 GetOldFingerPosCP(uint8 finger = 0);
 		void EndUpdate();
+
 		void SetGestureManager(std::shared_ptr<GestureManager> gestureManager);
 		std::shared_ptr<GestureManager> GetGestureManager() const;
+
+		void AddGlobalGesture(BaseGesture* gesture);
+		void AddGlobalGesture(BaseGesture* gesture, const tstring & name);
+		void RemoveGlobalGesture(BaseGesture* gesture);
+		void RemoveGlobalGesture(const tstring & name);
+
+		template <typename T>
+		T * GetGlobalGesture(const tstring & name) const;
 #ifdef DESKTOP
 		
 		//[TODO] add InputActions for android
@@ -130,6 +142,9 @@ namespace star
 
 		void OnTouchEvent(AInputEvent* pEvent);
 		bool OnKeyboardEvent(AInputEvent* pEvent);
+
+		void SetOnBackButtonCallback(CallBack callback);
+		void SetOnMenuButtonCallback(CallBack callback);
 #endif
 
 	private:
@@ -179,9 +194,13 @@ namespace star
 		uint32 m_ActivePointerID;
 		std::vector<FingerPointerANDR> m_PointerVec;
 		std::vector<FingerPointerANDR> m_OldPointerVec;
+		CallBack m_OnBackButtonDown;
+		CallBack m_OnMenuButtonDown;
 #endif
 		vec2 m_CurrMousePosition, m_OldMousePosition, m_MouseMovement;
 		std::shared_ptr<GestureManager> m_GestureManager;
+		GestureManager* m_IndependantGestureManager;
+		uint32 m_GestureID;
 
 		InputManager(const InputManager& t);
 		InputManager(InputManager&& t);
@@ -189,3 +208,5 @@ namespace star
 		InputManager& operator=(InputManager&& t);
 	};
 }
+
+#include "InputManager.inl"
