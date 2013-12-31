@@ -4,11 +4,11 @@
 #include <Shlobj.h>
 #include <string>
 #include "jni/Scenes/SceneManager.h"
-#include "jni/Assets/TextureManager.h"
+#include "jni/Graphics/TextureManager.h"
 #include "jni/Logger.h"
 #include "jni/TimeManager.h"
 #include "jni/Helpers/Helpers.h"
-#include "jni/Helpers/Filepath.h"
+#include "jni/Helpers/FilePath.h"
 #include "jni/Input/XMLContainer.h"
 #ifdef _DEBUG
 	#include "jni/Input/XMLFileParser.h"
@@ -77,7 +77,8 @@ namespace star
 
 	void Window::Initialize(HINSTANCE instance, BaseGame * pBaseGame, bool useConsole)
 	{
-		ASSERT(!m_IsInitialized, _T("Engine is already initialized!"));
+		ASSERT_LOG(!m_IsInitialized,
+			_T("Engine is already initialized!"), STARENGINE_LOG_TAG);
 		if(!m_IsInitialized)
 		{
 			mGamePtr = pBaseGame;
@@ -114,18 +115,21 @@ namespace star
 
 			//Set the assets root that will be used for DirectoryMode::assets
 			auto assets_settings = winManifest[_T("assets")]->GetAttributes();
-			Filepath::SetAssetsRoot(assets_settings[_T("root")]);
+			FilePath::SetAssetsRoot(assets_settings[_T("root")]);
 			
 			//Set the internal root that will be used for DirectoryMode::internal
 			auto internal_settings = winManifest[_T("internal")]->GetAttributes();
 			tstring iPath(internal_settings[_T("root")]);
-			Filepath::SetInternalRoot(iPath);
+			FilePath::SetInternalRoot(iPath);
 			auto cdReturn = CreateDirectory(iPath.c_str(), NULL);
 			if(cdReturn == ERROR_ALREADY_EXISTS)
 			{
-				Logger::GetInstance()->Log(LogLevel::Warning, _T("Internal directory '") + iPath + _T("' already exists."));
+				LOG(LogLevel::Warning,
+					_T("Internal directory '") + iPath + _T("' already exists."),
+					STARENGINE_LOG_TAG);
 			}
-			ASSERT(cdReturn != ERROR_PATH_NOT_FOUND, _T("Couldn't create the internal directory!"));
+			ASSERT_LOG(cdReturn != ERROR_PATH_NOT_FOUND,
+				_T("Couldn't create the internal directory!"), STARENGINE_LOG_TAG);
 
 			//Set the external root that will be used for DirectoryMode::external
 			LPWSTR wszPath = NULL;
@@ -135,19 +139,24 @@ namespace star
 				NULL,
 				&wszPath
 			);
-			ASSERT(SUCCEEDED(mdReturn), _T("An error has occured, while trying to open 'my documents'!"));
+			ASSERT_LOG(SUCCEEDED(mdReturn),
+				_T("An error has occured, while trying to open 'my documents'!"),
+				STARENGINE_LOG_TAG);
 			tstring ePath = string_cast<tstring>(wszPath);
 			ePath += _T("/");
 			ePath += winManifest[_T("title")]->GetValue();
 			ePath += _T("/");
-			Filepath::SetExternalRoot(ePath);
+			FilePath::SetExternalRoot(ePath);
 			
 			cdReturn = CreateDirectory(ePath.c_str(), NULL);
 			if(cdReturn == ERROR_ALREADY_EXISTS)
 			{
-				Logger::GetInstance()->Log(LogLevel::Warning, _T("External directory '") + ePath + _T("' already exists."));
+				LOG(LogLevel::Warning,
+					_T("External directory '") + ePath + _T("' already exists."),
+					STARENGINE_LOG_TAG);
 			}
-			ASSERT(cdReturn != ERROR_PATH_NOT_FOUND, _T("Couldn't create the external directory!"));
+			ASSERT_LOG(cdReturn != ERROR_PATH_NOT_FOUND,
+				_T("Couldn't create the external directory!"), STARENGINE_LOG_TAG);
 
 
 			wndClass.style = 0;
@@ -184,7 +193,8 @@ namespace star
 			while(win_style_it != win_style_end_it);
 
 	#pragma warning ( disable : 4800 )
-			ASSERT(RegisterClassEx(&wndClass), _T("Couldn't register the Windows Class!"));
+			ASSERT_LOG(RegisterClassEx(&wndClass),
+				_T("Couldn't register the Windows Class!"), STARENGINE_LOG_TAG);
 	#pragma warning ( default : 4800 )
 
 			m_CanGoFullScreen =
@@ -226,7 +236,8 @@ namespace star
 									position_height,
 									NULL, NULL, instance, NULL);
 
-			ASSERT(mHandle != NULL, _T("Couldn't create the window."));
+			ASSERT_LOG(mHandle != NULL,
+				_T("Couldn't create the window."), STARENGINE_LOG_TAG);
 
 			SetResolution(position_width, position_height, false);
 
@@ -250,19 +261,24 @@ namespace star
 			};
 	
 			mHDC = GetDC(mHandle); // Gets the display context
-			ASSERT(mHDC != NULL, _T("Couldn't create the Display Context!"));
+			ASSERT_LOG(mHDC != NULL,
+				_T("Couldn't create the Display Context!"), STARENGINE_LOG_TAG);
 
 			int32 pixelFormat = ChoosePixelFormat(mHDC, &pixelFormatDesc); // Chooses the pixel format
-			ASSERT(pixelFormat != 0, _T("Invalid pixel format!"));
+			ASSERT_LOG(pixelFormat != 0,
+				_T("Invalid pixel format!"), STARENGINE_LOG_TAG);
 
 			// Sets the pixel format
-			ASSERT(SetPixelFormat(mHDC, pixelFormat, &pixelFormatDesc) != 0, _T("Couldn't set the pixel format!"));
+			ASSERT_LOG(SetPixelFormat(mHDC, pixelFormat, &pixelFormatDesc) != 0,
+				_T("Couldn't set the pixel format!"), STARENGINE_LOG_TAG);
 
 			HGLRC hglrc = wglCreateContext(mHDC); // Creates the rendering context
-			ASSERT(hglrc != NULL, _T("Couldn't create the rendering context!"));
+			ASSERT_LOG(hglrc != NULL,
+				_T("Couldn't create the rendering context!"), STARENGINE_LOG_TAG);
 
 			// Attaches the rendering context
-			ASSERT(wglMakeCurrent(mHDC, hglrc) != 0, _T("Action couldn't be completed!"));
+			ASSERT_LOG(wglMakeCurrent(mHDC, hglrc) != 0,
+				_T("Action couldn't be completed!"), STARENGINE_LOG_TAG);
 
 			MSG msg ={};
 
@@ -332,6 +348,14 @@ namespace star
 					TranslateMessage(&msg);
 					DispatchMessage(&msg);
 				}
+
+				if(m_IsActive)
+				{					
+					mGamePtr->Update(mContext);
+					SetWindowsTitle();
+					GraphicsManager::GetInstance()->SetHasWindowChanged(false);
+				}
+
 				if(m_IsActive) // We've processed all pending Win32 messages, and can now do a rendering update.
 				{
 					star::InputManager::GetInstance()->UpdateWin();
@@ -342,12 +366,7 @@ namespace star
 					SwapBuffers(Window::mHDC); // Swaps display buffers
 				}
 
-				if(m_IsActive)
-				{					
-					mGamePtr->Update(mContext);
-					SetWindowsTitle();
-					GraphicsManager::GetInstance()->SetHasWindowChanged(false);
-				}
+
 
 				if(monitor_started)
 				{
@@ -474,7 +493,6 @@ namespace star
 			SetWindowLongPtr(hWnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
 			SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, screenWidth, screenHeight, SWP_SHOWWINDOW);
 			bool isChangeSuccessful = ChangeDisplaySettings(&fullscreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
-			//ASSERT(isChangeSuccessful, _T("Couldn't put the screen into fullscreen mode..."));
 			ShowWindow(hWnd, SW_MAXIMIZE);
 		}
 		else
@@ -482,7 +500,6 @@ namespace star
 			SetWindowLongPtr(hWnd, GWL_EXSTYLE, m_SavedWindowState.ExStyle);
 			SetWindowLongPtr(hWnd, GWL_STYLE, m_SavedWindowState.Style);
 			bool isChangeSuccessful = ChangeDisplaySettings(NULL, CDS_RESET) == DISP_CHANGE_SUCCESSFUL;
-			//ASSERT(isChangeSuccessful, _T("Couldn't put the screen into windowed mode..."));
 			SetWindowPos(hWnd, HWND_NOTOPMOST, 
 				m_SavedWindowState.WinRect.left,
 				m_SavedWindowState.WinRect.top,
@@ -537,7 +554,6 @@ namespace star
 			SetWindowLongPtr(mHandle, GWL_EXSTYLE, m_SavedWindowState.ExStyle);
 			SetWindowLongPtr(mHandle, GWL_STYLE, m_SavedWindowState.Style);
 			bool isChangeSuccessful = ChangeDisplaySettings(NULL, CDS_RESET) == DISP_CHANGE_SUCCESSFUL;
-			//ASSERT(isChangeSuccessful, _T("Couldn't put the screen into windowed mode..."));
 		}
 		SetWindowPos(mHandle, HWND_NOTOPMOST, 
 			m_SavedWindowState.WinRect.left,
@@ -758,7 +774,9 @@ namespace star
 				return CLASS_STYLES[i].second;
 			}
 		}
-		ASSERT(false, _T("Invalid class style found in Win32Manifest.xml"));
+		ASSERT_LOG(false,
+			_T("Invalid class style found in Win32Manifest.xml"),
+			STARENGINE_LOG_TAG);
 		return NULL;
 	}
 
@@ -771,7 +789,9 @@ namespace star
 				return WINDOW_STYLES[i].second;
 			}
 		}
-		ASSERT(false, _T("Invalid window style found in Win32Manifest.xml"));
+		ASSERT_LOG(false,
+			_T("Invalid window style found in Win32Manifest.xml"),
+			STARENGINE_LOG_TAG);
 		return NULL;
 	}
 

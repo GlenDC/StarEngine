@@ -14,6 +14,10 @@ namespace star
 
 	GestureManager::~GestureManager()
 	{
+		for(auto& gesture :  m_GestureMap)
+		{
+			delete gesture.second;
+		}
 		m_GestureMap.clear();
 	}
 
@@ -23,7 +27,7 @@ namespace star
 	{
 		if(!m_GestureMap.empty())
 		{
-			for(auto gesture : m_GestureMap)
+			for(auto& gesture : m_GestureMap)
 			{
 				gesture.second->OnUpdateWinInputStateBase();
 			}
@@ -34,7 +38,7 @@ namespace star
 	{
 		if(!m_GestureMap.empty())
 		{
-			for(auto gesture : m_GestureMap)
+			for(auto& gesture : m_GestureMap)
 			{
 				gesture.second->OnTouchEventBase(pEvent);
 			}
@@ -42,52 +46,69 @@ namespace star
 	}
 #endif
 	
-	void GestureManager::AddGesture(BaseGesture* gesture,const tstring& tag)
+	void GestureManager::AddGesture(BaseGesture* gesture, const tstring& tag)
 	{
+		if(!gesture)
+		{
+			LOG(LogLevel::Error,
+				_T("GestureManager::AddGesture: Trying to add a nullptr gesture."));
+			return;
+		}
 		if(m_GestureMap.find(tag) == m_GestureMap.end())
 		{
-			m_GestureMap.insert(std::make_pair(tag,std::shared_ptr<BaseGesture>(gesture)));
+			m_GestureMap.insert(std::make_pair(tag, gesture));
 		}
 		else
 		{
-			Logger::GetInstance()->Log(LogLevel::Warning, 
-				_T("The gesture manager already contains ") + tag);
+			LOG(LogLevel::Warning, 
+				_T("The gesture manager already contains ") + tag,
+				STARENGINE_LOG_TAG);
 		}
 	}
 
 
 	void GestureManager::RemoveGesture(BaseGesture* gesture)
 	{
-		Logger::GetInstance()->Log(LogLevel::Warning, 
-			_T("Please use the method RemoveGesture(const tstring& tag) to remove gestures. \nthis method is much slower, use with care!"));
+		LOG(LogLevel::Warning, 
+			_T("GestureManager::RemoveGesture: \
+Please use the method RemoveGesture(const tstring& tag) to remove gestures.\
+using GestureManager::RemoveGesture(BaseGesture* gesture) is much slower, use with care!"),
+			STARENGINE_LOG_TAG);
+
 		auto it = m_GestureMap.begin();
-		for (it ; it != m_GestureMap.end(); ++it )
+		for ( ; it != m_GestureMap.end(); ++it )
 		{
-			if (it->second == std::shared_ptr<BaseGesture>(gesture))
+			if (it->second == gesture)
 			{
+				m_GestureMap.erase(it);
+				delete (*it).second;
 				return;
 			}
 		}
-		ASSERT(it != m_GestureMap.end(),_T("Gesture not found!"));
-		m_GestureMap.erase(it);
+		ASSERT_LOG(it != m_GestureMap.end(),
+			_T("Gesture not found!"), STARENGINE_LOG_TAG);
+		
 	}
 
 	void GestureManager::RemoveGesture(const tstring& tag)
 	{
 		auto it = m_GestureMap.find(tag);
-		bool can_delete = it != m_GestureMap.end();
-		ASSERT(can_delete,_T("Gesture not found!"));
-		if(can_delete)
-		{
-			m_GestureMap.erase(it);
-		}
+		ASSERT_LOG(it != m_GestureMap.end(),
+			_T("GestureManager::RemoveGesture(const tstring& tag): Gesture \"") + 
+			tag +
+			tstring(_T("\" not found!")),
+			STARENGINE_LOG_TAG
+			);
+
+		m_GestureMap.erase(it);
+		delete (*it).second;
 	}
 
 	void GestureManager::Update(const Context& context)
 	{
 		if(!m_GestureMap.empty())
 		{
-			for(auto gesture : m_GestureMap)
+			for(auto& gesture : m_GestureMap)
 			{
 				gesture.second->Update(context);
 			}
@@ -98,7 +119,7 @@ namespace star
 	{
 		if(!m_GestureMap.empty())
 		{
-			for(auto gesture : m_GestureMap)
+			for(auto& gesture : m_GestureMap)
 			{
 				gesture.second->EndUpdate();
 			}

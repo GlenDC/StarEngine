@@ -63,7 +63,7 @@ namespace star
 	}
 #endif
 
-	InputManager::InputManager(void)
+	InputManager::InputManager()
 	#ifdef DESKTOP
 		: m_ThreadAvailable(false)
 		, m_KeyboardState0Active(true)
@@ -78,22 +78,28 @@ namespace star
 		, m_ActivePointerID(0)
 		, m_PointerVec()
 		, m_OldPointerVec()
+		, m_OnBackButtonDown(nullptr)
+		, m_OnMenuButtonDown(nullptr)
 	#endif
 		, m_GestureManager(nullptr)
+		, m_IndependantGestureManager(nullptr)
 		, m_OldMousePosition()
 		, m_CurrMousePosition()
 		, m_MouseMovement()
+		, m_GestureID(0)
 	{
+		m_IndependantGestureManager = new GestureManager();
 #ifdef DESKTOP
 		//Init new keyboard states
 		GetKeyboardState(m_pKeyboardState0);
 		GetKeyboardState(m_pKeyboardState1);
+		UpdateWin();
 #endif
 	}
 
 	InputManager::~InputManager(void)
 	{
-		m_GestureManager = nullptr;
+		delete m_IndependantGestureManager;
 	}
 
 	InputManager * InputManager::GetInstance()
@@ -102,12 +108,13 @@ namespace star
 		{
 			m_InputManagerPtr = new InputManager();
 		}
-		return (m_InputManagerPtr);
+		return m_InputManagerPtr;
 	}
 
 	void InputManager::UpdateGestures(const Context & context)
 	{
 		m_GestureManager->Update(context);
+		m_IndependantGestureManager->Update(context);
 	}
 
 #ifdef DESKTOP
@@ -328,12 +335,11 @@ namespace star
 	{
 		//while(m_ThreadAvailable)
 		{
-
 			UpdateKeyboardStates();
 			UpdateGamepadStates();
 
 			//Reset previous InputAction States
-			for(auto it = m_InputActions.begin() ; it != m_InputActions.end() ; ++it)
+			for(auto it = m_InputActions.begin(); it != m_InputActions.end(); ++it)
 			{
 				auto currAction = &(it->second);
 				//Reset the previous state before updating/checking the new state
@@ -363,8 +369,8 @@ namespace star
 							IsMouseButtonDown_unsafe(currAction->MouseButtonCode))
 						{
 							currAction->IsTriggered = true;
-							Logger::GetInstance()->Log(LogLevel::Info, 
-								_T("Clicked mouse button."));
+							LOG(LogLevel::Info, 
+								_T("Clicked mouse button."), STARENGINE_LOG_TAG);
 						}
 					}
 
@@ -469,10 +475,12 @@ namespace star
 			
 			m_CurrMousePosition = vec2(
 				mousePos.x , 
-				float32(GraphicsManager::GetInstance()->GetWindowHeight() - mousePos.y));
+				float32(GraphicsManager::GetInstance()->GetWindowHeight() - mousePos.y)
+				);
 			m_CurrMousePosition -= vec2(
 				float32(GraphicsManager::GetInstance()->GetHorizontalViewportOffset()),
-				float32(GraphicsManager::GetInstance()->GetVerticalViewportOffset()));
+				float32(GraphicsManager::GetInstance()->GetVerticalViewportOffset())
+				);
 			m_CurrMousePosition /= GraphicsManager::GetInstance()->GetViewportResolution();
 			m_CurrMousePosition *= GraphicsManager::GetInstance()->GetScreenResolution();
 			
@@ -482,8 +490,10 @@ namespace star
 					GetActiveScene()->GetActiveCamera();
 				if(projectionObject)
 				{
-					m_CurrMousePosition += projectionObject->GetTransform()->
-						GetWorldPosition().pos2D();
+					auto worldPos = projectionObject->GetTransform()->GetWorldPosition().pos2D();
+					worldPos.x /= (star::ScaleSystem::GetInstance()->GetWorkingResolution().x / 2.0f);
+					worldPos.y /= (star::ScaleSystem::GetInstance()->GetWorkingResolution().y / 2.0f);
+					m_CurrMousePosition += worldPos;
 				}
 			}
 
@@ -494,6 +504,7 @@ namespace star
 			{
 				m_GestureManager->OnUpdateWinInputState();
 			}
+			m_IndependantGestureManager->OnUpdateWinInputState();
 			//Sleep(1000/60);
 		}
 		return 0;
@@ -609,8 +620,9 @@ namespace star
 		case 5:
 			return VK_XBUTTON2;
 		default:
-			Logger::GetInstance()->Log(LogLevel::Warning,
-				_T("Only 5 (0 - 4) finger Indices supported for mouse. Using VK_XBUTTON2"));
+			LOG(LogLevel::Warning,
+				_T("Only 5 (0 - 4) finger Indices supported for mouse. Using VK_XBUTTON2"),
+				STARENGINE_LOG_TAG);
 			return VK_XBUTTON2;
 		}
 	}
@@ -748,10 +760,12 @@ namespace star
 			break;
 		case AMOTION_EVENT_ACTION_CANCEL:
 			m_ActivePointerID = INVALID_POINTER_ID;
-			Logger::GetInstance()->Log(LogLevel::Info, _T("Canceled"));
+			LOG(LogLevel::Info,
+				_T("Canceled"), STARENGINE_LOG_TAG);
 			break;
 		case AMOTION_EVENT_ACTION_OUTSIDE:
-			Logger::GetInstance()->Log(LogLevel::Info, _T("Outside"));
+			LOG(LogLevel::Info,
+			_T("Outside"), STARENGINE_LOG_TAG);
 			break;
 		case AMOTION_EVENT_ACTION_MOVE:
 			break;
@@ -783,6 +797,7 @@ namespace star
 		{
 			m_GestureManager->OnTouchEvent(pEvent);
 		}
+		m_IndependantGestureManager->OnTouchEvent(pEvent);
 	}
 
 	bool InputManager::OnKeyboardEvent(AInputEvent* pEvent)
@@ -794,27 +809,37 @@ namespace star
 			//Try: (schar) cast the keycode
 			switch(AKeyEvent_getKeyCode(pEvent))
 			{
-			case AKEYCODE_HOME:
+			case AKEYCODE_MENU:
+				if(m_OnMenuButtonDown)
+				{
+					m_OnMenuButtonDown();
+					return true;
+				}
 				break;
 			case AKEYCODE_BACK:
-				break;
-			case AKEYCODE_VOLUME_DOWN:
+				if(m_OnBackButtonDown)
+				{
+					m_OnBackButtonDown();
+					return true;
+				}
 				break;
 			}
 			return false;
 		}
 		else
 		{
-			switch(AKeyEvent_getKeyCode(pEvent))
-			{
-			case AKEYCODE_MENU:
-				//return false;
-				break;
-			case AKEYCODE_BACK:
-				break;
-			}
 			return false;
 		}
+	}
+
+	void InputManager::SetOnBackButtonCallback(CallBack callback)
+	{
+		m_OnBackButtonDown = callback;
+	}
+
+	void InputManager::SetOnMenuButtonCallback(CallBack callback)
+	{
+		m_OnMenuButtonDown = callback;
 	}
 
 	FingerPointerANDR InputManager::GetTouchPropertiesANDR(uint8 fingerIndex)const
@@ -880,6 +905,7 @@ namespace star
 	void InputManager::EndUpdate()
 	{
 		m_GestureManager->EndUpdate();
+		m_IndependantGestureManager->EndUpdate();
 #ifndef DESKTOP
 		m_bMainIsDown = false;
 		m_bMainIsUp = false;
@@ -896,5 +922,32 @@ namespace star
 	std::shared_ptr<GestureManager> InputManager::GetGestureManager() const
 	{
 		return m_GestureManager;
+	}
+
+	void InputManager::AddGlobalGesture(BaseGesture* gesture)
+	{
+		LOG(LogLevel::Warning, 
+_T("Please use the method AddGesture(BaseGesture* gesture, \
+const tstring & name) to add gestures. \
+using InputManager::AddGesture(BaseGesture* gesture) is much slower, use with care!"),
+			STARENGINE_LOG_TAG);
+
+		m_IndependantGestureManager->AddGesture(gesture, _T("Gesture_") + string_cast<tstring>(m_GestureID));
+		++m_GestureID;
+	}
+
+	void InputManager::AddGlobalGesture(BaseGesture* gesture, const tstring & name)
+	{
+		m_IndependantGestureManager->AddGesture(gesture, name);
+	}
+
+	void InputManager::RemoveGlobalGesture(BaseGesture* gesture)
+	{
+		m_IndependantGestureManager->RemoveGesture(gesture);
+	}
+
+	void InputManager::RemoveGlobalGesture(const tstring & name)
+	{
+		m_IndependantGestureManager->RemoveGesture(name);
 	}
 }
