@@ -20,9 +20,9 @@ namespace star
 
 	void SpriteAnimationManager::AddSpritesheet(const tstring & file, DirectoryMode mode)
 	{
-		XMLFileParser parser(file);
+		XMLFileParser parser(file, mode);
 		XMLContainer container;
-		parser.Read(container, mode);
+		parser.Read(container);
 		
 		tstring name = container.GetAttributes()[_T("name")];
 		auto it = m_Spritesheets.find(name);
@@ -34,7 +34,7 @@ namespace star
 		}
 		else
 		{
-			Logger::GetInstance()->Log(LogLevel::Warning,
+			LOG(LogLevel::Warning,
 				_T("SpriteAnimationManager::AddSpritesheet: This spritesheet already exists!"),
 				STARENGINE_LOG_TAG);
 		}
@@ -43,9 +43,9 @@ namespace star
 	void SpriteAnimationManager::AddSpritesheet(const tstring & file, const tstring & binary_file,
 		DirectoryMode mode)
 	{
-		XMLFileParser parser(file);
+		XMLFileParser parser(file, mode);
 		XMLContainer container;
-		parser.Read(container, binary_file, mode);
+		parser.Read(container, binary_file);
 		
 		tstring name = container.GetAttributes()[_T("name")];
 		auto it = m_Spritesheets.find(name);
@@ -57,7 +57,7 @@ namespace star
 		}
 		else
 		{
-			Logger::GetInstance()->Log(LogLevel::Warning,
+			LOG(LogLevel::Warning,
 				_T("SpriteAnimationManager::AddSpritesheet: This spritesheet already exists!"),
 				STARENGINE_LOG_TAG);
 		}
@@ -68,7 +68,7 @@ namespace star
 	{
 		auto it = m_Spritesheets.find(name);
 		bool isValid = it != m_Spritesheets.end();
-		Logger::GetInstance()->Log(isValid,
+		ASSERT_LOG(isValid,
 			_T("SpriteAnimationManager::GetSpritesheet(const tstring & name): Couldn't find \"") + 
 			name + tstring(_T("\" in the loaded spritesheets.")),
 			STARENGINE_LOG_TAG);

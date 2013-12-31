@@ -30,15 +30,9 @@ namespace star
 			{
 				//If the component isn't in the vector already
 				auto vecIt = std::find((*it).second.begin(), (*it).second.end(), component);
-				if(vecIt != (*it).second.end())
-				{
-					Logger::GetInstance()->Log(false, _T("CollisionManager::AddComponent \
-The component you tried to add is already in the CollisionManager"));
-				}
-				else
-				{
-					(*it).second.push_back(component);
-				}
+				ASSERT_LOG(vecIt == (*it).second.end(), _T("CollisionManager::AddComponent \
+The component you tried to add is already in the CollisionManager"), STARENGINE_LOG_TAG);
+				(*it).second.push_back(component);
 			}
 			//make a new layer!
 			else
@@ -72,17 +66,13 @@ The component you tried to add is already in the CollisionManager"));
 				}
 				else
 				{
-					Logger::GetInstance()->Log(false, _T("CollisionManager::RemoveComponent: \
-The component you tried to remove is not in the CollisionManager"), STARENGINE_LOG_TAG);
-					Logger::GetInstance()->Log(LogLevel::Error, _T("CollisionManager::RemoveComponent: \
+					ASSERT_LOG(false, _T("CollisionManager::RemoveComponent: \
 The component you tried to remove is not in the CollisionManager"), STARENGINE_LOG_TAG);
 				}
 			}
 			else
 			{
-				Logger::GetInstance()->Log(false, _T("CollisionManager::RemoveComponent: \
-The component you tried to remove is not in the CollisionManager"), STARENGINE_LOG_TAG);
-				Logger::GetInstance()->Log(LogLevel::Error, _T("CollisionManager::RemoveComponent: \
+				ASSERT_LOG(false, _T("CollisionManager::RemoveComponent: \
 The component you tried to remove is not in the CollisionManager"), STARENGINE_LOG_TAG);
 			}
 		}

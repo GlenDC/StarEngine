@@ -8,6 +8,7 @@
 
 #include "Helpers\SerializedData.h"
 #include "definesTypes.h"
+#include "definesCrossPlatform.h"
 
 /// <summary>
 /// The starengine's version

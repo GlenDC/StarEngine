@@ -6,7 +6,47 @@
 
 namespace star
 {
-	template < typename TReturnValue, typename TValue>
+	template <typename T>
+	T CalculateSmallestElement(
+		const T * vec, 
+		uint8 size
+		)
+	{
+		ASSERT_LOG(size != 0,
+			_T("You can't calculate the minimum of 0 elements!"),
+			STARENGINE_LOG_TAG);
+		float32 minimum = vec[0];
+		for(int32 i = 1; i < size; ++i)
+		{
+			if(vec[i] < minimum)
+			{
+				minimum = vec[i];
+			}
+		}
+		return minimum;
+	}
+
+	template <typename T>
+	T CalculateLargestElement(
+		const T * vec, 
+		uint8 size
+		)
+	{
+		ASSERT_LOG(size != 0, 
+			_T("You can't calculate the maximum of 0 elements!"),
+			STARENGINE_LOG_TAG);
+		float32 maximum = vec[0];
+		for(int32 i = 1; i < size; ++i)
+		{
+			if(vec[i] > maximum)
+			{
+				maximum = vec[i];
+			}
+		}
+		return maximum;
+	}
+
+	template <typename TReturnValue, typename TValue>
 	TReturnValue string_cast(const TValue & value)
 	{
 		tstringstream strstr;
@@ -17,7 +57,7 @@ namespace star
 	template < typename TReturnValue, typename TValue>
 	TReturnValue string_cast(const TValue * value)
 	{
-		Logger::GetInstance()->Log(false,
+		ASSERT_LOG(false,
 			_T("Invalid String cast: No implementation found that match these parameters!"),
 			STARENGINE_LOG_TAG);
 		return TReturnValue();

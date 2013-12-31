@@ -25,13 +25,45 @@ namespace star
 	/// </summary>
 	/// <param name="page">the URL of the webpage to be opened</param>
 	void LaunchWebpage(const tstring & page);
+
+	/// <summary>
+	/// Returns the filename, including the extension,
+	/// substracted from a path.
+	/// </summary>
+	/// <param name="path">A full path to a file.</param>
+	/// <returns>The filename and its extension.</returns>
+	tstring GetFileName(const tstring & path);
+	
+	/// <summary>
+	/// returns the smallest item of all elements in a given array of type T.
+	/// </summary>
+	/// <param name="vec">The array.</param>
+	/// <param name="size">The size of the array.</param>
+	/// <returns>The smallest item in the array</returns>
+	template <typename T>
+	T CalculateSmallestElement(
+	  const T * vec, 
+	  uint8 size
+	  );
+	
+	/// <summary>
+	/// returns the largest item of all elements in a given array of type T.
+	/// </summary>
+	/// <param name="vec">The array.</param>
+	/// <param name="size">The size of the array.</param>
+	/// <returns>The largest item in the array.</returns>
+	template <typename T>
+	T CalculateLargestElement(
+		const T * vec,
+		uint8 size
+		);
 	
 	/// <summary>
 	/// Cast from type 'TReturnValue' to type 'TValue', where one of the 2 types is a string type.
 	/// </summary>
 	/// <param name="value">the value to be casted to type 'TReturnValue'</param>
 	/// <returns>a copy of the casted value</returns>
-	template < typename TReturnValue, typename TValue>
+	template <typename TReturnValue, typename TValue>
 	TReturnValue string_cast(const TValue & value);
 	
 	/// <summary>

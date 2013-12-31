@@ -36,12 +36,12 @@ namespace star
 		auto error = FT_Init_FreeType(&mLibrary);
 		if(error)
 		{
-			star::Logger::GetInstance()->Log(star::LogLevel::Error,
+			LOG(star::LogLevel::Error,
 				_T("Font Manager : Could not initialize FreeType library"),
 				STARENGINE_LOG_TAG);
 		}
 
-		star::Logger::GetInstance()->Log(star::LogLevel::Info,
+		LOG(star::LogLevel::Info,
 			_T("Font Manager : Initialized FreeType library"),
 			STARENGINE_LOG_TAG);
 	}
@@ -67,7 +67,7 @@ namespace star
 	{
 		if(mFontList.find(name) != mFontList.end())
 		{
-			star::Logger::GetInstance()->Log(star::LogLevel::Info,
+			LOG(star::LogLevel::Info,
 				_T("Font Manager : Font ") + name + _T(" already exist, using that"),
 				STARENGINE_LOG_TAG);
 			return true;
@@ -102,7 +102,10 @@ namespace star
 
 	const Font* FontManager::GetFont(const tstring& name)
 	{
-		Logger::GetInstance()->Log(mFontList.find(name) != mFontList.end(),_T("No such font"), STARENGINE_LOG_TAG);
+		ASSERT_LOG(
+			mFontList.find(name) != mFontList.end(),
+			_T("No such font"), STARENGINE_LOG_TAG
+			);
 		return mFontList[name];
 	}
 }

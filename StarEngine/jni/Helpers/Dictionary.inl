@@ -72,7 +72,7 @@ namespace star
 	TValue & Dictionary<TKey, TValue>::at(const TKey & key)
 	{
 		auto it = m_MultiMap.find(key);
-		Logger::GetInstance()->Log(it != m_MultiMap.end(), _T("Couldn't find key '") +
+		ASSERT_LOG(it != m_MultiMap.end(), _T("Dictionary::at: Couldn't find key '") +
 				string_cast<tstring>(key) + _T("'."), STARENGINE_LOG_TAG);
 		return ((*it).second);
 	}
@@ -94,7 +94,7 @@ namespace star
 		{
 			++i;
 			++it;
-			Logger::GetInstance()->Log(it != range.second, _T("The value with key '") +
+			ASSERT_LOG(it != range.second, _T("Dictionary::at: The value with key '") +
 					string_cast<tstring>(key) + _T("' and index '") +
 					string_cast<tstring>(index) + _T("' couldn't be found."),
 					STARENGINE_LOG_TAG);
@@ -273,5 +273,26 @@ namespace star
 		Dictionary<TKey, TValue>::max_size() const
 	{
 		return (m_MultiMap.max_size());
+	}
+
+	template < typename TKey, typename TValue >
+	void swap( Dictionary<TKey, TValue>& lhs,
+		Dictionary<TKey, TValue>& rhs)
+	{
+		std::swap(lhs.m_MultiMap, rhs.m_MultiMap);
+	}
+
+	template < typename TKey, typename TValue >
+	bool operator== ( Dictionary<TKey, TValue>& lhs,
+		Dictionary<TKey, TValue>& rhs)
+	{
+		return (lhs.m_MultiMap == rhs.m_MultiMap);
+	}
+
+	template < typename TKey, typename TValue >
+	bool operator!= ( Dictionary<TKey, TValue>& lhs,
+		Dictionary<TKey, TValue>& rhs)
+	{
+		return (lhs.m_MultiMap != rhs.m_MultiMap);
 	}
 }

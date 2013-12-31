@@ -27,6 +27,9 @@ namespace star
 	class Texture2D final
 	{
 	public:
+		//[NOTE]	You're not supposed to make Textures yourself.
+		//			Use the TextureManager to load your textures.
+		//			This ensures a same texture is not loaded multiple times
 		Texture2D(const tstring & pPath);
 		~Texture2D();
 
@@ -51,9 +54,16 @@ namespace star
 #else
 		tstring mPath;
 #endif
+		static const tstring LIBPNG_LOG_TAG;
+
+		static void CustomErrorFunction(png_structp pngPtr, png_const_charp error);
+		static void CustomWarningFunction(png_structp pngPtr, png_const_charp warning);
+
 		Texture2D(const Texture2D& yRef);
 		Texture2D(Texture2D&& yRef);
 		Texture2D& operator=(const Texture2D& yRef);
 		Texture2D& operator=(Texture2D&& yRef);
 	};
 }
+
+

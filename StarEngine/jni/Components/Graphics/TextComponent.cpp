@@ -54,7 +54,7 @@ namespace star
 				m_FontSize
 				))
 		{
-			Logger::GetInstance()->Log(LogLevel::Error,
+			LOG(LogLevel::Error,
 				_T("TextComponent : Could not load Font '")
 				+ m_FileName + _T("'."), STARENGINE_LOG_TAG);
 		}
@@ -68,10 +68,10 @@ namespace star
 		if(m_pParentObject->HasComponent<SpriteSheetComponent>(this)
 			|| m_pParentObject->HasComponent<SpriteComponent>(this))
 		{
-			Logger::GetInstance()->Log(false,
+			ASSERT_LOG(false,
 				_T("Object '") + m_pParentObject->GetName() +
 				_T("': Can't add a TextComponent when already \
-having a SpriteSheet- or SpriteComponent."));
+having a SpriteSheet- or SpriteComponent."), STARENGINE_LOG_TAG);
 			m_pParentObject->RemoveComponent(this);
 		}
 		else
@@ -292,7 +292,11 @@ having a SpriteSheet- or SpriteComponent."));
 	{
 		if(m_TextInfo->text.size() == 0)
 		{
-			Logger::GetInstance()->Log(LogLevel::Warning, _T("Trying to draw empty textComponent"));
+			LOG(
+				LogLevel::Warning,
+				_T("Trying to draw empty textComponent"),
+				STARENGINE_LOG_TAG
+				);
 			return;
 		}
 		SpriteBatch::GetInstance()->AddTextToQueue(m_TextInfo);

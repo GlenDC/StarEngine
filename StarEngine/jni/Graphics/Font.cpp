@@ -40,20 +40,20 @@ namespace star
 		Resource resource(path);
 		if(!resource.Open())
 		{
-			star::Logger::GetInstance()->Log(LogLevel::Error,
+			LOG(LogLevel::Error,
 				_T("Font : Failed to open file"), STARENGINE_LOG_TAG);
 			return false;
 		}
 
 		int32 length = resource.GetLength();
-		star::Logger::GetInstance()->Log(LogLevel::Info,
+		LOG(LogLevel::Info,
 			_T("Font : File size :") + star::string_cast<tstring>(length),
 			STARENGINE_LOG_TAG);
 		mFontBuffer = new BYTE[length]();
 
 		if(!resource.Read(mFontBuffer,length))
 		{
-			star::Logger::GetInstance()->Log(LogLevel::Error,
+			LOG(LogLevel::Error,
 				_T("Font : Failed to read file"), STARENGINE_LOG_TAG);
 			resource.Close();
 			return false;
@@ -65,21 +65,21 @@ namespace star
 #endif
 		if(error == FT_Err_Unknown_File_Format)
 		{
-			star::Logger::GetInstance()->Log(star::LogLevel::Error,
+			LOG(star::LogLevel::Error,
 				_T("Font Manager : Font : ") + path +
-				_T(" ,could be opened but its in unsuported format"),
+				_T(" ,could be opened but it's in an unsupported format"),
 				STARENGINE_LOG_TAG);
 			return (false);
 		}
 		else if(error)
 		{
-			star::Logger::GetInstance()->Log(star::LogLevel::Error,
+			LOG(star::LogLevel::Error,
 				_T("Font Manager : Font : ") + path +
-				_T(" ,is invalid and cant be opened or read or its broken"),
+				_T(" ,is invalid and can't be opened or read."),
 				STARENGINE_LOG_TAG);
 			return (false);
 		}
-		star::Logger::GetInstance()->Log(star::LogLevel::Info,
+		LOG(star::LogLevel::Info,
 			_T("Font Manager : Font : ") + path + 
 			_T(" ,loaded and ready for use"),
 			STARENGINE_LOG_TAG);
@@ -114,16 +114,16 @@ namespace star
 		auto error = FT_Load_Char(face, ch, FT_LOAD_DEFAULT);
 		if(error)
 		{
-			star::Logger::GetInstance()->Log(star::LogLevel::Error, 
-				_T("Font : could not load Glyph"), STARENGINE_LOG_TAG);
+			LOG(star::LogLevel::Error, 
+				_T("Font : could not load glyph"), STARENGINE_LOG_TAG);
 			return;
 		}
 
 		error = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 		if(error)
 		{
-			star::Logger::GetInstance()->Log(star::LogLevel::Error,
-				_T("Font : could not load Glyph"), STARENGINE_LOG_TAG);
+			LOG(star::LogLevel::Error,
+				_T("Font : could not load glyph"), STARENGINE_LOG_TAG);
 			return;
 		}
 
@@ -156,13 +156,13 @@ namespace star
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, width, height, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, expanded_data);
 		*/
 #endif
-		Logger::GetInstance()->CheckGlError();
+		OPENGL_LOG();
 		delete[] expanded_data;
 
 		//uvs
 		float32 x = static_cast<float32>(bitmap.width) / static_cast<float32>(width);
 		float32 y = static_cast<float32>(bitmap.rows) / static_cast<float32>(height);
-		//letterheight
+		//letter height
 		int32 dimX = (face->glyph->metrics.horiAdvance / 64);
 		int32 dimY = ((face->glyph->metrics.horiBearingY) - (face->glyph->metrics.height)) / 64;		
 		if(mMaxLetterHeight < face->glyph->bitmap_top)

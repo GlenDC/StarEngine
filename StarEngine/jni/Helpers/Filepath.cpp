@@ -24,29 +24,16 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 	FilePath::FilePath()
 		: m_Path(EMPTY_STRING) 
 		, m_File(EMPTY_STRING)
+		, m_DirectoryMode(DEFAULT_DIRECTORY_MODE)
 	{
 
 	}
 
-	FilePath::FilePath(const tstring & full_path)
+	FilePath::FilePath(const tstring & full_path, DirectoryMode mode)
 		: m_Path(EMPTY_STRING)
 		, m_File(EMPTY_STRING)
+		, m_DirectoryMode(mode)
 	{
-		int32 dotCounter(0);
-		for(uint32 i = 0; i < full_path.size(); ++i)
-		{
-			if(full_path[i] == _T('.'))
-			{
-				++dotCounter;
-			}
-		}
-		if(dotCounter > 1)
-		{
-			Logger::GetInstance()->Log(LogLevel::Error, 
-				_T("Please don't use . in your filename (except for the file extension)"),
-				STARENGINE_LOG_TAG);
-		}
-
 		auto index = full_path.find_last_of('/');
 		if(index == tstring::npos)
 		{
@@ -62,13 +49,8 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 		{
 			m_File = full_path;
 		}
-	}
-
-	FilePath::FilePath(const tstring & path, const tstring & file)
-		: m_Path(path)
-		, m_File(file)
-	{
-
+		ConvertPathToCorrectPlatformStyle(m_Path);
+		CheckIfPathIsCapitalCorrect(m_AssetsRoot + m_Path + m_File);
 	}
 
 	FilePath::FilePath(const FilePath & yRef)
@@ -187,36 +169,49 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 			break;
 		}
 	}
+	
+	void FilePath::GetCorrectPath(const tstring & path,
+		tstring & correct_path) const
+	{
+		GetCorrectPath(path, correct_path, m_DirectoryMode);
+	}
+
+	DirectoryMode FilePath::GetDirectoryMode() const
+	{
+		return m_DirectoryMode;
+	}
 
 #ifdef DESKTOP
 	void FilePath::SetAssetsRoot(const tstring & root)
 	{
 		m_AssetsRoot = root;
+		ConvertPathToCorrectPlatformStyle(m_AssetsRoot);
 	}
 	
 	void FilePath::SetInternalRoot(const tstring & root)
 	{
 		m_InternalRoot = root;
+		ConvertPathToCorrectPlatformStyle(m_InternalRoot);
 	}
 	
 	void FilePath::SetExternalRoot(const tstring & root)
 	{
 		m_ExternalRoot = root;
+		ConvertPathToCorrectPlatformStyle(m_ExternalRoot);
 	}
 #endif
 
-#ifdef _WIN32
-	tstring FilePath::GetActualPathName(const tstring& path ) const
-	{
-		// This is quite involved, but the meat is SHGetFileInfo
 
+	void FilePath::GetActualPathName(const tstring & pathIn, tstring & pathOut)
+	{
+#ifdef _WIN32
 		const tchar kSeparator = _T('\\');
 
-		tstring buffer(path);
+		tstring buffer(pathIn);
 
 		size_t i = 0;
+		pathOut = EMPTY_STRING;
 
-		tstring result;
 		bool addSeparator = false;
 
 		while(i < buffer.size())
@@ -229,7 +224,7 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 
 			if(addSeparator)
 			{
-				result += kSeparator;
+				pathOut += kSeparator;
 			}
 
 			// if we found path separator, get real filename of this
@@ -240,15 +235,15 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 
 			// nuke the path separator so that we get real name of current path component
 			info.szDisplayName[0] = 0;
-			if(SHGetFileInfo(buffer.c_str(), 0, &info, sizeof(info), SHGFI_DISPLAYNAME ))
+			if(SHGetFileInfo(buffer.c_str(), 0, &info, sizeof(info), SHGFI_DISPLAYNAME))
 			{
-				result += info.szDisplayName;
+				pathOut += info.szDisplayName;
 			}
 			else
 			{
 				tstringstream message;
-				message << _T("The path \" ") << path << _T(" \" Is Invalid!");
-				Logger::GetInstance()->Log(LogLevel::Error,
+				message << _T("The path \" ") << pathIn << _T(" \" Is Invalid!");
+				LOG(LogLevel::Error,
 					message.str(), STARENGINE_LOG_TAG);
 				break;
 			}
@@ -262,7 +257,51 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 			++i;
 			addSeparator = true;
 		}
-		return result;
-	}
 #endif
+	}
+	void FilePath::ConvertPathToCorrectPlatformStyle(tstring & path)
+	{
+#ifdef _WIN32
+		std::replace(path.begin(), path.end(), '/', '\\');
+#else
+		std::replace(path.begin(), path.end(), '\\', '/');
+#endif
+	}
+
+	void FilePath::CheckIfPathIsCapitalCorrect(const tstring & full_path)
+	{
+#ifdef _WIN32 && defined (_DEBUG)
+		tstring shellPath;
+		GetActualPathName(full_path, shellPath);
+		auto seperatorIndex(shellPath.find_last_of(_T("\\")));
+		if(seperatorIndex != tstring::npos)
+		{
+			shellPath = shellPath.substr(seperatorIndex + 1, shellPath.size() - (seperatorIndex + 1));
+		}
+		auto extensionIndex = m_File.find_last_of(_T("."));
+		auto fileWithoutExtension(m_File);
+		if(extensionIndex != tstring::npos)
+		{
+			fileWithoutExtension = m_File.substr(0, extensionIndex);
+		}
+		auto shellExtensionIndex = shellPath.find_last_of(_T("."));
+		auto shellNameWithoutExtension(shellPath);
+		if(shellExtensionIndex != tstring::npos)
+		{
+			shellNameWithoutExtension = shellPath.substr(0, shellExtensionIndex);
+		}
+		if(fileWithoutExtension != shellNameWithoutExtension)
+		{
+			tstringstream buffer; 
+			buffer << 
+				_T("The path \" ") << 
+				full_path << 
+				_T(" \" is not capital correct. Please change the name in code to \" ") << 
+				shellPath << 
+				_T(" \" or your game will crash on Android and Linux");
+			DEBUG_LOG(LogLevel::Error, buffer.str(), STARENGINE_LOG_TAG);
+		}
+#endif
+	}
+
 }
