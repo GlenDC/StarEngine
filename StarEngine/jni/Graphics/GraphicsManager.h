@@ -42,7 +42,8 @@ namespace star
 		int32 GetScreenWidth() const;
 		int32 GetScreenHeight() const;
 
-		const mat4& GetViewProjectionMatrix() const;
+		const mat4& GetViewInverseProjectionMatrix() const;
+		const mat4& GetViewMatrix() const;
 		const mat4& GetViewInverseMatrix() const;
 		const mat4& GetProjectionMatrix() const;
 
@@ -67,7 +68,7 @@ namespace star
 
 	private:
 		GraphicsManager();
-
+		void InitializeOpenGLStates();
 #ifdef DESKTOP
 		bool WGLExtensionSupported(const schar* extension_name);
 		bool InitializeOpenGLFunctors();
@@ -82,6 +83,7 @@ namespace star
 			mVerticalViewportOffset;
 
 		mat4 mViewProjectionMatrix;
+		mat4 mViewMatrix;
 		mat4 mViewInverseMatrix;
 		mat4 mProjectionMatrix;
 		vec2 mScreenResolution, mViewportResolution;
@@ -89,9 +91,9 @@ namespace star
 		bool mIsInitialized;
 
 #ifdef ANDROID
-        EGLDisplay mDisplay;
-        EGLSurface mSurface;
-        EGLContext mContext;
+		EGLDisplay mDisplay;
+		EGLSurface mSurface;
+		EGLContext mContext;
 #endif
 
 		GraphicsManager(const GraphicsManager& yRef);

@@ -1,9 +1,9 @@
 #include "SoundFile.h"
 #include "AudioManager.h"
 #include "../Logger.h"
-#include "../Assets/Resource.h"
+#include "../Graphics/Resource.h"
 #include "../Helpers/Helpers.h"
-#include "../Helpers/Filepath.h"
+#include "../Helpers/FilePath.h"
 
 #ifdef ANDROID
 #include "../StarEngine.h"
@@ -27,14 +27,15 @@ namespace star
 		SLEngineItf engine = AudioManager::GetInstance()->GetEngine();
 		CreateSound(mPlayerObj, engine, mPlayer, path);
 #else
-		Filepath real_path(path);
-		sstring sound_path = string_cast<sstring>(real_path.GetAssetsPath());
+		FilePath real_path(path);
+		sstring sound_path = string_cast<sstring>(real_path.GetCorrectPath());
 		mpSound = Mix_LoadMUS(sound_path.c_str());
 		if(!mpSound)
 		{
-			star::Logger::GetInstance()->Log(star::LogLevel::Error,
+			LOG(LogLevel::Error,
 				_T("SoundFile: Could not load sound, reason : ")
-				+ string_cast<tstring>(Mix_GetError()));
+				+ string_cast<tstring>(Mix_GetError()),
+				STARENGINE_LOG_TAG);
 		}
 #endif
 		SetChannel(channel);
@@ -61,9 +62,10 @@ namespace star
 	{
 		BaseSound::Play(looptimes);
 		mLoopTimes = looptimes;
-		star::Logger::GetInstance()->Log(star::LogLevel::Info,
+		LOG(LogLevel::Info,
 			_T("Sound File: Playing File , Looptimes = ") +
-			star::string_cast<tstring>(mLoopTimes));
+			star::string_cast<tstring>(mLoopTimes),
+			STARENGINE_LOG_TAG);
 #ifdef DESKTOP
 		Mix_HookMusicFinished(NULL);
 		Mix_PlayMusic(mpSound, mLoopTimes);
@@ -80,9 +82,10 @@ namespace star
 
 			if (lRes != SL_RESULT_SUCCESS)
 			{
-				star::Logger::GetInstance()->Log(
-					star::LogLevel::Error,
-					_T("Sound File: Can't set audio loop")
+				LOG(
+					LogLevel::Error,
+					_T("Sound File: Can't set audio loop"),
+					STARENGINE_LOG_TAG
 					);
 				Stop();
 				return;
@@ -92,8 +95,8 @@ namespace star
 		lRes = (*mPlayer)->SetPlayState(mPlayer,SL_PLAYSTATE_PLAYING);
 		if (lRes != SL_RESULT_SUCCESS)
 		{
-			star::Logger::GetInstance()->Log(star::LogLevel::Error,
-				_T("Sound File: Can't play audio"));
+			LOG(LogLevel::Error,
+				_T("Sound File: Can't play audio"), STARENGINE_LOG_TAG);
 			Stop();
 			return;
 		};
@@ -219,8 +222,9 @@ namespace star
 				);
 		if (lRes != SL_RESULT_SUCCESS)
 		{
-			star::Logger::GetInstance()->Log(star::LogLevel::Error,
-					_T("SoundFile : Can't get audio seek interface"));
+			LOG(LogLevel::Error,
+				_T("SoundFile : Can't get audio seek interface"),
+				STARENGINE_LOG_TAG);
 			Stop();
 			return;
 		}
@@ -232,8 +236,8 @@ namespace star
 			player, MusicStoppedCallback,
 			&player) != SL_RESULT_SUCCESS)
 		{
-			star::Logger::GetInstance()->Log(star::LogLevel::Error,
-				_T("SoundFile: Can't set callback"));
+			LOG(LogLevel::Error,
+				_T("SoundFile: Can't set callback"), STARENGINE_LOG_TAG);
 		}
 	}
 
@@ -245,9 +249,10 @@ namespace star
 		SoundFile* file =
 			reinterpret_cast<SoundFile*>(pContext);
 
-		star::Logger::GetInstance()->Log(star::LogLevel::Info,
+		LOG(LogLevel::Info,
 			_T("Sound File: Callback Entered, Looptimes = ") +
-			star::string_cast<tstring>(file->mLoopTimes)
+			star::string_cast<tstring>(file->mLoopTimes),
+			STARENGINE_LOG_TAG
 			);
 
 		if(file->mLoopTimes == 0)

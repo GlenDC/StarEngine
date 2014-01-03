@@ -4,7 +4,6 @@
 #include "Helpers/FPS.h"
 #include <memory>
 
-#include "Scenes/LoadScreen.h"
 #include <random>
 
 #ifdef ANDROID
@@ -47,6 +46,8 @@ namespace star
 		void ResetTitleUpdateMark();
 
 		std::mt19937& GetMt19937Engine();
+
+		void Quit();
 
 #ifdef ANDROID
 		void SetAndroidApp(android_app * app);

@@ -1,4 +1,4 @@
-#include "Filepath.h"
+#include "FilePath.h"
 #ifdef _WIN32
 	#include <shellapi.h>
 	#include "../StarEngine.h"
@@ -13,36 +13,24 @@
 namespace star
 {
 #ifdef DESKTOP
-tstring Filepath::m_AssetsRoot = EMPTY_STRING;
-tstring Filepath::m_InternalRoot = EMPTY_STRING;
-tstring Filepath::m_ExternalRoot = EMPTY_STRING;
+tstring FilePath::m_AssetsRoot = EMPTY_STRING;
+tstring FilePath::m_InternalRoot = EMPTY_STRING;
+tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 #endif
 
-	Filepath::Filepath()
+	FilePath::FilePath()
 		: m_Path(EMPTY_STRING) 
 		, m_File(EMPTY_STRING)
+		, m_DirectoryMode(DEFAULT_DIRECTORY_MODE)
 	{
 
 	}
 
-	Filepath::Filepath(const tstring & full_path)
+	FilePath::FilePath(const tstring & full_path, DirectoryMode mode)
 		: m_Path(EMPTY_STRING)
 		, m_File(EMPTY_STRING)
+		, m_DirectoryMode(mode)
 	{
-		int32 dotCounter(0);
-		for(uint32 i = 0; i < full_path.size(); ++i)
-		{
-			if(full_path[i] == _T('.'))
-			{
-				++dotCounter;
-			}
-		}
-		if(dotCounter > 1)
-		{
-			Logger::GetInstance()->Log(LogLevel::Error, 
-				_T("Please don't use . in your filename (except for the file extension)"));
-		}
-
 		auto index = full_path.find_last_of('/');
 		if(index == tstring::npos)
 		{
@@ -58,155 +46,140 @@ tstring Filepath::m_ExternalRoot = EMPTY_STRING;
 		{
 			m_File = full_path;
 		}
+		ConvertPathToCorrectPlatformStyle(m_Path);
+		CheckIfPathIsCapitalCorrect(GetRoot() + m_Path + m_File);
 	}
 
-	Filepath::Filepath(const tstring & path, const tstring & file)
-		: m_Path(path)
-		, m_File(file)
-	{
-
-	}
-
-	Filepath::Filepath(const Filepath & yRef)
+	FilePath::FilePath(const FilePath & yRef)
 		: m_Path(yRef.m_Path)
 		, m_File(yRef.m_File)
 	{
 		
 	}
 
-	Filepath::~Filepath()
+	FilePath::~FilePath()
 	{
 
 	}
 
-	const Filepath & Filepath::operator=(const Filepath & yRef)
+	FilePath & FilePath::operator=(const FilePath & yRef)
 	{
 		m_Path = yRef.m_Path;
 		m_File = yRef.m_File;
 		return *this;
 	}
 
-	bool Filepath::operator==(const Filepath & yRef)
+	bool FilePath::operator==(const FilePath & yRef)
 	{
 		return m_Path == yRef.m_Path && m_File == yRef.m_File;
 	}
 
-	const tstring & Filepath::GetPath() const
+	const tstring & FilePath::GetPath() const
 	{
 		return m_Path;
 	}
 
-	const tstring & Filepath::GetFile() const
+	const tstring & FilePath::GetFile() const
 	{
 		return m_File;
 	}
 
-	tstring Filepath::GetName() const
+	tstring FilePath::GetName() const
 	{
 		tstring name(m_File);
 		auto index(name.find_last_of(_T(".")));
 		return name.substr(0, index);
 	}
 
-	tstring Filepath::GetExtension() const
+	tstring FilePath::GetExtension() const
 	{
 		tstring extension(m_File);
 		auto index(extension.find_last_of(_T(".")));
 		return extension.substr(index, extension.size() - index);
 	}
+
+	const tstring & FilePath::GetRoot() const
+	{
+#ifdef DESKTOP
+		switch(m_DirectoryMode)
+		{
+		case DirectoryMode::assets:
+			return m_AssetsRoot;
+		case DirectoryMode::internal:
+			return m_InternalRoot;
+		case DirectoryMode::external:
+			return m_ExternalRoot;
+		default:
+			return EMPTY_STRING;
+		}
+#endif
+#ifdef ANDROID
+		auto app = StarEngine::GetInstance()->GetAndroidApp();
+		switch(m_DirectoryMode)
+		{
+		case DirectoryMode::assets:
+			return EMPTY_STRING;
+		case DirectoryMode::internal:
+			return string_cast<tstring>(app->activity->internalDataPath) + tstring(_T("/"));
+		case DirectoryMode::external:
+			return string_cast<tstring>(app->activity->externalDataPath) + tstring(_T("/"));
+		default:
+			return EMPTY_STRING;
+		}
+#endif
+	}
 	
-	tstring Filepath::GetLocalPath() const
+	tstring FilePath::GetLocalPath() const
 	{
 		return m_Path + m_File;
 	}
-
-	tstring Filepath::GetAssetsPath() const
-	{
-		tstring assets_path(EMPTY_STRING);
-	#ifdef DESKTOP
-		assets_path = m_AssetsRoot;
-	#endif
-		assets_path += m_Path + m_File;
-		return assets_path;
-	}
-
-	tstring Filepath::GetInternalPath() const
-	{
-		tstring internal_path(EMPTY_STRING);
-	#ifdef DESKTOP
-		internal_path = m_InternalRoot;
-	#else
-		auto app = StarEngine::GetInstance()->GetAndroidApp();
-		internal_path = string_cast<tstring>(app->activity->internalDataPath);
-		internal_path += _T("/");
-	#endif
-		internal_path += m_Path + m_File;
-		return internal_path;
-	}
-
-	tstring Filepath::GetExternalPath() const
-	{
-		tstring external_path(EMPTY_STRING);
-	#ifdef DESKTOP
-		external_path = m_ExternalRoot;
-	#else
-		auto app = StarEngine::GetInstance()->GetAndroidApp();
-		external_path = string_cast<tstring>(app->activity->externalDataPath);
-		external_path += _T("/");
-	#endif
-		external_path += m_Path + m_File;
-		return external_path;
-	}
 	
-	void Filepath::GetCorrectPath(const tstring & path,
-		tstring & correct_path, DirectoryMode mode)
+	void FilePath::GetCorrectPath(tstring & correct_path) const
 	{
-		switch(mode)
-		{
-		case DirectoryMode::assets:
-			correct_path = Filepath(path).GetAssetsPath();
-			break;
-		case DirectoryMode::internal:
-			correct_path = Filepath(path).GetInternalPath();
-			break;
-		case DirectoryMode::external:
-			correct_path = Filepath(path).GetExternalPath();
-			break;
-		default:
-			correct_path = path;
-			break;
-		}
+		correct_path = GetRoot() + GetLocalPath();
+	}
+
+	tstring FilePath::GetCorrectPath() const
+	{
+		return GetRoot() + GetLocalPath();
+	}
+
+	DirectoryMode FilePath::GetDirectoryMode() const
+	{
+		return m_DirectoryMode;
 	}
 
 #ifdef DESKTOP
-	void Filepath::SetAssetsRoot(const tstring & root)
+	void FilePath::SetAssetsRoot(const tstring & root)
 	{
 		m_AssetsRoot = root;
+		ConvertPathToCorrectPlatformStyle(m_AssetsRoot);
 	}
 	
-	void Filepath::SetInternalRoot(const tstring & root)
+	void FilePath::SetInternalRoot(const tstring & root)
 	{
 		m_InternalRoot = root;
+		ConvertPathToCorrectPlatformStyle(m_InternalRoot);
 	}
 	
-	void Filepath::SetExternalRoot(const tstring & root)
+	void FilePath::SetExternalRoot(const tstring & root)
 	{
 		m_ExternalRoot = root;
+		ConvertPathToCorrectPlatformStyle(m_ExternalRoot);
 	}
 #endif
 
-#ifdef _WIN32
-	tstring Filepath::GetActualPathName(const tstring& path ) const
-	{
-		// This is quite involved, but the meat is SHGetFileInfo
 
+	bool FilePath::GetActualPathName(const tstring & pathIn, tstring & pathOut)
+	{
+#ifdef _WIN32
 		const tchar kSeparator = _T('\\');
 
-		tstring buffer(path);
+		tstring buffer(pathIn);
 
 		size_t i = 0;
+		pathOut = EMPTY_STRING;
 
-		tstring result;
 		bool addSeparator = false;
 
 		while(i < buffer.size())
@@ -219,7 +192,7 @@ tstring Filepath::m_ExternalRoot = EMPTY_STRING;
 
 			if(addSeparator)
 			{
-				result += kSeparator;
+				pathOut += kSeparator;
 			}
 
 			// if we found path separator, get real filename of this
@@ -230,16 +203,22 @@ tstring Filepath::m_ExternalRoot = EMPTY_STRING;
 
 			// nuke the path separator so that we get real name of current path component
 			info.szDisplayName[0] = 0;
-			if(SHGetFileInfo(buffer.c_str(), 0, &info, sizeof(info), SHGFI_DISPLAYNAME ))
+			if(SHGetFileInfo(buffer.c_str(), 0, &info, sizeof(info), SHGFI_DISPLAYNAME))
 			{
-				result += info.szDisplayName;
+				pathOut += info.szDisplayName;
 			}
 			else
 			{
 				tstringstream message;
-				message << _T("The path \" ") << path << _T(" \" Is Invalid!");
-				Logger::GetInstance()->Log(LogLevel::Error,message.str());
-				break;
+				message << _T("FilePath::GetActualPathName: ")
+					<< _T("The path \"") 
+					<< pathIn 
+					<< _T("\" points to an unexisting file! ")
+					<< _T("The file might be created or this can \
+be unexpected behaviour. Please verify!");
+				LOG(LogLevel::Info,
+					message.str(), STARENGINE_LOG_TAG);
+				return false;
 			}
 
 			// restore path separator that we might have nuked before
@@ -251,7 +230,54 @@ tstring Filepath::m_ExternalRoot = EMPTY_STRING;
 			++i;
 			addSeparator = true;
 		}
-		return result;
-	}
+		return true;
 #endif
+	}
+	void FilePath::ConvertPathToCorrectPlatformStyle(tstring & path)
+	{
+#ifdef _WIN32
+		std::replace(path.begin(), path.end(), '/', '\\');
+#else
+		std::replace(path.begin(), path.end(), '\\', '/');
+#endif
+	}
+
+	void FilePath::CheckIfPathIsCapitalCorrect(const tstring & full_path)
+	{
+#if defined (_WIN32) & defined (_DEBUG)
+		tstring shellPath;
+		if(GetActualPathName(full_path, shellPath))
+		{
+			auto seperatorIndex(shellPath.find_last_of(_T("\\")));
+			if(seperatorIndex != tstring::npos)
+			{
+				shellPath = shellPath.substr(seperatorIndex + 1, shellPath.size() - (seperatorIndex + 1));
+			}
+			auto extensionIndex = m_File.find_last_of(_T("."));
+			auto fileWithoutExtension(m_File);
+			if(extensionIndex != tstring::npos)
+			{
+				fileWithoutExtension = m_File.substr(0, extensionIndex);
+			}
+			auto shellExtensionIndex = shellPath.find_last_of(_T("."));
+			auto shellNameWithoutExtension(shellPath);
+			if(shellExtensionIndex != tstring::npos)
+			{
+				shellNameWithoutExtension = shellPath.substr(0, shellExtensionIndex);
+			}
+			if(fileWithoutExtension != shellNameWithoutExtension)
+			{
+				tstringstream buffer; 
+				buffer << 
+					_T("The path \" ") << 
+					full_path << 
+					_T(" \" is not capital correct. Please change the name in code to \" ") << 
+					shellPath << 
+					_T(" \" or your game will crash on Android and Linux");
+				DEBUG_LOG(LogLevel::Error, buffer.str(), STARENGINE_LOG_TAG);
+			}
+		}
+#endif
+	}
+
 }
