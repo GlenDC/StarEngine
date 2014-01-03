@@ -4,7 +4,6 @@
 #include "Helpers/FPS.h"
 #include <memory>
 
-#include "Scenes/LoadScreen.h"
 #include <random>
 
 #ifdef ANDROID
@@ -25,7 +24,7 @@ namespace star
 	public:
 		~StarEngine();
 
-		static std::shared_ptr<StarEngine> GetInstance();
+		static StarEngine * GetInstance();
 		void Initialize(int32 window_width, int32 window_height);
 
 		void Update(const Context & context);
@@ -48,13 +47,15 @@ namespace star
 
 		std::mt19937& GetMt19937Engine();
 
+		void Quit();
+
 #ifdef ANDROID
 		void SetAndroidApp(android_app * app);
 		android_app * GetAndroidApp() const;
 #endif
 
 	private:
-		static std::shared_ptr<StarEngine> m_pEngine;
+		static StarEngine * m_pEngine;
 		FPS m_FPS;
 		tstring m_Title, m_SubTitle;
 		bool m_TitleHasUpdated;

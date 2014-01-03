@@ -72,6 +72,8 @@ namespace star
 		static const SLInterfaceID PLAYER_ID_ARR[];
 		static const SLboolean PLAYER_REQ_ARR[];
 
+		tstring mPath;
+
 		virtual void CreateSoundDetails();
 		virtual void RegisterCallback(SLPlayItf & player) = 0;
 
@@ -132,9 +134,9 @@ namespace star
 	private:
 		struct SoundVolume
 		{
-			float32 Volume;
-			float32 ChannelVolume;
-			float32 MasterVolume;
+			float32 volume;
+			float32 channelVolume;
+			float32 masterVolume;
 
 			SoundVolume();
 			float32 GetVolume() const;

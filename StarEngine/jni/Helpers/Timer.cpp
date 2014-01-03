@@ -3,7 +3,7 @@
 
 namespace star
 {
-	Timer::Timer() //Default Constructor
+	Timer::Timer()
 		:m_TargetTime(1.0f)
 		,m_CurrentTime(0)
 		,m_CountingDown(false)
@@ -27,7 +27,7 @@ namespace star
 	{
 	}
 
-	Timer::~Timer() //Default Destructor
+	Timer::~Timer()
 	{
 	}
 
@@ -43,13 +43,13 @@ namespace star
 	}
 
 	Timer::Timer(Timer&& yRef)
-		:m_TargetTime(yRef.m_TargetTime)
-		,m_CurrentTime(yRef.m_CurrentTime)
-		,m_CountingDown(yRef.m_CountingDown)
-		,m_Looping(yRef.m_Looping)
-		,m_Paused(yRef.m_Paused)
-		,m_Infinite(yRef.m_Infinite)
-		,m_ExcecutingFunction(yRef.m_ExcecutingFunction)
+		:m_TargetTime(std::move(yRef.m_TargetTime))
+		,m_CurrentTime(std::move(yRef.m_CurrentTime))
+		,m_CountingDown(std::move(yRef.m_CountingDown))
+		,m_Looping(std::move(yRef.m_Looping))
+		,m_Paused(std::move(yRef.m_Paused))
+		,m_Infinite(std::move(yRef.m_Infinite))
+		,m_ExcecutingFunction(std::move(yRef.m_ExcecutingFunction))
 	{
 	}
 
@@ -67,13 +67,13 @@ namespace star
 
 	Timer& Timer::operator=(Timer&& yRef)
 	{
-		m_TargetTime = yRef.m_TargetTime;
-		m_CurrentTime = yRef.m_CurrentTime;
-		m_CountingDown = yRef.m_CountingDown;
-		m_Looping = yRef.m_Looping;
-		m_Paused = yRef.m_Paused;
-		m_Infinite = yRef.m_Infinite;
-		m_ExcecutingFunction = yRef.m_ExcecutingFunction;
+		m_TargetTime = std::move(yRef.m_TargetTime);
+		m_CurrentTime = std::move(yRef.m_CurrentTime);
+		m_CountingDown = std::move(yRef.m_CountingDown);
+		m_Looping = std::move(yRef.m_Looping);
+		m_Paused = std::move(yRef.m_Paused);
+		m_Infinite = std::move(yRef.m_Infinite);
+		m_ExcecutingFunction = std::move(yRef.m_ExcecutingFunction);
 		return *this;
 	}
 
@@ -85,7 +85,7 @@ namespace star
 		}
 		if(m_CountingDown && m_CurrentTime >= 0)
 		{
-			m_CurrentTime -= context.mTimeManager->GetSeconds();
+			m_CurrentTime -= context.time->DeltaTime().GetSeconds();
 			if(m_CurrentTime < 0)
 			{
 				m_ExcecutingFunction();
@@ -100,7 +100,7 @@ namespace star
 		}
 		else if(!m_CountingDown && m_CurrentTime <= m_TargetTime)
 		{
-			m_CurrentTime += context.mTimeManager->GetSeconds();
+			m_CurrentTime += context.time->DeltaTime().GetSeconds();
 			if(m_CurrentTime > m_TargetTime)
 			{
 				m_ExcecutingFunction();
@@ -146,7 +146,7 @@ namespace star
 		}
 	}
 
-	void Timer::SetFunction(std::function<void ()> func)
+	void Timer::SetFunction(const std::function<void ()> & func)
 	{
 		m_ExcecutingFunction = func;
 	}
@@ -180,5 +180,28 @@ namespace star
 	float64 Timer::GetCurrentAccurateTime() const
 	{
 		return m_CurrentTime;
+	}
+	
+	float64 Timer::ForceEnd()
+	{
+		float64 rest(m_CurrentTime);
+		if(!m_CountingDown)
+		{
+			rest = m_TargetTime - rest;
+		}
+		m_CurrentTime = m_CountingDown ? 0 : m_TargetTime;
+		return rest;
+	}
+	
+	void Timer::Forward(float64 time)
+	{
+		if(m_CountingDown)
+		{
+			m_CurrentTime -= time;
+		}
+		else
+		{
+			m_CurrentTime += time;
+		}
 	}
 }

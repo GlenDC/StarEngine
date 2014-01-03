@@ -2,31 +2,31 @@
 #include "Graphics/GraphicsManager.h"
 #include "Graphics/SpriteAnimationManager.h"
 #include "Graphics/SpriteBatch.h"
+#include "Graphics/FontManager.h"
+#include "Graphics/ScaleSystem.h"
 #include "Scenes/SceneManager.h"
 #include "Input/InputManager.h"
 #include "Context.h"
 #include "Logger.h"
 #include "Sound/AudioManager.h"
-#include "Helpers/Stopwatch.h"
+#include "Helpers/TimerManager.h"
 #include "AI/Pathfinding/PathFindManager.h"
-#include "Assets/FontManager.h"
 #include "Physics/Collision/CollisionManager.h"
-#include "Graphics/ScaleSystem.h"
 #include "Helpers/Debug/DebugDraw.h"
 
 namespace star
 {
-	std::shared_ptr<StarEngine> StarEngine::m_pEngine = nullptr;
+	StarEngine * StarEngine::m_pEngine = nullptr;
 
 	StarEngine::~StarEngine()
 	{
 	}
 
-	std::shared_ptr<StarEngine> StarEngine::GetInstance()
+	StarEngine*  StarEngine::GetInstance()
 	{
 		if(m_pEngine == nullptr)
 		{
-			m_pEngine = std::shared_ptr<StarEngine>(new StarEngine());
+			m_pEngine = new StarEngine();
 		}
 		return m_pEngine;
 	}
@@ -51,13 +51,13 @@ namespace star
 	void StarEngine::Update(const Context & context)
 	{
 		m_FPS.Update(context);
-
 		SceneManager::GetInstance()->Update(context);
 		GraphicsManager::GetInstance()->Update();
-
 		InputManager::GetInstance()->EndUpdate();
 		Logger::GetInstance()->Update(context);
-		Logger::GetInstance()->CheckGlError();
+#if defined(DEBUG) | defined(_DEBUG)
+		OPENGL_LOG();
+#endif
 		m_bInitialized = true;
 	}
 
@@ -85,6 +85,7 @@ namespace star
 		delete PathFindManager::GetInstance();
 		delete SceneManager::GetInstance();
 		delete Logger::GetInstance();
+		delete TimeManager::GetInstance();
 	}
 	
 	void StarEngine::SetActive()
@@ -137,6 +138,15 @@ namespace star
 	std::mt19937& StarEngine::GetMt19937Engine()
 	{
 		return m_RandomEngine;
+	}
+
+	void StarEngine::Quit()
+	{
+#ifdef _WIN32
+		PostQuitMessage(0);
+#else
+		ANativeActivity_finish(m_pAndroidApp->activity);
+#endif
 	}
 
 #ifdef ANDROID
