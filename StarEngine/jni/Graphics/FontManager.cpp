@@ -76,7 +76,7 @@ namespace star
 		star::FilePath filepath(path);
 
 		Font* tempFont = new Font();
-		if(tempFont->Init(filepath.GetAssetsPath(), size, mLibrary))
+		if(tempFont->Init(filepath.GetCorrectPath(), size, mLibrary))
 		{
 			mFontList[name] = tempFont;
 

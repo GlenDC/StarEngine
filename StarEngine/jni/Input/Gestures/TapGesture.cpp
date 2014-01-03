@@ -65,6 +65,6 @@ namespace star
 	#endif
 	void TapGesture::Update(const Context& context)
 	{
-		m_TimeSinceBeginning = context.mTimeManager->GetMilliSecondsSinceStart();
+		m_TimeSinceBeginning = context.Time->TimeSinceStart().GetMilliSeconds();
 	}
 }

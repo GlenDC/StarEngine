@@ -35,7 +35,6 @@ namespace star
 		bool mEnabled;
 		bool mQuit;
 		BaseGame* mMainGame;
-		TimeManager* mTimeManager;
 		Context mContext;
 		android_app* mApplicationPtr;
 

@@ -50,7 +50,7 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 			m_File = full_path;
 		}
 		ConvertPathToCorrectPlatformStyle(m_Path);
-		CheckIfPathIsCapitalCorrect(m_AssetsRoot + m_Path + m_File);
+		CheckIfPathIsCapitalCorrect(GetRoot() + m_Path + m_File);
 	}
 
 	FilePath::FilePath(const FilePath & yRef)
@@ -100,80 +100,55 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 		auto index(extension.find_last_of(_T(".")));
 		return extension.substr(index, extension.size() - index);
 	}
+
+	const tstring & FilePath::GetRoot() const
+	{
+#ifdef DESKTOP
+		switch(m_DirectoryMode)
+		{
+		case DirectoryMode::assets:
+			return m_AssetsRoot;
+		case DirectoryMode::internal:
+			return m_InternalRoot;
+		case DirectoryMode::external:
+			return m_ExternalRoot;
+		default:
+			return EMPTY_STRING;
+		*/
+		}
+		/*
+		//[TODO] Implent new android code (2.0)
+		*/
+#endif
+#ifdef ANDROID
+		auto app = StarEngine::GetInstance()->GetAndroidApp();
+		switch(m_DirectoryMode)
+		{
+		case DirectoryMode::assets:
+			return EMPTY_STRING;
+		case DirectoryMode::internal:
+			return string_cast<tstring>(app->activity->internalDataPath) + tstring(_T("/"));
+		case DirectoryMode::external:
+			return string_cast<tstring>(app->activity->externalDataPath) + tstring(_T("/"));
+		default:
+			return EMPTY_STRING;
+		}
+#endif
+	}
 	
 	tstring FilePath::GetLocalPath() const
 	{
 		return m_Path + m_File;
 	}
-
-	tstring FilePath::GetAssetsPath() const
-	{
-		tstring assets_path(EMPTY_STRING);
-	#ifdef DESKTOP
-		assets_path = m_AssetsRoot;
-	#endif
-		assets_path += m_Path + m_File;
-		return assets_path;
-	}
-
-	tstring FilePath::GetInternalPath() const
-	{
-		tstring internal_path(EMPTY_STRING);
-	#ifdef DESKTOP
-		internal_path = m_InternalRoot;
-	#else
-		/*
-		//[TODO] Implent new android code (2.0)
-		auto app = StarEngine::GetInstance()->GetAndroidApp();
-		internal_path = string_cast<tstring>(app->activity->internalDataPath);
-		internal_path += _T("/");
-		*/
-	#endif
-		internal_path += m_Path + m_File;
-		return internal_path;
-	}
-
-	tstring FilePath::GetExternalPath() const
-	{
-		tstring external_path(EMPTY_STRING);
-	#ifdef DESKTOP
-		external_path = m_ExternalRoot;
-	#else
-		/*
-		//[TODO] Implent new android code (2.0)
-		auto app = StarEngine::GetInstance()->GetAndroidApp();
-		external_path = string_cast<tstring>(app->activity->externalDataPath);
-		external_path += _T("/");
-		*/
-	#endif
-		external_path += m_Path + m_File;
-		return external_path;
-	}
 	
-	void FilePath::GetCorrectPath(const tstring & path,
-		tstring & correct_path, DirectoryMode mode)
+	void FilePath::GetCorrectPath(tstring & correct_path) const
 	{
-		switch(mode)
-		{
-		case DirectoryMode::assets:
-			correct_path = FilePath(path).GetAssetsPath();
-			break;
-		case DirectoryMode::internal:
-			correct_path = FilePath(path).GetInternalPath();
-			break;
-		case DirectoryMode::external:
-			correct_path = FilePath(path).GetExternalPath();
-			break;
-		default:
-			correct_path = path;
-			break;
-		}
+		correct_path = GetRoot() + GetLocalPath();
 	}
-	
-	void FilePath::GetCorrectPath(const tstring & path,
-		tstring & correct_path) const
+
+	tstring FilePath::GetCorrectPath() const
 	{
-		GetCorrectPath(path, correct_path, m_DirectoryMode);
+		return GetRoot() + GetLocalPath();
 	}
 
 	DirectoryMode FilePath::GetDirectoryMode() const
@@ -202,7 +177,7 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 #endif
 
 
-	void FilePath::GetActualPathName(const tstring & pathIn, tstring & pathOut)
+	bool FilePath::GetActualPathName(const tstring & pathIn, tstring & pathOut)
 	{
 #ifdef _WIN32
 		const tchar kSeparator = _T('\\');
@@ -242,10 +217,15 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 			else
 			{
 				tstringstream message;
-				message << _T("The path \" ") << pathIn << _T(" \" Is Invalid!");
-				LOG(LogLevel::Error,
+				message << _T("FilePath::GetActualPathName: ")
+					<< _T("The path \"") 
+					<< pathIn 
+					<< _T("\" points to an unexisting file! ")
+					<< _T("The file might be created or this can \
+be unexpected behaviour. Please verify!");
+				LOG(LogLevel::Info,
 					message.str(), STARENGINE_LOG_TAG);
-				break;
+				return false;
 			}
 
 			// restore path separator that we might have nuked before
@@ -257,6 +237,7 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 			++i;
 			addSeparator = true;
 		}
+		return true;
 #endif
 	}
 	void FilePath::ConvertPathToCorrectPlatformStyle(tstring & path)
@@ -270,36 +251,38 @@ tstring FilePath::m_ExternalRoot = EMPTY_STRING;
 
 	void FilePath::CheckIfPathIsCapitalCorrect(const tstring & full_path)
 	{
-#ifdef _WIN32 && defined (_DEBUG)
+#if defined (_WIN32) & defined (_DEBUG)
 		tstring shellPath;
-		GetActualPathName(full_path, shellPath);
-		auto seperatorIndex(shellPath.find_last_of(_T("\\")));
-		if(seperatorIndex != tstring::npos)
+		if(GetActualPathName(full_path, shellPath))
 		{
-			shellPath = shellPath.substr(seperatorIndex + 1, shellPath.size() - (seperatorIndex + 1));
-		}
-		auto extensionIndex = m_File.find_last_of(_T("."));
-		auto fileWithoutExtension(m_File);
-		if(extensionIndex != tstring::npos)
-		{
-			fileWithoutExtension = m_File.substr(0, extensionIndex);
-		}
-		auto shellExtensionIndex = shellPath.find_last_of(_T("."));
-		auto shellNameWithoutExtension(shellPath);
-		if(shellExtensionIndex != tstring::npos)
-		{
-			shellNameWithoutExtension = shellPath.substr(0, shellExtensionIndex);
-		}
-		if(fileWithoutExtension != shellNameWithoutExtension)
-		{
-			tstringstream buffer; 
-			buffer << 
-				_T("The path \" ") << 
-				full_path << 
-				_T(" \" is not capital correct. Please change the name in code to \" ") << 
-				shellPath << 
-				_T(" \" or your game will crash on Android and Linux");
-			DEBUG_LOG(LogLevel::Error, buffer.str(), STARENGINE_LOG_TAG);
+			auto seperatorIndex(shellPath.find_last_of(_T("\\")));
+			if(seperatorIndex != tstring::npos)
+			{
+				shellPath = shellPath.substr(seperatorIndex + 1, shellPath.size() - (seperatorIndex + 1));
+			}
+			auto extensionIndex = m_File.find_last_of(_T("."));
+			auto fileWithoutExtension(m_File);
+			if(extensionIndex != tstring::npos)
+			{
+				fileWithoutExtension = m_File.substr(0, extensionIndex);
+			}
+			auto shellExtensionIndex = shellPath.find_last_of(_T("."));
+			auto shellNameWithoutExtension(shellPath);
+			if(shellExtensionIndex != tstring::npos)
+			{
+				shellNameWithoutExtension = shellPath.substr(0, shellExtensionIndex);
+			}
+			if(fileWithoutExtension != shellNameWithoutExtension)
+			{
+				tstringstream buffer; 
+				buffer << 
+					_T("The path \" ") << 
+					full_path << 
+					_T(" \" is not capital correct. Please change the name in code to \" ") << 
+					shellPath << 
+					_T(" \" or your game will crash on Android and Linux");
+				DEBUG_LOG(LogLevel::Error, buffer.str(), STARENGINE_LOG_TAG);
+			}
 		}
 #endif
 	}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../defines.h"
+#include "../Helpers/TimerManager.h"
 #include "../Helpers/Stopwatch.h"
 #include <memory>
 #include <map>
@@ -52,7 +53,9 @@ namespace star
 
 		void SetSystemCursorHiddenByDefault(bool hidden);
 
+		std::shared_ptr<TimerManager> GetTimerManager() const;
 		std::shared_ptr<Stopwatch> GetStopwatch() const;
+
 
 #ifdef ANDROID
 		/*
@@ -70,6 +73,7 @@ namespace star
 		BaseScene	*m_ActiveScene, 
 					*m_NewActiveScene;
 
+		std::shared_ptr<TimerManager> m_TimerManager;
 		std::shared_ptr<Stopwatch> m_Stopwatch;
 
 		std::vector<BaseScene*> m_GarbageList;

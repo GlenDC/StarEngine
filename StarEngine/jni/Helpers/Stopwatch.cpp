@@ -1,290 +1,74 @@
 #include "Stopwatch.h"
-#include "Timer.h"
-#include "../Context.h"
-#include <algorithm>
-
+#include "../TimeManager.h"
 #include "../Logger.h"
 
 namespace star
 {
 	Stopwatch::Stopwatch()
+		: m_bPaused(false)
+		, m_bStarted(false)
+		, m_TimePair()
+		, m_Laps()
 	{
-
 	}
+
 
 	Stopwatch::~Stopwatch()
 	{
-
 	}
 
-	void Stopwatch::Update(const Context& context)
+	void Stopwatch::Start()
 	{
-		//clean up the trash
-		for(auto& it : m_GarbageContainer)
+		if(m_bStarted)
 		{
-			m_TimerContainer.erase(it.first);
+			LOG(LogLevel::Warning, _T("Stopwatch::Start(): \
+Stopwatch already running! Overwriting start time..."));
 		}
-		m_GarbageContainer.clear();
-
-		for(auto it = m_TimerContainer.begin() ; it != m_TimerContainer.end() ; )
-		{
-			if (it->second.Update(context)) 
-			{
-				m_TimerContainer.erase(it++);
-			} 
-			else 
-			{
-				++it;
-			}
-		}
+		m_TimePair.push_back(
+			std::make_pair(
+				TimeManager::GetInstance()->CurrentTime(),
+				Time()
+				)
+			);
+		m_bStarted = true;
+		m_bPaused = false;
 	}
 
-	bool Stopwatch::CreateTimer(	const tstring & name, float32 targetTime,
-									bool countingDown, bool loop,
-									std::function<void ()> func, bool paused)
+	void Stopwatch::Stop()
 	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				return false;
-			}
-		}
-
-		for (auto it = m_TimerContainer.begin(); it != m_TimerContainer.end() ; ++it)
-		{
-			if(it->first == name)
-			{
-				m_GarbageContainer[it->first] = it->second;
-				break;
-			}
-		}
-
-		Timer newTimer(targetTime, countingDown, loop, func, paused);
-		m_TimerContainer[name] = newTimer;
-		return true;
+		m_TimePair.back().second = TimeManager::GetInstance()->CurrentTime();
+		m_bPaused = true;
+		m_bStarted = false;
 	}
 
-	bool Stopwatch::RemoveTimer(const tstring & name)
+	void Stopwatch::Reset()
 	{
-		for (auto it = m_TimerContainer.begin(); it != m_TimerContainer.end() ; ++it)
-		{
-			if (it->first == name)
-			{
-				m_GarbageContainer[it->first] = it->second;
-				return true;
-			}
-		}
-		LOG(LogLevel::Warning,
-			_T("Stopwatch::RemoveTimer: trying to remove unknown timer '")
-			+ name + _T("'."), STARENGINE_LOG_TAG);
-		return false;
+		m_TimePair.clear();
+		m_bStarted = false;
+		m_bPaused = false;
 	}
 
-	void Stopwatch::PauseTimer(const tstring & name, bool paused)
+	void Stopwatch::Lap()
 	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				it.second.SetPaused(paused);
-				return;
-			}
-		}
-		LOG(LogLevel::Warning,
-			_T("Stopwatch::PauseTimer: trying to pause unknown timer '")
-			+ name + _T("'."), STARENGINE_LOG_TAG);
+		m_Laps.push_back(GetTime());
 	}
 
-	void Stopwatch::SetCountingDownTimer(const tstring & name, bool countingDown)
+	const std::vector<Time> & Stopwatch::GetLapTimes() const
 	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				it.second.SetCountingDown(countingDown);
-				return;
-			}
-		}
-		LOG(LogLevel::Warning,
-			_T("Stopwatch::SetCountingDownTimer: trying to adjust unknown timer '")
-			+ name + _T("'."), STARENGINE_LOG_TAG);
+		return m_Laps;
 	}
 
-	void Stopwatch::SetLoopTimer(const tstring & name, bool looping)
+	Time Stopwatch::GetTime()
 	{
-		for(auto& it : m_TimerContainer)
+		Time totalTime = Time();
+		if(m_bPaused)
 		{
-			if(it.first == name)
-			{
-				it.second.SetLoop(looping);
-				return;
-			}
+			m_TimePair.back().second = TimeManager::GetInstance()->CurrentTime();
 		}
-		LOG(LogLevel::Warning,
-			_T("Stopwatch::SetLoopTimer: trying to adjust unknown timer '")
-			+ name + _T("'."), STARENGINE_LOG_TAG);
-	}
-
-	void Stopwatch::ResetTimer(const tstring & name, bool paused)
-	{
-		for(auto& it : m_TimerContainer)
+		for(auto time : m_TimePair)
 		{
-			if(it.first == name)
-			{
-				it.second.Reset(paused);
-				return;
-			}
+			totalTime += (time.second - time.first);
 		}
-		LOG(LogLevel::Warning,
-			_T("Stopwatch::ResetTimer: trying to reset unknown timer '")
-			+ name + _T("'."), STARENGINE_LOG_TAG);
-	}
-
-	void Stopwatch::SetTargetTimeTimer(const tstring & name, float32 targetTime, bool reset, bool paused)
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				it.second.SetTargetTime(targetTime, reset, paused);
-				return;
-			}
-		}
-		LOG(LogLevel::Warning,
-			_T("Stopwatch::SetTargetTimeTimer: trying to adjust unknown timer '")
-			+ name + _T("'."), STARENGINE_LOG_TAG);
-	}
-
-	void Stopwatch::SetFunctionTimer(const tstring & name, const std::function<void ()> & func)
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				it.second.SetFunction(func);
-				return;
-			}
-		}
-		LOG(LogLevel::Warning,
-			_T("Stopwatch::SetFunctionTimer: trying to adjust unknown timer '")
-			+ name + _T("'."), STARENGINE_LOG_TAG);
-	}
-
-	float64 Stopwatch::ForceEndTimer(const tstring & name)
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				return it.second.ForceEnd();
-			}
-		}
-		LOG(LogLevel::Warning,
-			_T("Stopwatch::ForceEndTimer: trying to end unknown timer '")
-			+ name + _T("'."), STARENGINE_LOG_TAG);
-		return 0;
-	}
-	
-	void Stopwatch::ForwardTimer(const tstring & name, float64 time)
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				it.second.Forward(time);
-				return;
-			}
-		}
-		LOG(LogLevel::Warning,
-			_T("Stopwatch::ForwardTimer: trying to forward unknown timer '")
-			+ name + _T("'."), STARENGINE_LOG_TAG);
-	}
-
-	void Stopwatch::ForwardAllTimers(float64 time)
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			it.second.Forward(time);
-		}
-	}
-
-	int32 Stopwatch::GetTimerMinutes(const tstring & name) const
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				return it.second.GetCurrentMinutes();
-			}
-		}
-		LOG(LogLevel::Warning, 
-			_T("Stopwatch::GetTimerMinutes: Couldn't find the timer '")
-				+ name + _T("'."),
-			STARENGINE_LOG_TAG);
-		return 0;
-	}
-
-	int32 Stopwatch::GetTimerSeconds(const tstring & name) const
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				return it.second.GetCurrentSeconds();
-			}
-		}
-		LOG(LogLevel::Warning, 
-			_T("Stopwatch::GetTimerSeconds: Couldn't find the timer '")
-				+ name + _T("'."),
-			STARENGINE_LOG_TAG);
-		return 0;
-	}
-
-	int32 Stopwatch::GetTimerTotalSeconds(const tstring & name) const
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				return it.second.GetCurrentTotalSeconds();
-			}
-		}
-		LOG(LogLevel::Warning, 
-			_T("Stopwatch::GetTimerTotalSeconds: Couldn't find the timer '")
-				+ name + _T("'."),
-			STARENGINE_LOG_TAG);
-		return 0;
-	}
-	
-	float64 Stopwatch::GetTimerTargetTime(const tstring & name) const
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				return it.second.GetTargetTime();
-			}
-		}
-		LOG(LogLevel::Warning,
-			_T("Stopwatch::GetTimerTargetTime: trying to access unknown timer '")
-				+ name + _T("'."), STARENGINE_LOG_TAG);
-		return 0;
-	}
-
-	float64 Stopwatch::GetTimerAccurateTime(const tstring & name) const
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				return it.second.GetCurrentAccurateTime();
-			}
-		}
-		LOG(LogLevel::Warning, 
-			_T("Stopwatch::GetTimerAccurateTime: Couldn't find the timer '")
-				+ name + _T("'."),
-			STARENGINE_LOG_TAG);
-		return 0;
+		return totalTime;
 	}
 }

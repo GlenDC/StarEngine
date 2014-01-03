@@ -1,56 +1,39 @@
 #pragma once
 
 #include "defines.h"
+#include <memory>
+#include "Helpers\Time.h"
 
-#ifndef _WIN32
-#include <time.h>
-#endif
+#include <chrono>
 
 namespace star
 {
-	const float64 NSMULTIPLIER = 1.0e-9;
-	const float64 MICROMULTIPLIER = 1000000.0;
-	const float64 MILLIMULTIPLIER = 1000.0;
-	const float64 SECONDMULTIPLIER = 1.0;
-
 	class TimeManager final
 	{
 	public:
-		TimeManager();
+		static std::shared_ptr<TimeManager> GetInstance();
 		~TimeManager();
 
 		void StartMonitoring();
 		void StopMonitoring();
 
-		float64 GetSeconds() const;
-		float64 GetMilliSeconds() const;
-		float64 GetMicroSeconds() const;
-
-		float64 GetSecondsSinceStart() const;
-		float64 GetMilliSecondsSinceStart() const;
+		const Time & DeltaTime();
+		const Time & TimeSinceStart();
+		const Time & CurrentTime();
 
 		tstring GetTimeStamp();
 
 	private:
-#ifdef _WIN32
-
-		LARGE_INTEGER	mFrequency;
-		LARGE_INTEGER	mF1,
-						mF2;
-#else
+		static std::shared_ptr<TimeManager> m_TimeManager;
+		TimeManager();
 		/*
 		//[TODO] Implent new android code (2.0)
-		float64 	mF1,
-				mF2;
-		float32 mElapsed;
 		*/
-#endif
 
-		float64	mDeltaMs,
-				mDeltaS,
-				mDeltauS;
-
-		float64	mTotalMS;
+		std::chrono::system_clock::time_point m_StartTime;
+		Time m_DeltaTime;
+		Time m_ElapsedTime;
+		Time m_CurrentTime;
 
 		TimeManager(const TimeManager& t);
 		TimeManager(TimeManager&& t);

@@ -71,56 +71,33 @@ namespace star
 		/// <returns>the extension of the file</returns>
 		tstring GetExtension() const;
 		/// <summary>
+		/// Get the root of the path, using the correct DirectoryMode.
+		/// </summary>
+		/// <returns>the root of the path</returns>
+		/// <seealso cref="DirectoryMode"></seealso>
+		const tstring & GetRoot() const;
+		/// <summary>
 		/// Get the complete local path which is equal
 		/// to a combination of the path and file datamembers.
 		/// </summary>
 		/// <returns>the complete local path</returns>
 		tstring GetLocalPath() const;
 		/// <summary>
-		/// Get the complete dynamic path with the root being used,
-		/// as defined as in the assets enumeration value of DirectoryMode.
-		/// </summary>
-		/// <returns>the complete dynamic path, combining the 
-		/// assets directory and the full local path.</returns>
-		/// <seealso cref="DirectoryMode"></seealso>
-		tstring GetAssetsPath() const;
-		/// <summary>
-		/// Get the complete dynamic path with the root being used,
-		/// as defined as in the internal enumeration value of DirectoryMode.
-		/// </summary>
-		/// <returns>the complete dynamic path, combining the 
-		/// internal directory and the full local path.</returns>
-		/// <seealso cref="DirectoryMode"></seealso>
-		tstring GetInternalPath() const;
-		/// <summary>
-		/// Get the complete dynamic path with the root being used,
-		/// as defined as in the external enumeration value of DirectoryMode.
-		/// </summary>
-		/// <returns>the complete dynamic path, combining the 
-		/// external directory and the full local path.</returns>
-		/// <seealso cref="DirectoryMode"></seealso>
-		tstring GetExternalPath() const;
-		/// <summary>
 		/// Get the correct complete dynamic path with the root being used,
-		/// defined based on the datamember mode value.
-		/// </summary>
-		/// <param name="path">the path, starting from the root directory</param>
+		/// defined based on the mode value.
 		/// <param name="correct_path">the complete dynamic path, combining the 
 		/// directory defined by the mode value and the full local path.</param>
-		/// <param name="mode">the directory mode, defining the root directory</param>
+		/// </summary>
 		/// <seealso cref="DirectoryMode"></seealso>
-		static void GetCorrectPath(const tstring & path,
-			tstring & correct_path, DirectoryMode mode);
+		void GetCorrectPath(tstring & correct_path) const;
 		/// <summary>
 		/// Get the correct complete dynamic path with the root being used,
 		/// defined based on the mode value.
-		/// <param name="path">the path, starting from the root directory</param>
-		/// <param name="correct_path">the complete dynamic path, combining the 
-		/// directory defined by the mode value and the full local path.</param>
 		/// </summary>
+		/// <returns>the complete dynamic path, combining the 
+		/// directory defined by the mode value and the full local path.</returns>
 		/// <seealso cref="DirectoryMode"></seealso>
-		void GetCorrectPath(const tstring & path,
-			tstring & correct_path) const;
+		tstring GetCorrectPath() const;
 		/// <summary>
 		/// Gets the directory mode.
 		/// </summary>
@@ -168,7 +145,8 @@ namespace star
 		/// </summary>
 		/// <param name="pathIn">the path to be checked</param>
 		/// <param name="pathOut">the correct capital-sensitive static path</param>
-		static void GetActualPathName(const tstring & pathIn, tstring & pathOut);
+		/// <returns>True if the file existed, false if the file didnt exist.</returns>
+		static bool GetActualPathName(const tstring & pathIn, tstring & pathOut);
 		/// <summary>
 		/// For windows: Converts all / seperators to \\ seperators.
 		/// For android and linux: Converts all \\ seperators to / seperators.
