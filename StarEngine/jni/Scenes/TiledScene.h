@@ -3,7 +3,6 @@
 #include "BaseScene.h"
 #include <map>
 #include <functional>
-#include "../Objects/FreeCamera.h"
 
 namespace star
 {
@@ -15,8 +14,8 @@ namespace star
 	public:
 		struct TileSet
 		{
-			uint32 FirstGid, TileWidth, TileHeight, Width, Height;
-			tstring Texture, Name;
+			uint32 firstGid, tileWidth, tileHeight, width, height;
+			tstring texture, name;
 		};
 
 		struct TileObject
@@ -31,6 +30,7 @@ namespace star
 		TiledScene(const tstring & name, float32 scale = 1.0f);
 		virtual ~TiledScene();
 
+		virtual void RemoveObject(Object * object);
 	protected:
 
 		virtual void CreateObjects();
@@ -41,24 +41,32 @@ namespace star
 		virtual void Draw();
 
 		void CreateLevel(const tstring & file,
-			DirectoryMode mode = DirectoryMode::assets);
+			DirectoryMode mode = DEFAULT_DIRECTORY_MODE);
 		void CreateLevel(const tstring & file, const tstring & binary_file,
-			DirectoryMode mode = DirectoryMode::assets);
+			DirectoryMode mode = DEFAULT_DIRECTORY_MODE);
 		void BaseCreateLevel(XMLContainer & container);
 
+		void ClearLevel();
+
 		void DefineSpecialObject(const tstring & object_id,
-			std::function<Object*(const TileObject&)> func);
+			const std::function<Object*(const TileObject&)> & func);
+
+		void ExtendTile(uint32 tileID,
+			const std::function<void(Object*)> & func);
+
+		void ExtendTiles(uint32 * tileIDArray, uint32 size,
+			const std::function<void(Object*)> & func);
 
 		void GetCorrectTileset(uint32 gid, TileSet & set) const;
 		star::SpriteComponent * CreateSpriteFromGid(uint32 gid, const TileSet & set);
 		tstring GetSpritesheetName(const TileSet & set) const;
 
-		star::FreeCamera *m_pActiveCamera;
-
 		uint32 m_Width, m_Height, m_TileWidth, m_TileHeight;
 		float32 m_Scale;
 		std::vector<TileSet> m_TileSets;
+		std::vector<Object*> m_TiledObjects;
 		std::map<tstring, std::function<Object*(const TileObject&)>> m_DefinedObject;
+		std::map<uint32, std::function<void(Object*)>> m_ExtensionTiles;
 
 	private:
 		void CreateTiledObjects(XMLContainer & container);

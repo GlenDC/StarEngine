@@ -11,10 +11,7 @@ namespace star
 	float128 Cotan(float128 x);
 
 	template <typename T>
-	T DegreesToRadians(T degrees)
-	{
-		return T(float64(degrees) * PI / 180);
-	}
+	T DegreesToRadians(T degrees);
 
 	template float32 DegreesToRadians<float32>(float32);
 	template float64 DegreesToRadians<float64>(float64);
@@ -37,10 +34,7 @@ namespace star
 	void DegreesToRadians(const dvec4 & degIn, dvec4 & degOut);
 
 	template <typename T>
-	T RadiansToDegrees(T radians)
-	{
-		return T(float64(radians) * 180 / PI);
-	}
+	T RadiansToDegrees(T radians);
 
 	template float32 RadiansToDegrees<float32>(float32);
 	template float64 RadiansToDegrees<float64>(float64);
@@ -63,10 +57,7 @@ namespace star
 	void RadiansToDegrees(const dvec4 & radIn, dvec4 & radOut);
 
 	template <typename T>
-	inline T Clamp(T x, T min, T max)
-	{
-		return x < min ? min : (x > max ? max : x);
-	}
+	T Clamp(T x, T min, T max);
 	
 	template int16 Clamp<int16>(int16, int16, int16);
 	template uint16 Clamp<uint16>(uint16, uint16, uint16);
@@ -79,16 +70,10 @@ namespace star
 	template float128 Clamp<float128>(float128, float128, float128);
 
 	template <typename T>
-	T Lerp(const T & start, const T & end, float32 percent)
-	{
-		return start + percent * (end - start);
-	}
+	T Lerp(const T & start, const T & end, float32 percent);
 	
 	template <typename T>
-	T Lerp(const T & start, const T & end, float64 percent)
-	{
-		return start + percent * (end - start);
-	}
+	T Lerp(const T & start, const T & end, float64 percent);
 	
 	fvec2 Slerp(const fvec2 & start, const fvec2 & end, float32 percent);
 	fvec3 Slerp(const fvec3 & start, const fvec3 & end, float32 percent);
@@ -225,11 +210,13 @@ namespace star
 	float64 Dot(const dvec3 & vecA, const dvec3 & vecB);
 	float64 Dot(const dvec4 & vecA, const dvec4 & vecB);
 
+	float32 Cross(const fvec2 & vecA, const fvec2 & vecB);
+	float64 Cross(const dvec2 & vecA, const dvec2 & vecB);
 	fvec3 Cross(const fvec3 & vecA, const fvec3 & vecB);
 	dvec3 Cross(const dvec3 & vecA, const dvec3 & vecB);
 
-	void Cross(const fvec3 & vecA, const fvec3 & vecB, fvec3 & vecOut);
-	void Cross(const dvec3 & vecA, const dvec3 & vecB, dvec3 & vecOut);
+	void Cross(const fvec2 & vecA, const fvec2 & vecB, fvec2 & vecOut);
+	void Cross(const dvec2 & vecA, const dvec2 & vecB, dvec2 & vecOut);
 
 	fvec2 Mul(const fvec2 & vec, const fmat2 & mat);
 	fvec3 Mul(const fvec3 & vec, const fmat3 & mat);
@@ -392,10 +379,7 @@ namespace star
 	void Step(const dvec4 & edge, float64 x, dvec2 & out);
 
 	template <typename T>
-	T Saturate(T x)
-	{
-		return glm::saturate<T>(x);
-	}
+	T Saturate(T x);
 
 	fvec2 Saturate(const fvec2 & vec);
 	fvec3 Saturate(const fvec3 & vec);
@@ -541,3 +525,5 @@ namespace star
 	void Mod(const pos & posIn, float32 mod, pos & posOut);
 #endif
 }
+
+#include "Math.inl"

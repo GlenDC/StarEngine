@@ -22,7 +22,7 @@ namespace star
 			const tstring& name,
 			uint8 channel = 0
 			);
-		void LoadSoundEffect(
+		void LoadEffect(
 			const tstring& path,
 			const tstring& name,
 			uint8 channel = 0
@@ -34,7 +34,7 @@ namespace star
 			float32 volume,
 			uint8 channel = 0
 			);
-		void LoadSoundEffect(
+		void LoadEffect(
 			const tstring& path,
 			const tstring& name,
 			float32 volume,
@@ -44,53 +44,56 @@ namespace star
 		void PlayMusic(
 			const tstring& path,
 			const tstring& name,
-			uint8 channel = 0,
-			int32 loopTimes = 0
+			uint8 channel,
+			int32 loopTimes
 			);
 		void PlayMusic(
 			const tstring& name,
 			int32 loopTimes = 0
 			);
-		void PlaySoundEffect(
+		void PlayEffect(
 			const tstring& path,
 			const tstring& name,
-			uint8 channel = 0,
-			int32 loopTimes = 0
+			uint8 channel,
+			int32 loopTimes
 			);
-		void PlaySoundEffect(
+		void PlayEffect(
 			const tstring& name,
-			int32 loopTimes = 0.0f
+			int32 loopTimes = 0
 			);
 
 		void PlayMusic(
 			const tstring& path,
 			const tstring& name,
 			float32 volume,
-			uint8 channel = 0,
-			int32 loopTimes = 0
+			uint8 channel,
+			int32 loopTimes
 			);
 		void PlayMusic(
 			const tstring& name,
 			float32 volume,
-			int32 loopTimes = 0
+			int32 loopTimes
 			);
-		void PlaySoundEffect(
+		void PlayEffect(
 			const tstring& path,
 			const tstring& name,
 			float32 volume,
-			uint8 channel = 0,
-			int32 loopTimes = 0
+			uint8 channel,
+			int32 loopTimes
 			);
-		void PlaySoundEffect(
+		void PlayEffect(
 			const tstring& name,
 			float32 volume,
-			int32 loopTimes = 0.0f
+			int32 loopTimes
 			);
 
 		void AddToBackgroundQueue(const tstring& name);
 
 		void PlayBackgroundQueue();
 		void PlayNextSongInQueue();
+		void ResumeBackgroundQueue();
+		void PauseBackgroundQueue();
+		void StopBackgroundQueue();
 
 		void PauseMusic(const tstring & name);
 		void ResumeMusic(const tstring & name);
@@ -122,9 +125,13 @@ namespace star
 		void IncreaseEffectVolume(const tstring& name, float32 volume);
 		void DecreaseEffectVolume(const tstring& name, float32 volume);
 
+		void MuteAllMusic(bool mute);
+		bool IsAllMusicMuted() const;
 		void SetMusicMuted(const tstring& name, bool muted);
 		bool IsMusicMuted(const tstring& name) const;
 
+		void MuteAllEffects(bool mute);
+		bool IsAllEffectsMuted() const;
 		void SetEffectMuted(const tstring& name, bool muted);
 		bool IsEffectMuted(const tstring& name) const;
 
@@ -187,23 +194,21 @@ namespace star
 
 		struct SoundChannel
 		{
-			float32 mVolume;
-			bool mIsMuted;
-			std::vector<BaseSound*> mSounds;
-			uint8 mChannel;
-			ChannelState mState;
+			float32 volume;
+			bool isMuted;
+			std::vector<BaseSound*> sounds;
+			uint8 channel;
+			ChannelState state;
 
 			SoundChannel();
 			~SoundChannel();
 
 			void SetVolume(float32 volume);
-			float32 GetVolume() const;
 
 			void IncreaseVolume(float32 volume);
 			void DecreaseVolume(float32 volume);
 
 			void SetMuted(bool muted);
-			bool IsMuted() const;
 		};
 
 		AudioManager();
@@ -226,6 +231,9 @@ namespace star
 		SoundEffect* mCurrentSoundEffect;
 
 		float32 mVolume;
+
+		bool	mbMusicMuted,
+				mbEffectsMuted;
 
 #ifdef ANDROID
 		SLObjectItf mEngineObj;

@@ -9,8 +9,9 @@
 #include <io.h>
 #include <fcntl.h>
 
-namespace WindowsConsole
+namespace star_w
 {
 	void RedirectIOToConsole();
+	void CleanUpConsole();
 }
  

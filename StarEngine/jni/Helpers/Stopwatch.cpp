@@ -1,227 +1,107 @@
 #include "Stopwatch.h"
-#include "Timer.h"
-#include "../Context.h"
-#include <algorithm>
-
+#include "../TimeManager.h"
 #include "../Logger.h"
 
 namespace star
 {
 	Stopwatch::Stopwatch()
+		: m_bPaused(false)
+		, m_bStarted(false)
+		, m_TimePairVec()
+		, m_Laps()
 	{
+	}
 
+	Stopwatch::Stopwatch(const Stopwatch & yRef)
+		: m_bPaused(yRef.m_bPaused)
+		, m_bStarted(yRef.m_bStarted)
+		, m_TimePairVec(yRef.m_TimePairVec)
+		, m_Laps(yRef.m_Laps)
+	{
+	}
+
+	Stopwatch::Stopwatch(Stopwatch && yRef)
+		: m_bPaused(std::move(yRef.m_bPaused))
+		, m_bStarted(std::move(yRef.m_bStarted))
+		, m_TimePairVec(std::move(yRef.m_TimePairVec))
+		, m_Laps(std::move(yRef.m_Laps))
+	{
 	}
 
 	Stopwatch::~Stopwatch()
 	{
-
 	}
 
-	void Stopwatch::Update(const Context& context)
+	Stopwatch & Stopwatch::operator=(const Stopwatch & yRef)
 	{
-		//clean up the trash
-		for(auto& it : m_GarbageContainer)
-		{
-			m_TimerContainer.erase(it.first);
-		}
-		m_GarbageContainer.clear();
-
-		//add new timers
-		for(auto& it : m_TempContainer)
-		{
-			m_TimerContainer[it.first] = it.second;
-		}
-		m_TempContainer.clear();
-
-		for(auto it = m_TimerContainer.begin() ; it != m_TimerContainer.end() ; )
-		{
-			if (it->second.Update(context)) 
-			{
-				m_TimerContainer.erase(it++);
-			} 
-			else 
-			{
-				++it;
-			}
-		}
+		m_bPaused = yRef.m_bPaused;
+		m_bStarted = yRef.m_bStarted;
+		m_TimePairVec = yRef.m_TimePairVec;
+		m_Laps = yRef.m_Laps;
+		return * this;
 	}
 
-	bool Stopwatch::CreateTimer(	const tstring & name, float32 targetTime,
-									bool countingDown, bool loop,
-									std::function<void ()> func, bool paused)
+	Stopwatch & Stopwatch::operator=(Stopwatch && yRef)
 	{
-		for(auto& it : m_TempContainer)
-		{
-			if(it.first == name)
-			{
-				return false;
-			}
-		}
-
-		for (auto it = m_TimerContainer.begin(); it != m_TimerContainer.end() ; ++it)
-		{
-			if(it->first == name)
-			{
-				m_GarbageContainer[it->first] = it->second;
-				break;
-			}
-		}
-
-		Timer newTimer(targetTime, countingDown, loop, func, paused);
-		m_TempContainer[name] = newTimer;
-		return true;
+		m_bPaused = std::move(yRef.m_bPaused);
+		m_bStarted = std::move(yRef.m_bStarted);
+		m_TimePairVec = std::move(yRef.m_TimePairVec);
+		m_Laps = std::move(yRef.m_Laps);
+		return * this;
 	}
 
-	bool Stopwatch::RemoveTimer(const tstring & name)
+	void Stopwatch::Start()
 	{
-		for (auto it = m_TimerContainer.begin(); it != m_TimerContainer.end() ; ++it)
+		if(m_bStarted)
 		{
-			if (it->first == name)
-			{
-				m_GarbageContainer[it->first] = it->second;
-				return true;
-			}
+			LOG(LogLevel::Warning, _T("Stopwatch::Start(): \
+Stopwatch already running! Overwriting start time..."), STARENGINE_LOG_TAG);
 		}
-		return false;
+		m_TimePairVec.push_back(
+			std::make_pair(
+				TimeManager::GetInstance()->CurrentTime(),
+				Time()
+				)
+			);
+		m_bStarted = true;
+		m_bPaused = false;
 	}
 
-	void Stopwatch::PauseTimer(const tstring & name, bool paused)
+	void Stopwatch::Stop()
 	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				it.second.SetPaused(paused);
-				return;
-			}
-		}
+		m_TimePairVec.back().second = TimeManager::GetInstance()->CurrentTime();
+		m_bPaused = true;
+		m_bStarted = false;
 	}
 
-	void Stopwatch::SetCountingDownTimer(const tstring & name, bool countingDown)
+	void Stopwatch::Reset()
 	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				it.second.SetCountingDown(countingDown);
-				return;
-			}
-		}
+		m_TimePairVec.clear();
+		m_bStarted = false;
+		m_bPaused = false;
 	}
 
-	void Stopwatch::SetLoopTimer(const tstring & name, bool looping)
+	void Stopwatch::Lap()
 	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				it.second.SetLoop(looping);
-				return;
-			}
-		}
+		m_Laps.push_back(GetTime());
 	}
 
-	void Stopwatch::ResetTimer(const tstring & name, bool paused)
+	const std::vector<Time> & Stopwatch::GetLapTimes() const
 	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				it.second.Reset(paused);
-				return;
-			}
-		}
+		return m_Laps;
 	}
 
-	void Stopwatch::SetTargetTimeTimer(const tstring & name, float32 targetTime, bool reset, bool paused)
+	Time Stopwatch::GetTime()
 	{
-		for(auto& it : m_TimerContainer)
+		Time totalTime;
+		if(m_bPaused)
 		{
-			if(it.first == name)
-			{
-				it.second.SetTargetTime(targetTime, reset, paused);
-				return;
-			}
+			m_TimePairVec.back().second = TimeManager::GetInstance()->CurrentTime();
 		}
-	}
-
-	void Stopwatch::SetFunctionTimer(const tstring & name, std::function<void ()> func)
-	{
-		for(auto& it : m_TimerContainer)
+		for(const auto & time : m_TimePairVec)
 		{
-			if(it.first == name)
-			{
-				it.second.SetFunction(func);
-				return;
-			}
+			totalTime += time.second - time.first;
 		}
-	}
-
-	int32 Stopwatch::GetTimerMinutes(const tstring & name) const
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				return it.second.GetCurrentMinutes();
-			}
-		}
-		Logger::GetInstance()->Log(LogLevel::Warning, 
-			_T("GetTimerMinutes: Couldn't find the timer '") + name + _T("'."));
-		return 0;
-	}
-
-	int32 Stopwatch::GetTimerSeconds(const tstring & name) const
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				return it.second.GetCurrentSeconds();
-			}
-		}
-		Logger::GetInstance()->Log(LogLevel::Warning, 
-			_T("GetTimerSeconds: Couldn't find the timer '") + name + _T("'."));
-		return 0;
-	}
-
-	int32 Stopwatch::GetTimerTotalSeconds(const tstring & name) const
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				return it.second.GetCurrentTotalSeconds();
-			}
-		}
-		Logger::GetInstance()->Log(LogLevel::Warning, 
-			_T("GetTimerTotalSeconds: Couldn't find the timer '") + name + _T("'."));
-		return 0;
-	}
-	
-	float64 Stopwatch::GetTimerTargetTime(const tstring & name) const
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				return it.second.GetTargetTime();
-			}
-		}
-		return 0;
-	}
-
-	float64 Stopwatch::GetTimerAccurateTime(const tstring & name) const
-	{
-		for(auto& it : m_TimerContainer)
-		{
-			if(it.first == name)
-			{
-				return it.second.GetCurrentAccurateTime();
-			}
-		}
-		Logger::GetInstance()->Log(LogLevel::Warning, 
-			_T("GetTimerAccurateTime: Couldn't find the timer '") + name + _T("'."));
-		return 0;
+		return totalTime;
 	}
 }

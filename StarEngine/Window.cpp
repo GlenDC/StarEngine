@@ -4,11 +4,11 @@
 #include <Shlobj.h>
 #include <string>
 #include "jni/Scenes/SceneManager.h"
-#include "jni/Assets/TextureManager.h"
+#include "jni/Graphics/TextureManager.h"
 #include "jni/Logger.h"
 #include "jni/TimeManager.h"
 #include "jni/Helpers/Helpers.h"
-#include "jni/Helpers/Filepath.h"
+#include "jni/Helpers/FilePath.h"
 #include "jni/Input/XMLContainer.h"
 #ifdef _DEBUG
 	#include "jni/Input/XMLFileParser.h"
@@ -77,7 +77,8 @@ namespace star
 
 	void Window::Initialize(HINSTANCE instance, BaseGame * pBaseGame, bool useConsole)
 	{
-		ASSERT(!m_IsInitialized, _T("Engine is already initialized!"));
+		ASSERT_LOG(!m_IsInitialized,
+			_T("Engine is already initialized!"), STARENGINE_LOG_TAG);
 		if(!m_IsInitialized)
 		{
 			mGamePtr = pBaseGame;
@@ -85,8 +86,8 @@ namespace star
 
 			XMLContainer winManifest;
 #ifdef _DEBUG
-			XMLFileParser manifestParser(_T("Win32Manifest.xml"));
-			manifestParser.Read(winManifest, DirectoryMode::custom);
+			XMLFileParser manifestParser(_T("Win32Manifest.xml"), DirectoryMode::custom);
+			manifestParser.Read(winManifest);
 			winManifest.Serialize(_T("Win32Manifest.star"), DirectoryMode::custom);
 #else
 			winManifest.Deserialize(_T("Win32Manifest.star"), DirectoryMode::custom);
@@ -107,25 +108,28 @@ namespace star
 				}
 			}
 
-			mContext.mTimeManager = mTimeManager;
+			mContext.time = TimeManager::GetInstance();
 
 			WNDCLASSEX wndClass;
 			wndClass.cbSize = sizeof(WNDCLASSEX);
 
 			//Set the assets root that will be used for DirectoryMode::assets
 			auto assets_settings = winManifest[_T("assets")]->GetAttributes();
-			Filepath::SetAssetsRoot(assets_settings[_T("root")]);
+			FilePath::SetAssetsRoot(assets_settings[_T("root")]);
 			
 			//Set the internal root that will be used for DirectoryMode::internal
 			auto internal_settings = winManifest[_T("internal")]->GetAttributes();
 			tstring iPath(internal_settings[_T("root")]);
-			Filepath::SetInternalRoot(iPath);
+			FilePath::SetInternalRoot(iPath);
 			auto cdReturn = CreateDirectory(iPath.c_str(), NULL);
 			if(cdReturn == ERROR_ALREADY_EXISTS)
 			{
-				Logger::GetInstance()->Log(LogLevel::Warning, _T("Internal directory '") + iPath + _T("' already exists."));
+				LOG(LogLevel::Warning,
+					_T("Internal directory '") + iPath + _T("' already exists."),
+					STARENGINE_LOG_TAG);
 			}
-			ASSERT(cdReturn != ERROR_PATH_NOT_FOUND, _T("Couldn't create the internal directory!"));
+			ASSERT_LOG(cdReturn != ERROR_PATH_NOT_FOUND,
+				_T("Couldn't create the internal directory!"), STARENGINE_LOG_TAG);
 
 			//Set the external root that will be used for DirectoryMode::external
 			LPWSTR wszPath = NULL;
@@ -135,19 +139,24 @@ namespace star
 				NULL,
 				&wszPath
 			);
-			ASSERT(SUCCEEDED(mdReturn), _T("An error has occured, while trying to open 'my documents'!"));
+			ASSERT_LOG(SUCCEEDED(mdReturn),
+				_T("An error has occured, while trying to open 'my documents'!"),
+				STARENGINE_LOG_TAG);
 			tstring ePath = string_cast<tstring>(wszPath);
 			ePath += _T("/");
 			ePath += winManifest[_T("title")]->GetValue();
 			ePath += _T("/");
-			Filepath::SetExternalRoot(ePath);
+			FilePath::SetExternalRoot(ePath);
 			
 			cdReturn = CreateDirectory(ePath.c_str(), NULL);
 			if(cdReturn == ERROR_ALREADY_EXISTS)
 			{
-				Logger::GetInstance()->Log(LogLevel::Warning, _T("External directory '") + ePath + _T("' already exists."));
+				LOG(LogLevel::Warning,
+					_T("External directory '") + ePath + _T("' already exists."),
+					STARENGINE_LOG_TAG);
 			}
-			ASSERT(cdReturn != ERROR_PATH_NOT_FOUND, _T("Couldn't create the external directory!"));
+			ASSERT_LOG(cdReturn != ERROR_PATH_NOT_FOUND,
+				_T("Couldn't create the external directory!"), STARENGINE_LOG_TAG);
 
 
 			wndClass.style = 0;
@@ -184,7 +193,8 @@ namespace star
 			while(win_style_it != win_style_end_it);
 
 	#pragma warning ( disable : 4800 )
-			ASSERT(RegisterClassEx(&wndClass), _T("Couldn't register the Windows Class!"));
+			ASSERT_LOG(RegisterClassEx(&wndClass),
+				_T("Couldn't register the Windows Class!"), STARENGINE_LOG_TAG);
 	#pragma warning ( default : 4800 )
 
 			m_CanGoFullScreen =
@@ -226,7 +236,8 @@ namespace star
 									position_height,
 									NULL, NULL, instance, NULL);
 
-			ASSERT(mHandle != NULL, _T("Couldn't create the window."));
+			ASSERT_LOG(mHandle != NULL,
+				_T("Couldn't create the window."), STARENGINE_LOG_TAG);
 
 			SetResolution(position_width, position_height, false);
 
@@ -250,21 +261,24 @@ namespace star
 			};
 	
 			mHDC = GetDC(mHandle); // Gets the display context
-			ASSERT(mHDC != NULL, _T("Couldn't create the Display Context!"));
+			ASSERT_LOG(mHDC != NULL,
+				_T("Couldn't create the Display Context!"), STARENGINE_LOG_TAG);
 
 			int32 pixelFormat = ChoosePixelFormat(mHDC, &pixelFormatDesc); // Chooses the pixel format
-			ASSERT(pixelFormat != 0, _T("Invalid pixel format!"));
+			ASSERT_LOG(pixelFormat != 0,
+				_T("Invalid pixel format!"), STARENGINE_LOG_TAG);
 
 			// Sets the pixel format
-			ASSERT(SetPixelFormat(mHDC, pixelFormat, &pixelFormatDesc) != 0, _T("Couldn't set the pixel format!"));
+			ASSERT_LOG(SetPixelFormat(mHDC, pixelFormat, &pixelFormatDesc) != 0,
+				_T("Couldn't set the pixel format!"), STARENGINE_LOG_TAG);
 
 			HGLRC hglrc = wglCreateContext(mHDC); // Creates the rendering context
-			ASSERT(hglrc != NULL, _T("Couldn't create the rendering context!"));
+			ASSERT_LOG(hglrc != NULL,
+				_T("Couldn't create the rendering context!"), STARENGINE_LOG_TAG);
 
 			// Attaches the rendering context
-			ASSERT(wglMakeCurrent(mHDC, hglrc) != 0, _T("Action couldn't be completed!"));
-
-			MSG msg ={};
+			ASSERT_LOG(wglMakeCurrent(mHDC, hglrc) != 0,
+				_T("Action couldn't be completed!"), STARENGINE_LOG_TAG);
 
 			auto cursor = winManifest[_T("cursor")];
 			auto cursor_settings = cursor->GetAttributes();
@@ -318,46 +332,40 @@ namespace star
 			//AttachThreadInput(m_dKeybThreadID, GetCurrentThreadId(), true);
 
 			// Main message loop:
-			while(msg.message != WM_QUIT)
-			{
-				bool monitor_started(false);
-				if(m_IsActive)
-				{
-					mTimeManager->StartMonitoring();
-					monitor_started = true;
-				}
-
-				if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-				{
-					TranslateMessage(&msg);
-					DispatchMessage(&msg);
-				}
-				if(m_IsActive) // We've processed all pending Win32 messages, and can now do a rendering update.
-				{
-					star::InputManager::GetInstance()->UpdateWin();
-				}
-				if(m_IsActive) // We've processed all pending Win32 messages, and can now do a rendering update.
-				{
-					mGamePtr->Draw();
-					SwapBuffers(Window::mHDC); // Swaps display buffers
-				}
-
-				if(m_IsActive)
-				{					
-					mGamePtr->Update(mContext);
-					SetWindowsTitle();
-					GraphicsManager::GetInstance()->SetHasWindowChanged(false);
-				}
-
-				if(monitor_started)
-				{
-					mTimeManager->StopMonitoring();
-				}
-			}
+			RunMainLoop();
 
 			mGamePtr->End();
 
 			delete this;
+		}
+	}
+
+	void Window::RunMainLoop()
+	{
+		MSG msg = {};
+		while(msg.message != WM_QUIT)
+		{
+			TimeManager::GetInstance()->StartMonitoring();		
+
+			if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+			else
+			{
+				if(m_IsActive)
+				{
+					star::InputManager::GetInstance()->UpdateWin();
+					mGamePtr->Update(mContext);
+					SetWindowsTitle();
+					GraphicsManager::GetInstance()->SetHasWindowChanged(false);
+
+					mGamePtr->Draw();
+					SwapBuffers(Window::mHDC); // Swaps display buffers
+					TimeManager::GetInstance()->StopMonitoring();
+				}
+			}
 		}
 	}
 
@@ -371,7 +379,6 @@ namespace star
 		, m_ManipulateWindowResolution(false)
 		, m_SavedWindowState()
 		, mGamePtr(nullptr)
-		, mTimeManager(new TimeManager())
 		, mHandle()
 		, mOGLContext()
 		, mHDC()
@@ -431,15 +438,15 @@ namespace star
 	{
 		if(!m_IsFullScreen)
 		{
-			m_SavedWindowState.Maximized = IsZoomed(hWnd);
-			if(m_SavedWindowState.Maximized)
+			m_SavedWindowState.maximized = IsZoomed(hWnd);
+			if(m_SavedWindowState.maximized)
 			{
 				// window can't be maximized in fullscreen modus
 				SendMessage(hWnd, WM_SYSCOMMAND, SC_RESTORE, 0);
 			}
-			m_SavedWindowState.Style = GetWindowLong(hWnd, GWL_STYLE);
-			m_SavedWindowState.ExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
-			GetWindowRect(hWnd, &m_SavedWindowState.WinRect);
+			m_SavedWindowState.style = GetWindowLong(hWnd, GWL_STYLE);
+			m_SavedWindowState.exStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
+			GetWindowRect(hWnd, &m_SavedWindowState.winRect);
 		}
 
 		m_IsFullScreen = fullscreen;
@@ -449,15 +456,15 @@ namespace star
 
 		if (m_IsFullScreen) 
 		{
-			DEVMODE fullscreenSettings;
+			DEVMODE fullscreenSettings = DEVMODE();
 
 			int32 screenWidth = GetDeviceCaps(hdc, HORZRES);
 			int32 screenHeight = GetDeviceCaps(hdc, VERTRES);
 
 			if(m_ManipulateWindowResolution)
 			{
-				screenWidth = m_SavedWindowState.WinRect.right - m_SavedWindowState.WinRect.left;
-				screenHeight = m_SavedWindowState.WinRect.bottom - m_SavedWindowState.WinRect.top;
+				screenWidth = m_SavedWindowState.winRect.right - m_SavedWindowState.winRect.left;
+				screenHeight = m_SavedWindowState.winRect.bottom - m_SavedWindowState.winRect.top;
 			}
 
 			EnumDisplaySettings(NULL, 0, &fullscreenSettings);
@@ -474,24 +481,22 @@ namespace star
 			SetWindowLongPtr(hWnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
 			SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, screenWidth, screenHeight, SWP_SHOWWINDOW);
 			bool isChangeSuccessful = ChangeDisplaySettings(&fullscreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
-			//ASSERT(isChangeSuccessful, _T("Couldn't put the screen into fullscreen mode..."));
 			ShowWindow(hWnd, SW_MAXIMIZE);
 		}
 		else
 		{
-			SetWindowLongPtr(hWnd, GWL_EXSTYLE, m_SavedWindowState.ExStyle);
-			SetWindowLongPtr(hWnd, GWL_STYLE, m_SavedWindowState.Style);
+			SetWindowLongPtr(hWnd, GWL_EXSTYLE, m_SavedWindowState.exStyle);
+			SetWindowLongPtr(hWnd, GWL_STYLE, m_SavedWindowState.style);
 			bool isChangeSuccessful = ChangeDisplaySettings(NULL, CDS_RESET) == DISP_CHANGE_SUCCESSFUL;
-			//ASSERT(isChangeSuccessful, _T("Couldn't put the screen into windowed mode..."));
 			SetWindowPos(hWnd, HWND_NOTOPMOST, 
-				m_SavedWindowState.WinRect.left,
-				m_SavedWindowState.WinRect.top,
-				m_SavedWindowState.WinRect.right - m_SavedWindowState.WinRect.left,
-				m_SavedWindowState.WinRect.bottom - m_SavedWindowState.WinRect.top,
+				m_SavedWindowState.winRect.left,
+				m_SavedWindowState.winRect.top,
+				m_SavedWindowState.winRect.right - m_SavedWindowState.winRect.left,
+				m_SavedWindowState.winRect.bottom - m_SavedWindowState.winRect.top,
 				SWP_SHOWWINDOW);
 			ShowWindow(hWnd, SW_RESTORE);
 
-			if (m_SavedWindowState.Maximized)
+			if (m_SavedWindowState.maximized)
 			{
 				SendMessage(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
 			}
@@ -525,23 +530,23 @@ namespace star
 
 		ClientResize(width, height);
 
-		m_SavedWindowState.Maximized = IsZoomed(mHandle);
-		m_SavedWindowState.Style = GetWindowLong(mHandle, GWL_STYLE);
-		m_SavedWindowState.ExStyle = GetWindowLong(mHandle, GWL_EXSTYLE);
-		GetWindowRect(mHandle, &m_SavedWindowState.WinRect);
+		m_SavedWindowState.maximized = IsZoomed(mHandle);
+		m_SavedWindowState.style = GetWindowLong(mHandle, GWL_STYLE);
+		m_SavedWindowState.exStyle = GetWindowLong(mHandle, GWL_EXSTYLE);
+		GetWindowRect(mHandle, &m_SavedWindowState.winRect);
 
 		WindowInactiveUpdate(false);
 
 		if(reset)
 		{
-			SetWindowLongPtr(mHandle, GWL_EXSTYLE, m_SavedWindowState.ExStyle);
-			SetWindowLongPtr(mHandle, GWL_STYLE, m_SavedWindowState.Style);
-			bool isChangeSuccessful = ChangeDisplaySettings(NULL, CDS_RESET) == DISP_CHANGE_SUCCESSFUL;
-			//ASSERT(isChangeSuccessful, _T("Couldn't put the screen into windowed mode..."));
+			SetWindowLongPtr(mHandle, GWL_EXSTYLE, m_SavedWindowState.exStyle);
+			SetWindowLongPtr(mHandle, GWL_STYLE, m_SavedWindowState.style);
+			bool isChangeSuccessful = 
+				ChangeDisplaySettings(NULL, CDS_RESET) == DISP_CHANGE_SUCCESSFUL;
 		}
 		SetWindowPos(mHandle, HWND_NOTOPMOST, 
-			m_SavedWindowState.WinRect.left,
-			m_SavedWindowState.WinRect.top,
+			m_SavedWindowState.winRect.left,
+			m_SavedWindowState.winRect.top,
 			width,
 			height,
 			SWP_SHOWWINDOW);
@@ -585,8 +590,8 @@ namespace star
 
 	void Window::ForceTimerCalculation()
 	{
-		mTimeManager->StartMonitoring();
-		mTimeManager->StopMonitoring();
+		TimeManager::GetInstance()->StartMonitoring();
+		TimeManager::GetInstance()->StopMonitoring();
 	}
 
 	void Window::SetWindowsTitle() const
@@ -594,7 +599,8 @@ namespace star
 		if (StarEngine::GetInstance()->HasTitleUpdated())
 		{
 			SetWindowText(mHandle, 
-				(StarEngine::GetInstance()->m_Title + StarEngine::GetInstance()->m_SubTitle).c_str());
+				(StarEngine::GetInstance()->m_Title + 
+				StarEngine::GetInstance()->m_SubTitle).c_str());
 			StarEngine::GetInstance()->ResetTitleUpdateMark();
 		}
 	}
@@ -613,7 +619,7 @@ namespace star
 
 		// Format a "unique" NewWindowTitle.
 		wsprintf(pszNewWindowTitle,_T("%d/%d"),
-					GetTickCount(),
+					GetTickCount64(),
 					GetCurrentProcessId());
 
 		// Change current window title.
@@ -623,7 +629,7 @@ namespace star
 		Sleep(40);
 
 		// Look for NewWindowTitle.
-		hwndFound=FindWindow(NULL, pszNewWindowTitle);
+		hwndFound = FindWindow(NULL, pszNewWindowTitle);
 
 		// Restore original window title.
 		SetConsoleTitle(pszOldWindowTitle);
@@ -709,17 +715,12 @@ namespace star
 
 	Window::~Window(void)
 	{
-		//InputManager::GetInstance()->StopKeyboardThread();
-		//WaitForSingleObject( m_hKeybThread, INFINITE );
-		//CloseHandle( m_hKeybThread );
-
 		delete InputManager::GetInstance();
 
 		delete (mGamePtr);
 		mGamePtr = nullptr;
 
-		delete (mTimeManager);
-		mTimeManager = nullptr;
+		delete StarEngine::GetInstance();
 	}
 
 	void Window::WindowInactiveUpdate(bool inactive)
@@ -758,7 +759,9 @@ namespace star
 				return CLASS_STYLES[i].second;
 			}
 		}
-		ASSERT(false, _T("Invalid class style found in Win32Manifest.xml"));
+		ASSERT_LOG(false,
+			_T("Invalid class style found in Win32Manifest.xml"),
+			STARENGINE_LOG_TAG);
 		return NULL;
 	}
 
@@ -771,7 +774,9 @@ namespace star
 				return WINDOW_STYLES[i].second;
 			}
 		}
-		ASSERT(false, _T("Invalid window style found in Win32Manifest.xml"));
+		ASSERT_LOG(false,
+			_T("Invalid window style found in Win32Manifest.xml"),
+			STARENGINE_LOG_TAG);
 		return NULL;
 	}
 

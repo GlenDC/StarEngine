@@ -49,6 +49,7 @@ namespace star
 
 		HWND GetConsoleHWND();
 		void SetWindowsTitle() const;
+		void RunMainLoop();
 
 		static Window * m_pInstance;
 
@@ -65,15 +66,14 @@ namespace star
 
 		struct WindowState
 		{
-			BOOL Maximized;
-			long Style, ExStyle;
-			RECT WinRect;
+			BOOL maximized;
+			long style, exStyle;
+			RECT winRect;
 		};
 
 		WindowState m_SavedWindowState;
 
 		BaseGame* mGamePtr;
-		TimeManager* mTimeManager;
 		Context mContext;
 
 		HWND mHandle;
