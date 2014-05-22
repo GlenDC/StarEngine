@@ -3,8 +3,12 @@ StarEngine [2D] Game Engine
 
 Crossplatform C++11 2D Game Engine for Windows and Android games
 
+## NOTE
+
+This project has been stopped. You can find the successor StarEngine project [here](https://github.com/StarEngine/engine). This repository stays alive as a reference, but should not be used anymore.
+
 ## Developers
-* [Cédric Van De Walle (Vanatis)](http://vdwcedric.com/)
+* [Cï¿½dric Van De Walle (Vanatis)](http://vdwcedric.com/)
 * [Glen De Cauwsemaecker (GlenDC)](http://www.glendc.com/)
 * [Pieter Vantorre (NuclearCookie)](http://pietervantorre.com/)
 * [Simon Vanhauwaert (Syvion)](http://www.simonvanhauwaert.com/)
