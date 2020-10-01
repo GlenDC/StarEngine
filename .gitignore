@@ -1,5 +1,6 @@
-# Compiled Object files
-*.slo
+# Compiled Object files // 
+
+*.slo 
 *.lo
 *.o
 
